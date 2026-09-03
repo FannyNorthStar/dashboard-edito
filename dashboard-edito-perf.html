@@ -1,0 +1,1280 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Édito Performance Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0C0E14;
+  --surface: #141721;
+  --surface-2: #1C2030;
+  --surface-3: #242840;
+  --border: #262B3D;
+  --border-light: #333852;
+  --text: #E2E5EE;
+  --text-muted: #7B82A0;
+  --text-dim: #4E5470;
+  --accent: #5B8DEF;
+  --accent-glow: rgba(91,141,239,0.15);
+  --green: #3DD68C;
+  --green-bg: rgba(61,214,140,0.1);
+  --red: #EF6461;
+  --red-bg: rgba(239,100,97,0.1);
+  --amber: #F5B731;
+  --amber-bg: rgba(245,183,49,0.1);
+  --radius: 10px;
+  --radius-sm: 6px;
+}
+
+body {
+  font-family: 'Inter', -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+/* ── Top Bar ── */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 32px;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  background: rgba(12,14,20,0.92);
+  backdrop-filter: blur(12px);
+  z-index: 100;
+}
+
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.logo {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+.logo span {
+  color: var(--accent);
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+select {
+  appearance: none;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 8px 32px 8px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%237B82A0' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  transition: border-color 0.2s;
+}
+
+select:hover { border-color: var(--accent); }
+select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-glow); }
+
+.period-toggle {
+  display: flex;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.period-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.period-btn:hover { color: var(--text); }
+.period-btn.active {
+  background: var(--accent);
+  color: #fff;
+}
+
+/* ── Main Layout ── */
+.main {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 24px 32px 48px;
+}
+
+/* ── KPI Row ── */
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.kpi-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+
+.kpi-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+}
+
+.kpi-value {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+
+.kpi-change {
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.kpi-change.up { color: var(--green); background: var(--green-bg); }
+.kpi-change.down { color: var(--red); background: var(--red-bg); }
+
+/* ── Insights Panel ── */
+.insights-card {
+  background: var(--surface);
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  padding: 24px;
+  margin-bottom: 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+.insights-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius);
+  padding: 1px;
+  background: linear-gradient(135deg, var(--accent), #a855f7, var(--accent));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.insights-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.insights-badge {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  background: var(--accent-glow);
+  padding: 3px 10px;
+  border-radius: 4px;
+}
+
+.insights-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.insights-body {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--text-muted);
+}
+
+.insights-body strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.insights-body .highlight-up {
+  color: var(--green);
+  font-weight: 600;
+}
+
+.insights-body .highlight-down {
+  color: var(--red);
+  font-weight: 600;
+}
+
+.insights-body .highlight-num {
+  color: var(--amber);
+  font-weight: 600;
+}
+
+/* ── Two-column layout ── */
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+/* ── Cards ── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.card-title {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.card-subtitle {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* ── Tabs ── */
+.tab-row {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 24px;
+}
+
+.tab-btn {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 12px 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active {
+  color: var(--text);
+  border-bottom-color: var(--accent);
+}
+
+/* ── Tables ── */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+thead th {
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+thead th.right { text-align: right; }
+
+tbody td {
+  padding: 12px 16px;
+  font-size: 13px;
+  border-bottom: 1px solid var(--border);
+}
+
+tbody td.right {
+  text-align: right;
+  font-weight: 500;
+}
+
+tbody td.dim { color: var(--text-muted); }
+
+tbody tr:last-child td { border-bottom: none; }
+
+tbody tr:hover { background: var(--surface-2); }
+
+/* ── Index Bar ── */
+.index-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.index-value {
+  font-weight: 600;
+  min-width: 36px;
+  text-align: right;
+  font-size: 13px;
+}
+
+.index-bar-wrap {
+  flex: 1;
+  height: 8px;
+  background: var(--surface-3);
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+  min-width: 80px;
+}
+
+.index-bar-center {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 1px;
+  height: 100%;
+  background: var(--border-light);
+}
+
+.index-bar {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.4s ease;
+}
+
+.index-bar.over {
+  left: 50%;
+  background: var(--green);
+}
+
+.index-bar.under {
+  right: 50%;
+  background: var(--red);
+}
+
+/* ── Distribution buckets ── */
+.dist-bar-wrap {
+  width: 100%;
+  height: 6px;
+  background: var(--surface-3);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.dist-bar {
+  height: 100%;
+  border-radius: 3px;
+  background: var(--accent);
+  transition: width 0.4s ease;
+}
+
+/* ── Metric toggles inside cards ── */
+.metric-toggle {
+  display: flex;
+  background: var(--surface-2);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.metric-btn {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.metric-btn:hover { color: var(--text-muted); }
+.metric-btn.active { background: var(--surface-3); color: var(--text); }
+
+/* ── Section Label ── */
+.section-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 16px;
+}
+
+/* ── Full-width card ── */
+.full-card { margin-bottom: 24px; }
+
+/* ── Top Articles ── */
+.article-rank {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-dim);
+  min-width: 28px;
+}
+
+.article-title {
+  font-weight: 500;
+  max-width: 500px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.article-topic {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 2px 8px;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+
+.topic-mercato { color: var(--amber); background: var(--amber-bg); }
+.topic-match { color: var(--accent); background: var(--accent-glow); }
+.topic-blessure { color: var(--red); background: var(--red-bg); }
+.topic-tactique { color: #a78bfa; background: rgba(167,139,250,0.1); }
+.topic-selection { color: var(--green); background: var(--green-bg); }
+.topic-rumeur { color: #f472b6; background: rgba(244,114,182,0.1); }
+.topic-interview { color: #67e8f9; background: rgba(103,232,249,0.1); }
+.topic-analyse { color: #c4b5fd; background: rgba(196,181,253,0.1); }
+.topic-resultat { color: #86efac; background: rgba(134,239,172,0.1); }
+.topic-default { color: var(--text-muted); background: var(--surface-3); }
+
+/* ── Status Badges ── */
+.status-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 4px;
+  white-space: nowrap;
+  letter-spacing: 0.01em;
+}
+
+.status-high-over { color: #059669; background: rgba(5,150,105,0.15); }
+.status-over { color: var(--green); background: var(--green-bg); }
+.status-slight-over { color: #6ee7b7; background: rgba(110,231,183,0.08); }
+.status-stable { color: var(--text-muted); background: var(--surface-3); }
+.status-slight-under { color: #fca5a5; background: rgba(252,165,165,0.08); }
+.status-under { color: var(--red); background: var(--red-bg); }
+.status-high-under { color: #dc2626; background: rgba(220,38,38,0.15); }
+
+.ratio-cell {
+  font-size: 12px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.ratio-cell .arrow { 
+  margin: 0 3px;
+  color: var(--text-dim);
+}
+
+/* ── Timestamp ── */
+.timestamp {
+  font-size: 12px;
+  color: var(--text-dim);
+  text-align: right;
+  padding: 8px 0;
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .topbar { padding: 12px 16px; flex-wrap: wrap; gap: 12px; }
+  .main { padding: 16px; }
+  .kpi-row { grid-template-columns: repeat(2, 1fr); }
+  .grid-2 { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="logo">Édito<span>Perf</span></div>
+  </div>
+  <div class="topbar-right">
+    <select id="siteSelect">
+      <option value="all">Tous les sites</option>
+    </select>
+    <div class="period-toggle">
+      <button class="period-btn active" data-period="yesterday">Hier</button>
+      <button class="period-btn" data-period="last_week">Semaine</button>
+      <button class="period-btn" data-period="last_month">Mois</button>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- KPI Row -->
+  <div class="kpi-row" id="kpiRow"></div>
+
+  <!-- AI Insights -->
+  <div class="insights-card" id="insightsCard"></div>
+
+  <!-- Distribution + Top Articles -->
+  <div class="grid-2">
+    <div class="card full-card">
+      <div class="card-header">
+        <div class="card-title">Distribution des performances</div>
+        <div class="card-subtitle">Articles par tranche de sessions</div>
+      </div>
+      <div style="padding: 4px 0;">
+        <table id="distTable"></table>
+      </div>
+    </div>
+    <div class="card full-card">
+      <div class="card-header">
+        <div class="card-title">Top articles</div>
+        <div class="card-subtitle">Les plus performants sur la période</div>
+      </div>
+      <div style="padding: 4px 0;">
+        <table id="topArticlesTable"></table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Performance Index Tabs -->
+  <div class="card full-card">
+    <div class="card-header">
+      <div>
+        <div class="card-title">Index de performance</div>
+        <div class="card-subtitle" style="margin-top:2px">Part de contenu vs part de trafic — index &gt; 1 = surperformance</div>
+      </div>
+      <div class="metric-toggle" id="metricToggle">
+        <button class="metric-btn active" data-metric="search">Search</button>
+        <button class="metric-btn" data-metric="discover">Discover</button>
+        <button class="metric-btn" data-metric="sessions">Sessions</button>
+      </div>
+    </div>
+    <div class="tab-row" id="dimensionTabs">
+      <button class="tab-btn active" data-dim="topic">Par sujet</button>
+      <button class="tab-btn" data-dim="club">Par club</button>
+      <button class="tab-btn" data-dim="competition">Par compétition</button>
+    </div>
+    <div style="padding: 0 0 8px;">
+      <table id="indexTable"></table>
+    </div>
+  </div>
+
+  <div class="timestamp" id="timestamp"></div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+// FAKE DATA — Replace with data.json fetch
+// ══════════════════════════════════════════════
+
+const DATA = {
+  last_updated: "2026-08-17T07:30:00",
+  sites: ["FootMercato", "Foot01", "SportBuzz"],
+  
+  // ── KPIs per site per period ──
+  kpis: {
+    FootMercato: {
+      yesterday: { articles: 87, sessions: 142300, search_clicks: 89400, discover_clicks: 52100, prev_articles: 82, prev_sessions: 138700, prev_search: 91200, prev_discover: 48300 },
+      last_week: { articles: 612, sessions: 987000, search_clicks: 623000, discover_clicks: 341000, prev_articles: 598, prev_sessions: 952000, prev_search: 611000, prev_discover: 328000 },
+      last_month: { articles: 2480, sessions: 4120000, search_clicks: 2540000, discover_clicks: 1380000, prev_articles: 2390, prev_sessions: 3980000, prev_search: 2480000, prev_discover: 1290000 }
+    },
+    Foot01: {
+      yesterday: { articles: 54, sessions: 68200, search_clicks: 41200, discover_clicks: 28900, prev_articles: 58, prev_sessions: 71400, prev_search: 43800, prev_discover: 26100 },
+      last_week: { articles: 378, sessions: 478000, search_clicks: 289000, discover_clicks: 198000, prev_articles: 385, prev_sessions: 491000, prev_search: 301000, prev_discover: 185000 },
+      last_month: { articles: 1520, sessions: 1940000, search_clicks: 1170000, discover_clicks: 812000, prev_articles: 1480, prev_sessions: 1870000, prev_search: 1120000, prev_discover: 778000 }
+    },
+    SportBuzz: {
+      yesterday: { articles: 112, sessions: 198400, search_clicks: 124800, discover_clicks: 71200, prev_articles: 105, prev_sessions: 187600, prev_search: 118300, prev_discover: 68900 },
+      last_week: { articles: 784, sessions: 1340000, search_clicks: 862000, discover_clicks: 489000, prev_articles: 761, prev_sessions: 1280000, prev_search: 841000, prev_discover: 471000 },
+      last_month: { articles: 3170, sessions: 5480000, search_clicks: 3520000, discover_clicks: 1980000, prev_articles: 3080, prev_sessions: 5210000, prev_search: 3380000, prev_discover: 1890000 }
+    }
+  },
+
+  // ── Session distribution per site per period ──
+  distribution: {
+    FootMercato: {
+      yesterday: [
+        { bucket: "< 100", articles: 41, pct_articles: 47.1, sessions: 1800, pct_sessions: 1.3 },
+        { bucket: "100 – 500", articles: 22, pct_articles: 25.3, sessions: 6200, pct_sessions: 4.4 },
+        { bucket: "500 – 2 000", articles: 13, pct_articles: 14.9, sessions: 14800, pct_sessions: 10.4 },
+        { bucket: "2 000 – 10 000", articles: 8, pct_articles: 9.2, sessions: 41200, pct_sessions: 29.0 },
+        { bucket: "10 000+", articles: 3, pct_articles: 3.4, sessions: 78300, pct_sessions: 55.0 }
+      ],
+      last_week: [
+        { bucket: "< 100", articles: 289, pct_articles: 47.2, sessions: 12400, pct_sessions: 1.3 },
+        { bucket: "100 – 500", articles: 158, pct_articles: 25.8, sessions: 44100, pct_sessions: 4.5 },
+        { bucket: "500 – 2 000", articles: 92, pct_articles: 15.0, sessions: 104000, pct_sessions: 10.5 },
+        { bucket: "2 000 – 10 000", articles: 54, pct_articles: 8.8, sessions: 278000, pct_sessions: 28.2 },
+        { bucket: "10 000+", articles: 19, pct_articles: 3.1, sessions: 548500, pct_sessions: 55.6 }
+      ],
+      last_month: [
+        { bucket: "< 100", articles: 1178, pct_articles: 47.5, sessions: 51200, pct_sessions: 1.2 },
+        { bucket: "100 – 500", articles: 632, pct_articles: 25.5, sessions: 178000, pct_sessions: 4.3 },
+        { bucket: "500 – 2 000", articles: 372, pct_articles: 15.0, sessions: 424000, pct_sessions: 10.3 },
+        { bucket: "2 000 – 10 000", articles: 223, pct_articles: 9.0, sessions: 1148000, pct_sessions: 27.9 },
+        { bucket: "10 000+", articles: 75, pct_articles: 3.0, sessions: 2318800, pct_sessions: 56.3 }
+      ]
+    },
+    Foot01: {
+      yesterday: [
+        { bucket: "< 100", articles: 28, pct_articles: 51.9, sessions: 1100, pct_sessions: 1.6 },
+        { bucket: "100 – 500", articles: 13, pct_articles: 24.1, sessions: 3400, pct_sessions: 5.0 },
+        { bucket: "500 – 2 000", articles: 7, pct_articles: 13.0, sessions: 7800, pct_sessions: 11.4 },
+        { bucket: "2 000 – 10 000", articles: 4, pct_articles: 7.4, sessions: 22100, pct_sessions: 32.4 },
+        { bucket: "10 000+", articles: 2, pct_articles: 3.7, sessions: 33800, pct_sessions: 49.6 }
+      ],
+      last_week: [
+        { bucket: "< 100", articles: 198, pct_articles: 52.4, sessions: 8200, pct_sessions: 1.7 },
+        { bucket: "100 – 500", articles: 91, pct_articles: 24.1, sessions: 24800, pct_sessions: 5.2 },
+        { bucket: "500 – 2 000", articles: 48, pct_articles: 12.7, sessions: 54200, pct_sessions: 11.3 },
+        { bucket: "2 000 – 10 000", articles: 28, pct_articles: 7.4, sessions: 147000, pct_sessions: 30.8 },
+        { bucket: "10 000+", articles: 13, pct_articles: 3.4, sessions: 243800, pct_sessions: 51.0 }
+      ],
+      last_month: [
+        { bucket: "< 100", articles: 802, pct_articles: 52.8, sessions: 34100, pct_sessions: 1.8 },
+        { bucket: "100 – 500", articles: 364, pct_articles: 23.9, sessions: 99800, pct_sessions: 5.1 },
+        { bucket: "500 – 2 000", articles: 190, pct_articles: 12.5, sessions: 216000, pct_sessions: 11.1 },
+        { bucket: "2 000 – 10 000", articles: 114, pct_articles: 7.5, sessions: 591000, pct_sessions: 30.5 },
+        { bucket: "10 000+", articles: 50, pct_articles: 3.3, sessions: 999100, pct_sessions: 51.5 }
+      ]
+    },
+    SportBuzz: {
+      yesterday: [
+        { bucket: "< 100", articles: 58, pct_articles: 51.8, sessions: 2400, pct_sessions: 1.2 },
+        { bucket: "100 – 500", articles: 27, pct_articles: 24.1, sessions: 7600, pct_sessions: 3.8 },
+        { bucket: "500 – 2 000", articles: 15, pct_articles: 13.4, sessions: 17200, pct_sessions: 8.7 },
+        { bucket: "2 000 – 10 000", articles: 8, pct_articles: 7.1, sessions: 48700, pct_sessions: 24.5 },
+        { bucket: "10 000+", articles: 4, pct_articles: 3.6, sessions: 122500, pct_sessions: 61.7 }
+      ],
+      last_week: [
+        { bucket: "< 100", articles: 408, pct_articles: 52.0, sessions: 17400, pct_sessions: 1.3 },
+        { bucket: "100 – 500", articles: 188, pct_articles: 24.0, sessions: 52800, pct_sessions: 3.9 },
+        { bucket: "500 – 2 000", articles: 104, pct_articles: 13.3, sessions: 118000, pct_sessions: 8.8 },
+        { bucket: "2 000 – 10 000", articles: 58, pct_articles: 7.4, sessions: 336000, pct_sessions: 25.1 },
+        { bucket: "10 000+", articles: 26, pct_articles: 3.3, sessions: 815800, pct_sessions: 60.9 }
+      ],
+      last_month: [
+        { bucket: "< 100", articles: 1652, pct_articles: 52.1, sessions: 72100, pct_sessions: 1.3 },
+        { bucket: "100 – 500", articles: 760, pct_articles: 24.0, sessions: 213000, pct_sessions: 3.9 },
+        { bucket: "500 – 2 000", articles: 418, pct_articles: 13.2, sessions: 476000, pct_sessions: 8.7 },
+        { bucket: "2 000 – 10 000", articles: 234, pct_articles: 7.4, sessions: 1370000, pct_sessions: 25.0 },
+        { bucket: "10 000+", articles: 106, pct_articles: 3.3, sessions: 3348900, pct_sessions: 61.1 }
+      ]
+    }
+  },
+
+  // ── Performance Index: topic / club / competition ──
+  index: {
+    FootMercato: {
+      yesterday: {
+        topic: [
+          { name: "Mercato", articles: 19, share_content: 21.8, search_clicks: 31200, share_search: 34.9, discover_clicks: 21800, share_discover: 41.8, sessions: 52100, share_sessions: 36.6 },
+          { name: "Match", articles: 14, share_content: 16.1, search_clicks: 18200, share_search: 20.4, discover_clicks: 4200, share_discover: 8.1, sessions: 24800, share_sessions: 17.4 },
+          { name: "Blessure", articles: 8, share_content: 9.2, search_clicks: 12400, share_search: 13.9, discover_clicks: 9800, share_discover: 18.8, sessions: 18200, share_sessions: 12.8 },
+          { name: "Tactique", articles: 6, share_content: 6.9, search_clicks: 3200, share_search: 3.6, discover_clicks: 1400, share_discover: 2.7, sessions: 5800, share_sessions: 4.1 },
+          { name: "Sélection", articles: 5, share_content: 5.7, search_clicks: 4100, share_search: 4.6, discover_clicks: 3200, share_discover: 6.1, sessions: 7200, share_sessions: 5.1 },
+          { name: "Rumeur", articles: 12, share_content: 13.8, search_clicks: 5800, share_search: 6.5, discover_clicks: 4900, share_discover: 9.4, sessions: 12400, share_sessions: 8.7 },
+          { name: "Résultat", articles: 8, share_content: 9.2, search_clicks: 7200, share_search: 8.1, discover_clicks: 2100, share_discover: 4.0, sessions: 8900, share_sessions: 6.3 },
+          { name: "Analyse", articles: 5, share_content: 5.7, search_clicks: 2800, share_search: 3.1, discover_clicks: 1200, share_discover: 2.3, sessions: 4100, share_sessions: 2.9 },
+          { name: "Interview", articles: 4, share_content: 4.6, search_clicks: 2400, share_search: 2.7, discover_clicks: 1800, share_discover: 3.5, sessions: 4200, share_sessions: 3.0 },
+          { name: "Formation", articles: 6, share_content: 6.9, search_clicks: 2100, share_search: 2.3, discover_clicks: 1700, share_discover: 3.3, sessions: 4600, share_sessions: 3.2 }
+        ],
+        club: [
+          { name: "PSG", articles: 18, share_content: 20.7, search_clicks: 24100, share_search: 27.0, discover_clicks: 16800, share_discover: 32.2, sessions: 39800, share_sessions: 28.0 },
+          { name: "OM", articles: 14, share_content: 16.1, search_clicks: 16200, share_search: 18.1, discover_clicks: 12100, share_discover: 23.2, sessions: 28400, share_sessions: 20.0 },
+          { name: "OL", articles: 11, share_content: 12.6, search_clicks: 9800, share_search: 11.0, discover_clicks: 4200, share_discover: 8.1, sessions: 14100, share_sessions: 9.9 },
+          { name: "ASSE", articles: 6, share_content: 6.9, search_clicks: 7400, share_search: 8.3, discover_clicks: 5100, share_discover: 9.8, sessions: 12800, share_sessions: 9.0 },
+          { name: "LOSC", articles: 7, share_content: 8.0, search_clicks: 5200, share_search: 5.8, discover_clicks: 3400, share_discover: 6.5, sessions: 8900, share_sessions: 6.3 },
+          { name: "RC Lens", articles: 5, share_content: 5.7, search_clicks: 6100, share_search: 6.8, discover_clicks: 3800, share_discover: 7.3, sessions: 10200, share_sessions: 7.2 },
+          { name: "AS Monaco", articles: 7, share_content: 8.0, search_clicks: 5800, share_search: 6.5, discover_clicks: 2400, share_discover: 4.6, sessions: 8100, share_sessions: 5.7 },
+          { name: "Stade Rennais", articles: 5, share_content: 5.7, search_clicks: 4200, share_search: 4.7, discover_clicks: 1200, share_discover: 2.3, sessions: 5400, share_sessions: 3.8 },
+          { name: "Éq. de France", articles: 8, share_content: 9.2, search_clicks: 7100, share_search: 7.9, discover_clicks: 2100, share_discover: 4.0, sessions: 9200, share_sessions: 6.5 },
+          { name: "Autres", articles: 6, share_content: 6.9, search_clicks: 3500, share_search: 3.9, discover_clicks: 1000, share_discover: 1.9, sessions: 5400, share_sessions: 3.8 }
+        ],
+        competition: [
+          { name: "Ligue 1", articles: 42, share_content: 48.3, search_clicks: 41200, share_search: 46.1, discover_clicks: 24800, share_discover: 47.6, sessions: 68200, share_sessions: 47.9 },
+          { name: "Champions League", articles: 12, share_content: 13.8, search_clicks: 18400, share_search: 20.6, discover_clicks: 12400, share_discover: 23.8, sessions: 28800, share_sessions: 20.2 },
+          { name: "Europa League", articles: 5, share_content: 5.7, search_clicks: 4800, share_search: 5.4, discover_clicks: 2100, share_discover: 4.0, sessions: 7200, share_sessions: 5.1 },
+          { name: "Ligue 2", articles: 8, share_content: 9.2, search_clicks: 3200, share_search: 3.6, discover_clicks: 1400, share_discover: 2.7, sessions: 5100, share_sessions: 3.6 },
+          { name: "Coupe de France", articles: 4, share_content: 4.6, search_clicks: 2800, share_search: 3.1, discover_clicks: 1800, share_discover: 3.5, sessions: 4600, share_sessions: 3.2 },
+          { name: "Éq. de France", articles: 8, share_content: 9.2, search_clicks: 12100, share_search: 13.5, discover_clicks: 6200, share_discover: 11.9, sessions: 18400, share_sessions: 12.9 },
+          { name: "Autres", articles: 8, share_content: 9.2, search_clicks: 6900, share_search: 7.7, discover_clicks: 3400, share_discover: 6.5, sessions: 10000, share_sessions: 7.0 }
+        ]
+      }
+    },
+    Foot01: {
+      yesterday: {
+        topic: [
+          { name: "Mercato", articles: 13, share_content: 24.1, search_clicks: 15200, share_search: 36.9, discover_clicks: 13100, share_discover: 45.3, sessions: 28100, share_sessions: 41.2 },
+          { name: "Match", articles: 8, share_content: 14.8, search_clicks: 7400, share_search: 18.0, discover_clicks: 2800, share_discover: 9.7, sessions: 10200, share_sessions: 15.0 },
+          { name: "Blessure", articles: 6, share_content: 11.1, search_clicks: 5200, share_search: 12.6, discover_clicks: 4100, share_discover: 14.2, sessions: 8400, share_sessions: 12.3 },
+          { name: "Rumeur", articles: 8, share_content: 14.8, search_clicks: 4800, share_search: 11.7, discover_clicks: 3200, share_discover: 11.1, sessions: 7100, share_sessions: 10.4 },
+          { name: "Résultat", articles: 6, share_content: 11.1, search_clicks: 3100, share_search: 7.5, discover_clicks: 1800, share_discover: 6.2, sessions: 4800, share_sessions: 7.0 },
+          { name: "Sélection", articles: 4, share_content: 7.4, search_clicks: 2400, share_search: 5.8, discover_clicks: 1600, share_discover: 5.5, sessions: 3800, share_sessions: 5.6 },
+          { name: "Tactique", articles: 3, share_content: 5.6, search_clicks: 1200, share_search: 2.9, discover_clicks: 800, share_discover: 2.8, sessions: 2100, share_sessions: 3.1 },
+          { name: "Interview", articles: 3, share_content: 5.6, search_clicks: 1000, share_search: 2.4, discover_clicks: 900, share_discover: 3.1, sessions: 1900, share_sessions: 2.8 },
+          { name: "Autres", articles: 3, share_content: 5.6, search_clicks: 900, share_search: 2.2, discover_clicks: 600, share_discover: 2.1, sessions: 1800, share_sessions: 2.6 }
+        ],
+        club: [
+          { name: "PSG", articles: 11, share_content: 20.4, search_clicks: 12100, share_search: 29.4, discover_clicks: 9800, share_discover: 33.9, sessions: 19200, share_sessions: 28.2 },
+          { name: "OM", articles: 9, share_content: 16.7, search_clicks: 8200, share_search: 19.9, discover_clicks: 7100, share_discover: 24.6, sessions: 14800, share_sessions: 21.7 },
+          { name: "OL", articles: 7, share_content: 13.0, search_clicks: 5400, share_search: 13.1, discover_clicks: 3200, share_discover: 11.1, sessions: 8200, share_sessions: 12.0 },
+          { name: "ASSE", articles: 5, share_content: 9.3, search_clicks: 4100, share_search: 10.0, discover_clicks: 2800, share_discover: 9.7, sessions: 6400, share_sessions: 9.4 },
+          { name: "RC Lens", articles: 4, share_content: 7.4, search_clicks: 3200, share_search: 7.8, discover_clicks: 2100, share_discover: 7.3, sessions: 5100, share_sessions: 7.5 },
+          { name: "LOSC", articles: 4, share_content: 7.4, search_clicks: 2400, share_search: 5.8, discover_clicks: 1400, share_discover: 4.8, sessions: 3800, share_sessions: 5.6 },
+          { name: "Éq. de France", articles: 5, share_content: 9.3, search_clicks: 2800, share_search: 6.8, discover_clicks: 1200, share_discover: 4.2, sessions: 4400, share_sessions: 6.5 },
+          { name: "Autres", articles: 9, share_content: 16.7, search_clicks: 3000, share_search: 7.3, discover_clicks: 1300, share_discover: 4.5, sessions: 6300, share_sessions: 9.2 }
+        ],
+        competition: [
+          { name: "Ligue 1", articles: 28, share_content: 51.9, search_clicks: 21800, share_search: 52.9, discover_clicks: 15200, share_discover: 52.6, sessions: 36200, share_sessions: 53.1 },
+          { name: "Champions League", articles: 8, share_content: 14.8, search_clicks: 8400, share_search: 20.4, discover_clicks: 6200, share_discover: 21.5, sessions: 13400, share_sessions: 19.6 },
+          { name: "Ligue 2", articles: 6, share_content: 11.1, search_clicks: 2800, share_search: 6.8, discover_clicks: 1400, share_discover: 4.8, sessions: 4800, share_sessions: 7.0 },
+          { name: "Éq. de France", articles: 5, share_content: 9.3, search_clicks: 4200, share_search: 10.2, discover_clicks: 3100, share_discover: 10.7, sessions: 6800, share_sessions: 10.0 },
+          { name: "Autres", articles: 7, share_content: 13.0, search_clicks: 4000, share_search: 9.7, discover_clicks: 3000, share_discover: 10.4, sessions: 7000, share_sessions: 10.3 }
+        ]
+      }
+    },
+    SportBuzz: {
+      yesterday: {
+        topic: [
+          { name: "Mercato", articles: 22, share_content: 19.6, search_clicks: 38200, share_search: 30.6, discover_clicks: 28400, share_discover: 39.9, sessions: 62100, share_sessions: 31.3 },
+          { name: "Match", articles: 18, share_content: 16.1, search_clicks: 24100, share_search: 19.3, discover_clicks: 8200, share_discover: 11.5, sessions: 32400, share_sessions: 16.3 },
+          { name: "Blessure", articles: 12, share_content: 10.7, search_clicks: 14800, share_search: 11.9, discover_clicks: 9400, share_discover: 13.2, sessions: 22100, share_sessions: 11.1 },
+          { name: "Rumeur", articles: 15, share_content: 13.4, search_clicks: 12400, share_search: 9.9, discover_clicks: 8100, share_discover: 11.4, sessions: 20800, share_sessions: 10.5 },
+          { name: "Résultat", articles: 12, share_content: 10.7, search_clicks: 11200, share_search: 9.0, discover_clicks: 4200, share_discover: 5.9, sessions: 16800, share_sessions: 8.5 },
+          { name: "Sélection", articles: 8, share_content: 7.1, search_clicks: 8400, share_search: 6.7, discover_clicks: 4800, share_discover: 6.7, sessions: 14200, share_sessions: 7.2 },
+          { name: "Analyse", articles: 7, share_content: 6.3, search_clicks: 4800, share_search: 3.8, discover_clicks: 2400, share_discover: 3.4, sessions: 8200, share_sessions: 4.1 },
+          { name: "Tactique", articles: 6, share_content: 5.4, search_clicks: 3400, share_search: 2.7, discover_clicks: 1800, share_discover: 2.5, sessions: 6200, share_sessions: 3.1 },
+          { name: "Interview", articles: 5, share_content: 4.5, search_clicks: 3200, share_search: 2.6, discover_clicks: 1400, share_discover: 2.0, sessions: 5800, share_sessions: 2.9 },
+          { name: "Autres", articles: 7, share_content: 6.3, search_clicks: 4300, share_search: 3.4, discover_clicks: 2400, share_discover: 3.4, sessions: 9800, share_sessions: 4.9 }
+        ],
+        club: [
+          { name: "PSG", articles: 22, share_content: 19.6, search_clicks: 28400, share_search: 22.8, discover_clicks: 18200, share_discover: 25.6, sessions: 44200, share_sessions: 22.3 },
+          { name: "OM", articles: 18, share_content: 16.1, search_clicks: 21200, share_search: 17.0, discover_clicks: 14100, share_discover: 19.8, sessions: 34800, share_sessions: 17.5 },
+          { name: "Real Madrid", articles: 10, share_content: 8.9, search_clicks: 14800, share_search: 11.9, discover_clicks: 9400, share_discover: 13.2, sessions: 22800, share_sessions: 11.5 },
+          { name: "OL", articles: 12, share_content: 10.7, search_clicks: 11200, share_search: 9.0, discover_clicks: 5200, share_discover: 7.3, sessions: 16400, share_sessions: 8.3 },
+          { name: "FC Barcelone", articles: 8, share_content: 7.1, search_clicks: 10200, share_search: 8.2, discover_clicks: 7100, share_discover: 10.0, sessions: 17400, share_sessions: 8.8 },
+          { name: "ASSE", articles: 6, share_content: 5.4, search_clicks: 8100, share_search: 6.5, discover_clicks: 4800, share_discover: 6.7, sessions: 12200, share_sessions: 6.1 },
+          { name: "LOSC", articles: 8, share_content: 7.1, search_clicks: 6800, share_search: 5.4, discover_clicks: 3400, share_discover: 4.8, sessions: 10400, share_sessions: 5.2 },
+          { name: "Éq. de France", articles: 12, share_content: 10.7, search_clicks: 12400, share_search: 9.9, discover_clicks: 4200, share_discover: 5.9, sessions: 18800, share_sessions: 9.5 },
+          { name: "Autres", articles: 16, share_content: 14.3, search_clicks: 11700, share_search: 9.4, discover_clicks: 4800, share_discover: 6.7, sessions: 21400, share_sessions: 10.8 }
+        ],
+        competition: [
+          { name: "Ligue 1", articles: 48, share_content: 42.9, search_clicks: 48200, share_search: 38.6, discover_clicks: 28400, share_discover: 39.9, sessions: 78200, share_sessions: 39.4 },
+          { name: "Champions League", articles: 18, share_content: 16.1, search_clicks: 28400, share_search: 22.8, discover_clicks: 16800, share_discover: 23.6, sessions: 42100, share_sessions: 21.2 },
+          { name: "Liga", articles: 12, share_content: 10.7, search_clicks: 16200, share_search: 13.0, discover_clicks: 9800, share_discover: 13.8, sessions: 24800, share_sessions: 12.5 },
+          { name: "Éq. de France", articles: 12, share_content: 10.7, search_clicks: 14200, share_search: 11.4, discover_clicks: 7200, share_discover: 10.1, sessions: 22400, share_sessions: 11.3 },
+          { name: "Premier League", articles: 8, share_content: 7.1, search_clicks: 8400, share_search: 6.7, discover_clicks: 4200, share_discover: 5.9, sessions: 14200, share_sessions: 7.2 },
+          { name: "Autres", articles: 14, share_content: 12.5, search_clicks: 9400, share_search: 7.5, discover_clicks: 4800, share_discover: 6.7, sessions: 16700, share_sessions: 8.4 }
+        ]
+      }
+    }
+  },
+
+  // ── Top Articles ──
+  topArticles: {
+    FootMercato: {
+      yesterday: [
+        { title: "PSG : Osimhen a dit oui, les détails du contrat révélés", topic: "Mercato", club: "PSG", sessions: 28400, search: 18200, discover: 14100 },
+        { title: "OM – Lens : les notes des joueurs, Greenwood encore décisif", topic: "Match", club: "OM", sessions: 24100, search: 14800, discover: 2400 },
+        { title: "Mbappé blessé au genou, durée d'absence estimée", topic: "Blessure", club: "Real Madrid", sessions: 25800, search: 12400, discover: 18200 },
+        { title: "ASSE : un buteur de L1 dans le viseur pour janvier", topic: "Mercato", club: "ASSE", sessions: 12800, search: 7400, discover: 5100 },
+        { title: "OL : Cherki prolonge jusqu'en 2029, le communiqué officiel", topic: "Mercato", club: "OL", sessions: 11200, search: 8100, discover: 4200 },
+        { title: "Deschamps : «Je ne suis pas inquiet pour Mbappé»", topic: "Interview", club: "Éq. de France", sessions: 8400, search: 4200, discover: 3100 },
+        { title: "Résultats Ligue 1 : tous les scores de la 3e journée", topic: "Résultat", club: "—", sessions: 7800, search: 6200, discover: 820 },
+        { title: "Monaco : Golovin touché aux adducteurs, forfait confirmé", topic: "Blessure", club: "AS Monaco", sessions: 6200, search: 4800, discover: 1200 }
+      ]
+    },
+    Foot01: {
+      yesterday: [
+        { title: "PSG : coup de théâtre, un attaquant du Barça en approche", topic: "Rumeur", club: "PSG", sessions: 18400, search: 8200, discover: 12100 },
+        { title: "OM : De Zerbi exige un défenseur central avant lundi", topic: "Mercato", club: "OM", sessions: 15200, search: 7400, discover: 8200 },
+        { title: "Mbappé – Real Madrid : première titularisation samedi ?", topic: "Blessure", club: "Real Madrid", sessions: 12100, search: 5400, discover: 7800 },
+        { title: "OL : les coulisses du transfert avorté de Rayan Cherki", topic: "Mercato", club: "OL", sessions: 8200, search: 4100, discover: 3200 },
+        { title: "ASSE : le onze probable face à Auxerre", topic: "Formation", club: "ASSE", sessions: 6400, search: 4100, discover: 2800 },
+        { title: "LOSC : David sur le départ, deux clubs anglais en pole", topic: "Mercato", club: "LOSC", sessions: 5100, search: 3200, discover: 1400 }
+      ]
+    },
+    SportBuzz: {
+      yesterday: [
+        { title: "EXCLU – Osimhen au PSG : salaire, durée, clause, tous les détails", topic: "Mercato", club: "PSG", sessions: 42100, search: 24100, discover: 21800 },
+        { title: "Barça : Yamal prolonge, clause fixée à 1 milliard", topic: "Mercato", club: "FC Barcelone", sessions: 31200, search: 14800, discover: 18400 },
+        { title: "PSG – Monaco : les compos probables et les absents", topic: "Match", club: "PSG", sessions: 28400, search: 18200, discover: 4200 },
+        { title: "Blessure Mbappé : le Real Madrid communique enfin", topic: "Blessure", club: "Real Madrid", sessions: 21400, search: 12400, discover: 11800 },
+        { title: "Mercato OM : un milieu de l'Inter Milan en ligne de mire", topic: "Mercato", club: "OM", sessions: 18200, search: 8400, discover: 12100 },
+        { title: "PSG : les 3 recrues que Luis Enrique veut absolument", topic: "Rumeur", club: "PSG", sessions: 14800, search: 4200, discover: 11200 },
+        { title: "Notes OL – Nantes : Lacazette porte les siens (8/10)", topic: "Match", club: "OL", sessions: 12400, search: 8100, discover: 2400 },
+        { title: "Équipe de France : Deschamps dévoile sa liste des 23", topic: "Sélection", club: "Éq. de France", sessions: 14200, search: 8400, discover: 4800 }
+      ]
+    }
+  },
+
+  // ── AI Insights ──
+  insights: {
+    FootMercato: {
+      yesterday: `<strong>FootMercato hier :</strong> Le contenu <strong>Mercato</strong> reste votre locomotive — <span class="highlight-num">21.8%</span> des articles pour <span class="highlight-up">41.8%</span> du trafic Discover (index 1.92). L'article Osimhen a capté à lui seul 20% des sessions du site. En revanche, le contenu <strong>Tactique</strong> et <strong>Analyse</strong> sous-performe nettement en Discover (index <span class="highlight-down">0.39</span> et <span class="highlight-down">0.40</span>) — ces formats marchent mieux en Search pur. <strong>RC Lens</strong> surperforme discrètement (index 1.26 en sessions avec seulement 5.7% du contenu) — piste éditoriale à creuser. <strong>Champions League</strong> capte <span class="highlight-up">20.2%</span> des sessions avec <span class="highlight-num">13.8%</span> du contenu — le ratio le plus favorable toutes compétitions confondues.`
+    },
+    Foot01: {
+      yesterday: `<strong>Foot01 hier :</strong> Forte dépendance au <strong>Mercato</strong> — <span class="highlight-num">24.1%</span> du contenu mais <span class="highlight-up">45.3%</span> du Discover (index 1.88). Attention : hors mercato, le site manque de relais de croissance Discover. Le <strong>PSG</strong> reste le club n°1 en volume et en trafic (index 1.38 en sessions). Alerte : le contenu <strong>Tactique</strong> représente 5.6% du volume mais ne capte que <span class="highlight-down">3.1%</span> des sessions — à recadrer ou abandonner. <strong>Champions League</strong> index <span class="highlight-up">1.33</span> en sessions : même constat que FootMercato, la C1 surperforme malgré un volume modeste.`
+    },
+    SportBuzz: {
+      yesterday: `<strong>SportBuzz hier :</strong> Journée exceptionnelle avec <span class="highlight-num">198k sessions</span> (+5.8% vs veille). Le scoop Osimhen a tout tiré : 42k sessions pour un seul article. La couverture <strong>international</strong> (Liga, Premier League) est un vrai différenciateur — <span class="highlight-num">Real Madrid</span> et <span class="highlight-num">FC Barcelone</span> captent 20.3% des sessions avec 16% du contenu. <strong>Discover</strong> : le Mercato atteint un index de <span class="highlight-up">2.04</span>, le plus élevé des 3 sites. Point de vigilance : <span class="highlight-down">51.8%</span> de vos articles font moins de 100 sessions — le taux le plus élevé du réseau.`
+    },
+    all: {
+      yesterday: `<strong>Réseau — vue d'ensemble :</strong> Total <span class="highlight-num">408 900 sessions</span> hier sur les 3 sites, porté par l'actualité Osimhen et la blessure de Mbappé. Le <strong>Mercato</strong> représente en moyenne 21% du contenu mais capte <span class="highlight-up">36%</span> des sessions — c'est le sujet roi, tous sites confondus. La <strong>Champions League</strong> surperforme partout (index moyen 1.4) malgré un volume modeste : c'est la piste de croissance la plus évidente à exploiter. <strong>Tactique</strong> et <strong>Analyse</strong> sous-performent systématiquement en Discover (index moyen <span class="highlight-down">0.45</span>) mais tiennent en Search — ces contenus ont un profil SEO, pas social. En cross-site : <strong>SportBuzz</strong> a le meilleur reach mais le pire ratio articles utiles (52% sous 100 sessions). <strong>FootMercato</strong> a le meilleur rendement par article. <strong>Foot01</strong> est le plus dépendant au PSG/OM (37% du trafic sur 2 clubs).`
+    }
+  }
+};
+
+// Fill in last_week and last_month index data by reusing yesterday with slight variations
+// (In production, this comes from real aggregated data)
+function generatePeriodVariant(base, variance) {
+  return base.map(row => {
+    const factor = 0.85 + Math.random() * 0.3;
+    return {
+      ...row,
+      articles: Math.round(row.articles * (5 + Math.random() * 3)),
+      search_clicks: Math.round(row.search_clicks * (5 + Math.random() * 3)),
+      discover_clicks: Math.round(row.discover_clicks * (5 + Math.random() * 3)),
+      sessions: Math.round(row.sessions * (5 + Math.random() * 3))
+    };
+  });
+}
+
+for (const site of DATA.sites) {
+  if (!DATA.index[site].last_week) {
+    DATA.index[site].last_week = {};
+    DATA.index[site].last_month = {};
+    for (const dim of ['topic', 'club', 'competition']) {
+      const base = DATA.index[site].yesterday[dim];
+      DATA.index[site].last_week[dim] = base; // same structure, different KPIs
+      DATA.index[site].last_month[dim] = base;
+    }
+  }
+  // Insights placeholders for other periods
+  if (!DATA.insights[site].last_week) {
+    DATA.insights[site].last_week = DATA.insights[site].yesterday.replace('hier', 'cette semaine');
+    DATA.insights[site].last_month = DATA.insights[site].yesterday.replace('hier', 'ce mois-ci');
+  }
+  // Top articles placeholders
+  if (!DATA.topArticles[site].last_week) {
+    DATA.topArticles[site].last_week = DATA.topArticles[site].yesterday;
+    DATA.topArticles[site].last_month = DATA.topArticles[site].yesterday;
+  }
+}
+DATA.insights.all.last_week = DATA.insights.all.yesterday.replace('hier', 'cette semaine');
+DATA.insights.all.last_month = DATA.insights.all.yesterday.replace('hier', 'ce mois-ci');
+
+// ══════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════
+let state = {
+  site: 'all',
+  period: 'yesterday',
+  dimension: 'topic',
+  metric: 'search'
+};
+
+// ══════════════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════════════
+function fmt(n) {
+  if (n >= 1000000) return (n / 1000000).toFixed(1).replace('.0', '') + 'M';
+  if (n >= 1000) return (n / 1000).toFixed(1).replace('.0', '') + 'k';
+  return n.toString();
+}
+
+function pct(n) { return n.toFixed(1) + '%'; }
+
+function change(current, previous) {
+  if (!previous) return { value: 0, label: '—', cls: '' };
+  const diff = ((current - previous) / previous) * 100;
+  return {
+    value: diff,
+    label: (diff >= 0 ? '+' : '') + diff.toFixed(1) + '%',
+    cls: diff >= 0 ? 'up' : 'down'
+  };
+}
+
+function topicClass(topic) {
+  const map = {
+    'Mercato': 'mercato', 'Match': 'match', 'Blessure': 'blessure',
+    'Tactique': 'tactique', 'Sélection': 'selection', 'Rumeur': 'rumeur',
+    'Interview': 'interview', 'Analyse': 'analyse', 'Résultat': 'resultat',
+    'Formation': 'default'
+  };
+  return 'topic-' + (map[topic] || 'default');
+}
+
+function getStatus(index) {
+  if (index >= 1.8) return { label: 'Forte surperf.', cls: 'status-high-over' };
+  if (index >= 1.35) return { label: 'Surperformance', cls: 'status-over' };
+  if (index >= 1.12) return { label: 'Légère surperf.', cls: 'status-slight-over' };
+  if (index >= 0.88) return { label: 'Stable', cls: 'status-stable' };
+  if (index >= 0.65) return { label: 'Légère sous-perf.', cls: 'status-slight-under' };
+  if (index >= 0.4)  return { label: 'Sous-performance', cls: 'status-under' };
+  return { label: 'Forte sous-perf.', cls: 'status-high-under' };
+}
+
+// ══════════════════════════════════════════════
+// AGGREGATION (for "all sites")
+// ══════════════════════════════════════════════
+function aggregateKpis(period) {
+  const result = { articles: 0, sessions: 0, search_clicks: 0, discover_clicks: 0, prev_articles: 0, prev_sessions: 0, prev_search: 0, prev_discover: 0 };
+  for (const site of DATA.sites) {
+    const k = DATA.kpis[site][period];
+    result.articles += k.articles;
+    result.sessions += k.sessions;
+    result.search_clicks += k.search_clicks;
+    result.discover_clicks += k.discover_clicks;
+    result.prev_articles += k.prev_articles;
+    result.prev_sessions += k.prev_sessions;
+    result.prev_search += k.prev_search;
+    result.prev_discover += k.prev_discover;
+  }
+  return result;
+}
+
+function aggregateDist(period) {
+  const buckets = {};
+  for (const site of DATA.sites) {
+    for (const row of DATA.distribution[site][period]) {
+      if (!buckets[row.bucket]) buckets[row.bucket] = { bucket: row.bucket, articles: 0, sessions: 0 };
+      buckets[row.bucket].articles += row.articles;
+      buckets[row.bucket].sessions += row.sessions;
+    }
+  }
+  const rows = Object.values(buckets);
+  const totalArticles = rows.reduce((s, r) => s + r.articles, 0);
+  const totalSessions = rows.reduce((s, r) => s + r.sessions, 0);
+  return rows.map(r => ({
+    ...r,
+    pct_articles: (r.articles / totalArticles * 100),
+    pct_sessions: (r.sessions / totalSessions * 100)
+  }));
+}
+
+function aggregateIndex(period, dim) {
+  const map = {};
+  for (const site of DATA.sites) {
+    const rows = DATA.index[site][period]?.[dim] || DATA.index[site].yesterday[dim];
+    for (const row of rows) {
+      if (!map[row.name]) map[row.name] = { name: row.name, articles: 0, search_clicks: 0, discover_clicks: 0, sessions: 0 };
+      map[row.name].articles += row.articles;
+      map[row.name].search_clicks += row.search_clicks;
+      map[row.name].discover_clicks += row.discover_clicks;
+      map[row.name].sessions += row.sessions;
+    }
+  }
+  const rows = Object.values(map);
+  const totals = rows.reduce((acc, r) => ({
+    articles: acc.articles + r.articles,
+    search_clicks: acc.search_clicks + r.search_clicks,
+    discover_clicks: acc.discover_clicks + r.discover_clicks,
+    sessions: acc.sessions + r.sessions
+  }), { articles: 0, search_clicks: 0, discover_clicks: 0, sessions: 0 });
+
+  return rows.map(r => ({
+    name: r.name,
+    articles: r.articles,
+    share_content: r.articles / totals.articles * 100,
+    search_clicks: r.search_clicks,
+    share_search: r.search_clicks / totals.search_clicks * 100,
+    discover_clicks: r.discover_clicks,
+    share_discover: r.discover_clicks / totals.discover_clicks * 100,
+    sessions: r.sessions,
+    share_sessions: r.sessions / totals.sessions * 100
+  }));
+}
+
+function aggregateTopArticles(period) {
+  let all = [];
+  for (const site of DATA.sites) {
+    const articles = DATA.topArticles[site][period] || DATA.topArticles[site].yesterday;
+    all = all.concat(articles.map(a => ({ ...a, site })));
+  }
+  return all.sort((a, b) => b.sessions - a.sessions).slice(0, 10);
+}
+
+// ══════════════════════════════════════════════
+// RENDER FUNCTIONS
+// ══════════════════════════════════════════════
+
+function renderKPIs() {
+  const { site, period } = state;
+  const k = site === 'all' ? aggregateKpis(period) : DATA.kpis[site][period];
+
+  const items = [
+    { label: 'Articles', value: k.articles, prev: k.prev_articles },
+    { label: 'Sessions', value: k.sessions, prev: k.prev_sessions },
+    { label: 'Search Clicks', value: k.search_clicks, prev: k.prev_search },
+    { label: 'Discover Clicks', value: k.discover_clicks, prev: k.prev_discover }
+  ];
+
+  document.getElementById('kpiRow').innerHTML = items.map(item => {
+    const ch = change(item.value, item.prev);
+    return `<div class="kpi-card">
+      <div class="kpi-label">${item.label}</div>
+      <div class="kpi-value">${fmt(item.value)}</div>
+      <div class="kpi-change ${ch.cls}">${ch.cls === 'up' ? '↑' : '↓'} ${ch.label} vs période préc.</div>
+    </div>`;
+  }).join('');
+}
+
+function renderInsights() {
+  const { site, period } = state;
+  const key = site === 'all' ? 'all' : site;
+  const text = DATA.insights[key]?.[period] || DATA.insights[key]?.yesterday || 'Insights non disponibles pour cette période.';
+
+  document.getElementById('insightsCard').innerHTML = `
+    <div class="insights-header">
+      <span class="insights-badge">✦ AI Insights</span>
+      <span class="insights-title">Analyse automatique</span>
+    </div>
+    <div class="insights-body">${text}</div>
+  `;
+}
+
+function renderDistribution() {
+  const { site, period } = state;
+  const rows = site === 'all' ? aggregateDist(period) : DATA.distribution[site][period];
+
+  document.getElementById('distTable').innerHTML = `
+    <thead>
+      <tr>
+        <th>Sessions</th>
+        <th class="right">Articles</th>
+        <th class="right">% contenu</th>
+        <th class="right">Sessions</th>
+        <th class="right">% sessions</th>
+        <th style="width:120px"></th>
+      </tr>
+    </thead>
+    <tbody>
+      ${rows.map(r => `<tr>
+        <td style="font-weight:500">${r.bucket}</td>
+        <td class="right">${r.articles}</td>
+        <td class="right dim">${pct(r.pct_articles)}</td>
+        <td class="right">${fmt(r.sessions)}</td>
+        <td class="right" style="font-weight:600; color: ${r.pct_sessions > 30 ? 'var(--green)' : r.pct_sessions < 5 ? 'var(--red)' : 'var(--text)'}">${pct(r.pct_sessions)}</td>
+        <td><div class="dist-bar-wrap"><div class="dist-bar" style="width:${r.pct_sessions}%"></div></div></td>
+      </tr>`).join('')}
+    </tbody>
+  `;
+}
+
+function renderTopArticles() {
+  const { site, period } = state;
+  let articles;
+  if (site === 'all') {
+    articles = aggregateTopArticles(period);
+  } else {
+    articles = DATA.topArticles[site]?.[period] || DATA.topArticles[site]?.yesterday || [];
+  }
+
+  document.getElementById('topArticlesTable').innerHTML = `
+    <thead>
+      <tr>
+        <th style="width:30px">#</th>
+        <th>Article</th>
+        <th>Sujet</th>
+        <th class="right">Sessions</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${articles.slice(0, 8).map((a, i) => `<tr>
+        <td><span class="article-rank">${i + 1}</span></td>
+        <td><span class="article-title">${a.title}</span></td>
+        <td><span class="article-topic ${topicClass(a.topic)}">${a.topic}</span></td>
+        <td class="right" style="font-weight:600">${fmt(a.sessions)}</td>
+      </tr>`).join('')}
+    </tbody>
+  `;
+}
+
+function renderIndex() {
+  const { site, period, dimension, metric } = state;
+  let rows;
+  if (site === 'all') {
+    rows = aggregateIndex(period, dimension);
+  } else {
+    rows = DATA.index[site][period]?.[dimension] || DATA.index[site].yesterday[dimension] || [];
+  }
+
+  // Compute shares and index based on selected metric
+  const metricMap = {
+    search: { shareKey: 'share_search', clicksKey: 'search_clicks', label: 'Search Clicks' },
+    discover: { shareKey: 'share_discover', clicksKey: 'discover_clicks', label: 'Discover Clicks' },
+    sessions: { shareKey: 'share_sessions', clicksKey: 'sessions', label: 'Sessions' }
+  };
+  const m = metricMap[metric];
+
+  // Recalculate shares for aggregated data
+  const totalContent = rows.reduce((s, r) => s + r.articles, 0);
+  const totalMetric = rows.reduce((s, r) => s + r[m.clicksKey], 0);
+
+  const enriched = rows.map(r => {
+    const shareContent = r.articles / totalContent * 100;
+    const shareMetric = totalMetric > 0 ? r[m.clicksKey] / totalMetric * 100 : 0;
+    const index = shareContent > 0 ? shareMetric / shareContent : 0;
+    return { ...r, shareContent, shareMetric, index };
+  }).sort((a, b) => b.index - a.index);
+
+  const maxIndex = Math.max(...enriched.map(r => r.index), 2);
+
+  document.getElementById('indexTable').innerHTML = `
+    <thead>
+      <tr>
+        <th style="min-width:120px">${dimension === 'topic' ? 'Sujet' : dimension === 'club' ? 'Club' : 'Compétition'}</th>
+        <th class="right">Articles</th>
+        <th class="right">% contenu</th>
+        <th class="right">${m.label}</th>
+        <th class="right">% trafic</th>
+        <th class="right">Ratio</th>
+        <th style="min-width:160px">Index</th>
+        <th>Statut</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${enriched.map(r => {
+        const barWidth = Math.min(Math.abs(r.index - 1) / (maxIndex - 1) * 50, 48);
+        const isOver = r.index >= 1;
+        const status = getStatus(r.index);
+        return `<tr>
+          <td style="font-weight:500">${r.name}</td>
+          <td class="right">${r.articles}</td>
+          <td class="right dim">${pct(r.shareContent)}</td>
+          <td class="right">${fmt(r[m.clicksKey])}</td>
+          <td class="right">${pct(r.shareMetric)}</td>
+          <td class="right"><span class="ratio-cell">${pct(r.shareContent)}<span class="arrow">→</span>${pct(r.shareMetric)}</span></td>
+          <td>
+            <div class="index-cell">
+              <span class="index-value" style="color: ${isOver ? 'var(--green)' : 'var(--red)'}">${r.index.toFixed(2)}</span>
+              <div class="index-bar-wrap">
+                <div class="index-bar-center"></div>
+                <div class="index-bar ${isOver ? 'over' : 'under'}" style="width: ${barWidth}%"></div>
+              </div>
+            </div>
+          </td>
+          <td><span class="status-badge ${status.cls}">${status.label}</span></td>
+        </tr>`;
+      }).join('')}
+    </tbody>
+  `;
+}
+
+function renderTimestamp() {
+  const d = new Date(DATA.last_updated);
+  document.getElementById('timestamp').textContent = `Dernière mise à jour : ${d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })} à ${d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`;
+}
+
+function renderAll() {
+  renderKPIs();
+  renderInsights();
+  renderDistribution();
+  renderTopArticles();
+  renderIndex();
+  renderTimestamp();
+}
+
+// ══════════════════════════════════════════════
+// EVENT HANDLERS
+// ══════════════════════════════════════════════
+
+// Populate site selector
+const siteSelect = document.getElementById('siteSelect');
+DATA.sites.forEach(s => {
+  const opt = document.createElement('option');
+  opt.value = s;
+  opt.textContent = s;
+  siteSelect.appendChild(opt);
+});
+
+siteSelect.addEventListener('change', e => {
+  state.site = e.target.value;
+  renderAll();
+});
+
+// Period toggle
+document.querySelectorAll('.period-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    state.period = btn.dataset.period;
+    renderAll();
+  });
+});
+
+// Dimension tabs
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    state.dimension = btn.dataset.dim;
+    renderIndex();
+  });
+});
+
+// Metric toggle
+document.querySelectorAll('.metric-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.metric-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    state.metric = btn.dataset.metric;
+    renderIndex();
+  });
+});
+
+// ══════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════
+renderAll();
+</script>
+</body>
+</html>
