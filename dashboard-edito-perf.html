@@ -1,37 +1,42 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Édito Performance Dashboard</title>
+<title>Media Dashboard — Performance</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
 :root {
-  --bg: #0C0E14;
-  --surface: #141721;
-  --surface-2: #1C2030;
-  --surface-3: #242840;
-  --border: #262B3D;
-  --border-light: #333852;
-  --text: #E2E5EE;
-  --text-muted: #7B82A0;
-  --text-dim: #4E5470;
-  --accent: #5B8DEF;
-  --accent-glow: rgba(91,141,239,0.15);
-  --green: #3DD68C;
-  --green-bg: rgba(61,214,140,0.1);
-  --red: #EF6461;
-  --red-bg: rgba(239,100,97,0.1);
-  --amber: #F5B731;
-  --amber-bg: rgba(245,183,49,0.1);
+  --bg: #F5F6FA;
+  --surface: #FFFFFF;
+  --surface-2: #F0F1F5;
+  --surface-3: #E8E9EF;
+  --border: #E2E4EA;
+  --border-light: #D0D3DC;
+  --text: #1A1D2E;
+  --text-muted: #6B7085;
+  --text-dim: #9B9FB2;
+  --accent: #6366F1;
+  --accent-glow: rgba(99,102,241,0.1);
+  --accent-hover: #5558E3;
+  --green: #10B981;
+  --green-bg: rgba(16,185,129,0.08);
+  --red: #EF4444;
+  --red-bg: rgba(239,68,68,0.08);
+  --amber: #F59E0B;
+  --amber-bg: rgba(245,158,11,0.08);
   --radius: 10px;
   --radius-sm: 6px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.03);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.06);
 }
 
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
 body {
-  font-family: 'Inter', -apple-system, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   background: var(--bg);
   color: var(--text);
   line-height: 1.5;
@@ -42,62 +47,79 @@ body {
 .topbar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 16px 32px;
+  gap: 16px;
+  padding: 14px 28px;
   border-bottom: 1px solid var(--border);
   position: sticky;
   top: 0;
-  background: rgba(12,14,20,0.92);
+  background: rgba(255,255,255,0.92);
   backdrop-filter: blur(12px);
   z-index: 100;
 }
 
-.topbar-left {
+.logo {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  color: var(--text);
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 8px;
 }
 
-.logo {
-  font-size: 15px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  color: var(--text);
+.logo-icon {
+  width: 26px; height: 26px;
+  background: var(--accent);
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 14px;
 }
 
-.logo span {
+.badge {
+  font-size: 11px; font-weight: 600;
+  background: var(--accent-glow);
   color: var(--accent);
+  padding: 3px 10px; border-radius: 20px;
 }
 
 .topbar-right {
+  margin-left: auto;
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-select {
+.topbar .nav-link {
+  font-size: 13px; color: var(--text-muted);
+  text-decoration: none; font-weight: 500;
+}
+.topbar .nav-link:hover { color: var(--accent); }
+
+/* ── Selects ── */
+.topbar select, select.site-select {
   appearance: none;
   background: var(--surface-2);
   border: 1px solid var(--border);
   color: var(--text);
   font-family: inherit;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
-  padding: 8px 32px 8px 12px;
+  padding: 6px 28px 6px 10px;
   border-radius: var(--radius-sm);
   cursor: pointer;
-  background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%237B82A0' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%236B7085' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: right 10px center;
+  background-position: right 8px center;
   transition: border-color 0.2s;
 }
 
-select:hover { border-color: var(--accent); }
-select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-glow); }
+.topbar select:hover, select.site-select:hover { border-color: var(--accent); }
+.topbar select:focus, select.site-select:focus { outline: none; border-color: var(--accent); }
 
+/* ── Period Toggle ── */
 .period-toggle {
   display: flex;
-  background: var(--surface);
+  background: var(--surface-2);
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   overflow: hidden;
@@ -108,9 +130,9 @@ select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px
   border: none;
   color: var(--text-muted);
   font-family: inherit;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
-  padding: 8px 16px;
+  padding: 6px 14px;
   cursor: pointer;
   transition: all 0.2s;
 }
@@ -121,11 +143,21 @@ select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px
   color: #fff;
 }
 
+/* ── Controls Row (below topbar) ── */
+.controls-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 28px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
 /* ── Main Layout ── */
 .main {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 24px 32px 48px;
+  padding: 24px 28px 48px;
 }
 
 /* ── KPI Row ── */
@@ -141,11 +173,12 @@ select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 20px;
+  box-shadow: var(--shadow);
 }
 
 .kpi-label {
-  font-size: 12px;
-  font-weight: 500;
+  font-size: 11px;
+  font-weight: 600;
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -157,6 +190,7 @@ select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px
   font-weight: 700;
   letter-spacing: -0.03em;
   font-variant-numeric: tabular-nums;
+  color: var(--text);
 }
 
 .kpi-change {
@@ -173,15 +207,28 @@ select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px
 .kpi-change.up { color: var(--green); background: var(--green-bg); }
 .kpi-change.down { color: var(--red); background: var(--red-bg); }
 
+/* Traffic-light dots */
+.tl-dot {
+  display: inline-block;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.tl-dot.green { background: var(--green); box-shadow: 0 0 6px rgba(16,185,129,0.4); }
+.tl-dot.amber { background: var(--amber); box-shadow: 0 0 6px rgba(245,158,11,0.4); }
+.tl-dot.red { background: var(--red); box-shadow: 0 0 6px rgba(239,68,68,0.4); }
+.tl-dot.sm { width: 8px; height: 8px; }
+
 /* ── Insights Panel ── */
 .insights-card {
   background: var(--surface);
-  border: 1px solid transparent;
+  border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 24px;
   margin-bottom: 24px;
   position: relative;
   overflow: hidden;
+  box-shadow: var(--shadow);
 }
 
 .insights-card::before {
@@ -190,7 +237,7 @@ select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px
   inset: 0;
   border-radius: var(--radius);
   padding: 1px;
-  background: linear-gradient(135deg, var(--accent), #a855f7, var(--accent));
+  background: linear-gradient(135deg, var(--accent), #8B5CF6, var(--accent));
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
@@ -205,14 +252,14 @@ select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px
 }
 
 .insights-badge {
-  font-size: 11px;
-  font-weight: 600;
+  font-size: 10px;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: var(--accent);
-  background: var(--accent-glow);
+  background: linear-gradient(135deg, #6366F1, #8B5CF6);
+  color: #fff;
   padding: 3px 10px;
-  border-radius: 4px;
+  border-radius: 10px;
 }
 
 .insights-title {
@@ -227,25 +274,10 @@ select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px
   color: var(--text-muted);
 }
 
-.insights-body strong {
-  color: var(--text);
-  font-weight: 600;
-}
-
-.insights-body .highlight-up {
-  color: var(--green);
-  font-weight: 600;
-}
-
-.insights-body .highlight-down {
-  color: var(--red);
-  font-weight: 600;
-}
-
-.insights-body .highlight-num {
-  color: var(--amber);
-  font-weight: 600;
-}
+.insights-body strong { color: var(--text); font-weight: 600; }
+.insights-body .highlight-up { color: var(--green); font-weight: 600; }
+.insights-body .highlight-down { color: var(--red); font-weight: 600; }
+.insights-body .highlight-num { color: var(--amber); font-weight: 600; }
 
 /* ── Two-column layout ── */
 .grid-2 {
@@ -261,6 +293,7 @@ select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px
   border: 1px solid var(--border);
   border-radius: var(--radius);
   overflow: hidden;
+  box-shadow: var(--shadow);
 }
 
 .card-header {
@@ -271,22 +304,15 @@ select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px
   border-bottom: 1px solid var(--border);
 }
 
-.card-title {
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.card-subtitle {
-  font-size: 12px;
-  color: var(--text-muted);
-}
+.card-title { font-size: 14px; font-weight: 600; }
+.card-subtitle { font-size: 12px; color: var(--text-muted); }
 
 /* ── Tabs ── */
 .tab-row {
   display: flex;
   gap: 0;
   border-bottom: 1px solid var(--border);
-  margin-bottom: 24px;
+  margin-bottom: 0;
 }
 
 .tab-btn {
@@ -295,7 +321,7 @@ select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px
   border-bottom: 2px solid transparent;
   color: var(--text-muted);
   font-family: inherit;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   padding: 12px 20px;
   cursor: pointer;
@@ -303,17 +329,10 @@ select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px
 }
 
 .tab-btn:hover { color: var(--text); }
-.tab-btn.active {
-  color: var(--text);
-  border-bottom-color: var(--accent);
-}
+.tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
 
 /* ── Tables ── */
-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-variant-numeric: tabular-nums;
-}
+table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
 
 thead th {
   text-align: left;
@@ -332,26 +351,16 @@ thead th.right { text-align: right; }
 tbody td {
   padding: 12px 16px;
   font-size: 13px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--surface-2);
 }
 
-tbody td.right {
-  text-align: right;
-  font-weight: 500;
-}
-
+tbody td.right { text-align: right; font-weight: 500; }
 tbody td.dim { color: var(--text-muted); }
-
 tbody tr:last-child td { border-bottom: none; }
-
 tbody tr:hover { background: var(--surface-2); }
 
 /* ── Index Bar ── */
-.index-cell {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
+.index-cell { display: flex; align-items: center; gap: 10px; }
 
 .index-value {
   font-weight: 600;
@@ -387,15 +396,8 @@ tbody tr:hover { background: var(--surface-2); }
   transition: width 0.4s ease;
 }
 
-.index-bar.over {
-  left: 50%;
-  background: var(--green);
-}
-
-.index-bar.under {
-  right: 50%;
-  background: var(--red);
-}
+.index-bar.over { left: 50%; background: var(--green); }
+.index-bar.under { right: 50%; background: var(--red); }
 
 /* ── Distribution buckets ── */
 .dist-bar-wrap {
@@ -417,6 +419,7 @@ tbody tr:hover { background: var(--surface-2); }
 .metric-toggle {
   display: flex;
   background: var(--surface-2);
+  border: 1px solid var(--border);
   border-radius: 4px;
   overflow: hidden;
 }
@@ -436,20 +439,7 @@ tbody tr:hover { background: var(--surface-2); }
 }
 
 .metric-btn:hover { color: var(--text-muted); }
-.metric-btn.active { background: var(--surface-3); color: var(--text); }
-
-/* ── Section Label ── */
-.section-label {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-dim);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  margin-bottom: 16px;
-}
-
-/* ── Full-width card ── */
-.full-card { margin-bottom: 24px; }
+.metric-btn.active { background: var(--accent); color: #fff; }
 
 /* ── Top Articles ── */
 .article-rank {
@@ -477,15 +467,15 @@ tbody tr:hover { background: var(--surface-2); }
   white-space: nowrap;
 }
 
-.topic-mercato { color: var(--amber); background: var(--amber-bg); }
+.topic-mercato { color: #B45309; background: var(--amber-bg); }
 .topic-match { color: var(--accent); background: var(--accent-glow); }
 .topic-blessure { color: var(--red); background: var(--red-bg); }
-.topic-tactique { color: #a78bfa; background: rgba(167,139,250,0.1); }
+.topic-tactique { color: #7C3AED; background: rgba(124,58,237,0.08); }
 .topic-selection { color: var(--green); background: var(--green-bg); }
-.topic-rumeur { color: #f472b6; background: rgba(244,114,182,0.1); }
-.topic-interview { color: #67e8f9; background: rgba(103,232,249,0.1); }
-.topic-analyse { color: #c4b5fd; background: rgba(196,181,253,0.1); }
-.topic-resultat { color: #86efac; background: rgba(134,239,172,0.1); }
+.topic-rumeur { color: #DB2777; background: rgba(219,39,119,0.08); }
+.topic-interview { color: #0891B2; background: rgba(8,145,178,0.08); }
+.topic-analyse { color: #7C3AED; background: rgba(124,58,237,0.06); }
+.topic-resultat { color: #059669; background: rgba(5,150,105,0.08); }
 .topic-default { color: var(--text-muted); background: var(--surface-3); }
 
 /* ── Status Badges ── */
@@ -498,13 +488,13 @@ tbody tr:hover { background: var(--surface-2); }
   letter-spacing: 0.01em;
 }
 
-.status-high-over { color: #059669; background: rgba(5,150,105,0.15); }
-.status-over { color: var(--green); background: var(--green-bg); }
-.status-slight-over { color: #6ee7b7; background: rgba(110,231,183,0.08); }
+.status-high-over { color: #047857; background: rgba(4,120,87,0.1); }
+.status-over { color: #059669; background: var(--green-bg); }
+.status-slight-over { color: #10B981; background: rgba(16,185,129,0.06); }
 .status-stable { color: var(--text-muted); background: var(--surface-3); }
-.status-slight-under { color: #fca5a5; background: rgba(252,165,165,0.08); }
+.status-slight-under { color: #F87171; background: rgba(248,113,113,0.06); }
 .status-under { color: var(--red); background: var(--red-bg); }
-.status-high-under { color: #dc2626; background: rgba(220,38,38,0.15); }
+.status-high-under { color: #DC2626; background: rgba(220,38,38,0.1); }
 
 .ratio-cell {
   font-size: 12px;
@@ -512,12 +502,18 @@ tbody tr:hover { background: var(--surface-2); }
   white-space: nowrap;
 }
 
-.ratio-cell .arrow { 
-  margin: 0 3px;
+.ratio-cell .arrow { margin: 0 3px; color: var(--text-dim); }
+
+/* ── Timestamp / Footer ── */
+.footer {
+  text-align: center;
+  padding: 16px 28px;
+  font-size: 11px;
   color: var(--text-dim);
+  border-top: 1px solid var(--border);
+  margin-top: 16px;
 }
 
-/* ── Timestamp ── */
 .timestamp {
   font-size: 12px;
   color: var(--text-dim);
@@ -525,9 +521,71 @@ tbody tr:hover { background: var(--surface-2); }
   padding: 8px 0;
 }
 
+/* ── Settings modal ── */
+.settings-btn {
+  background: none; border: none;
+  color: var(--text-muted); cursor: pointer;
+  font-size: 18px; padding: 4px;
+  border-radius: 4px;
+  transition: color 0.2s;
+}
+.settings-btn:hover { color: var(--accent); }
+
+.modal-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.3);
+  z-index: 200;
+  align-items: center; justify-content: center;
+}
+.modal-overlay.active { display: flex; }
+.modal {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 28px;
+  width: 440px; max-width: 90vw;
+  box-shadow: var(--shadow-md);
+}
+.modal h3 { font-size: 16px; font-weight: 600; margin-bottom: 16px; }
+.modal label { font-size: 13px; font-weight: 500; color: var(--text-muted); display: block; margin-bottom: 6px; }
+.modal input {
+  width: 100%;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  font-size: 13px; font-family: monospace;
+  color: var(--text);
+  outline: none;
+  margin-bottom: 8px;
+}
+.modal input:focus { border-color: var(--accent); }
+.modal .hint { font-size: 11px; color: var(--text-dim); margin-bottom: 16px; }
+.modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+.modal-actions .btn-secondary {
+  background: var(--surface-2);
+  color: var(--text); border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 16px;
+  font-size: 13px; font-weight: 500; font-family: inherit;
+  cursor: pointer;
+}
+.modal-actions .btn-secondary:hover { background: var(--surface-3); }
+.modal-actions .btn {
+  display: inline-flex; align-items: center;
+  background: var(--accent);
+  color: #fff; border: none;
+  border-radius: var(--radius-sm);
+  padding: 8px 16px;
+  font-size: 13px; font-weight: 600; font-family: inherit;
+  cursor: pointer;
+}
+.modal-actions .btn:hover { background: var(--accent-hover); }
+
 /* ── Responsive ── */
 @media (max-width: 900px) {
-  .topbar { padding: 12px 16px; flex-wrap: wrap; gap: 12px; }
+  .topbar { padding: 12px 16px; flex-wrap: wrap; gap: 8px; }
+  .controls-row { padding: 12px 16px; flex-wrap: wrap; }
   .main { padding: 16px; }
   .kpi-row { grid-template-columns: repeat(2, 1fr); }
   .grid-2 { grid-template-columns: 1fr; }
@@ -537,57 +595,67 @@ tbody tr:hover { background: var(--surface-2); }
 <body>
 
 <div class="topbar">
-  <div class="topbar-left">
-    <div class="logo">Édito<span>Perf</span></div>
+  <div class="logo">
+    <div class="logo-icon">&#8853;</div>
+    Media Dashboard
   </div>
+  <div class="badge">Performance</div>
   <div class="topbar-right">
-    <select id="siteSelect">
-      <option value="all">Tous les sites</option>
+    <select id="langSelect" title="Language">
+      <option value="en">EN</option>
+      <option value="fr">FR</option>
+      <option value="pt-br">PT-BR</option>
     </select>
-    <div class="period-toggle">
-      <button class="period-btn active" data-period="yesterday">Hier</button>
-      <button class="period-btn" data-period="last_week">Semaine</button>
-      <button class="period-btn" data-period="last_month">Mois</button>
-    </div>
+    <button class="settings-btn" onclick="openSettings()" title="Settings">&#9881;</button>
+    <a href="url-checker.html" class="nav-link" data-t="nav_checker">URL Checker &rarr;</a>
+  </div>
+</div>
+
+<div class="controls-row">
+  <select id="siteSelect" class="site-select">
+    <option value="all" data-t-option="all_sites">All sites</option>
+  </select>
+  <div class="period-toggle">
+    <button class="period-btn active" data-period="yesterday" data-t="period_yesterday">Yesterday</button>
+    <button class="period-btn" data-period="last_week" data-t="period_week">Week</button>
+    <button class="period-btn" data-period="last_month" data-t="period_month">Month</button>
   </div>
 </div>
 
 <div class="main">
-
-  <!-- KPI Row -->
   <div class="kpi-row" id="kpiRow"></div>
-
-  <!-- AI Insights -->
   <div class="insights-card" id="insightsCard"></div>
 
-  <!-- Distribution + Top Articles -->
   <div class="grid-2">
     <div class="card full-card">
       <div class="card-header">
-        <div class="card-title">Distribution des performances</div>
-        <div class="card-subtitle">Articles par tranche de sessions</div>
+        <div>
+          <div class="card-title" data-t="dist_title">Performance distribution</div>
+          <div class="card-subtitle" data-t="dist_subtitle">Articles by session bucket</div>
+        </div>
       </div>
-      <div style="padding: 4px 0;">
+      <div style="padding: 4px 0; overflow-x: auto;">
         <table id="distTable"></table>
       </div>
     </div>
     <div class="card full-card">
       <div class="card-header">
-        <div class="card-title">Top articles</div>
-        <div class="card-subtitle">Les plus performants sur la période</div>
+        <div>
+          <div class="card-title" data-t="top_title">Top articles</div>
+          <div class="card-subtitle" data-t="top_subtitle">Best performing in the period</div>
+        </div>
       </div>
-      <div style="padding: 4px 0;">
+      <div style="padding: 4px 0; overflow-x: auto;">
         <table id="topArticlesTable"></table>
       </div>
     </div>
   </div>
 
-  <!-- Performance Index Tabs -->
   <div class="card full-card">
     <div class="card-header">
       <div>
-        <div class="card-title">Index de performance</div>
-        <div class="card-subtitle" style="margin-top:2px">Part de contenu vs part de trafic — index &gt; 1 = surperformance</div>
+        <div class="card-title" data-t="index_title">Performance index</div>
+        <div class="card-subtitle" style="margin-top:2px" data-t="index_subtitle">Content share vs traffic share &mdash; index &gt; 1 = overperformance</div>
       </div>
       <div class="metric-toggle" id="metricToggle">
         <button class="metric-btn active" data-metric="search">Search</button>
@@ -596,11 +664,11 @@ tbody tr:hover { background: var(--surface-2); }
       </div>
     </div>
     <div class="tab-row" id="dimensionTabs">
-      <button class="tab-btn active" data-dim="topic">Par sujet</button>
-      <button class="tab-btn" data-dim="club">Par club</button>
-      <button class="tab-btn" data-dim="competition">Par compétition</button>
+      <button class="tab-btn active" data-dim="topic" data-t="tab_topic">By topic</button>
+      <button class="tab-btn" data-dim="club" data-t="tab_club">By club</button>
+      <button class="tab-btn" data-dim="competition" data-t="tab_competition">By competition</button>
     </div>
-    <div style="padding: 0 0 8px;">
+    <div style="padding: 0 0 8px; overflow-x: auto;">
       <table id="indexTable"></table>
     </div>
   </div>
@@ -608,7 +676,262 @@ tbody tr:hover { background: var(--surface-2); }
   <div class="timestamp" id="timestamp"></div>
 </div>
 
+<div class="footer">
+  Media Dashboard &middot; Performance
+</div>
+
+<!-- SETTINGS MODAL -->
+<div class="modal-overlay" id="settingsModal">
+  <div class="modal">
+    <h3 data-t="settings_title">Settings</h3>
+    <label for="settingsApiKey">OpenAI API Key</label>
+    <input type="password" id="settingsApiKey" placeholder="sk-proj-...">
+    <div class="hint" data-t="settings_hint">Stored locally in your browser only. Used for AI analysis.</div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeSettings()" data-t="btn_cancel">Cancel</button>
+      <button class="btn" onclick="saveSettings()" data-t="btn_save">Save</button>
+    </div>
+  </div>
+</div>
+
 <script>
+// ══════════════════════════════════════════════
+// TRANSLATIONS
+// ══════════════════════════════════════════════
+const T = {
+  en: {
+    nav_checker: "URL Checker →",
+    all_sites: "All sites",
+    period_yesterday: "Yesterday",
+    period_week: "Week",
+    period_month: "Month",
+    dist_title: "Performance distribution",
+    dist_subtitle: "Articles by session bucket",
+    top_title: "Top articles",
+    top_subtitle: "Best performing in the period",
+    index_title: "Performance index",
+    index_subtitle: "Content share vs traffic share — index > 1 = overperformance",
+    tab_topic: "By topic",
+    tab_club: "By club",
+    tab_competition: "By competition",
+    settings_title: "Settings",
+    settings_hint: "Stored locally in your browser only. Used for AI analysis.",
+    btn_cancel: "Cancel",
+    btn_save: "Save",
+    // KPI labels
+    kpi_articles: "Articles",
+    kpi_sessions: "Sessions",
+    kpi_search: "Search Clicks",
+    kpi_discover: "Discover Clicks",
+    kpi_vs_prev: "vs prev. period",
+    // Insights
+    insights_badge: "AI Insights",
+    insights_auto: "Automated analysis",
+    insights_unavail: "Insights not available for this period.",
+    // Distribution table headers
+    th_sessions_bucket: "Sessions",
+    th_articles: "Articles",
+    th_pct_content: "% content",
+    th_sessions: "Sessions",
+    th_pct_sessions: "% sessions",
+    // Top articles table headers
+    th_rank: "#",
+    th_article: "Article",
+    th_topic: "Topic",
+    // Index table headers
+    th_topic_dim: "Topic",
+    th_club_dim: "Club",
+    th_competition_dim: "Competition",
+    th_pct_traffic: "% traffic",
+    th_ratio: "Ratio",
+    th_index: "Index",
+    th_status: "Status",
+    // Status labels
+    status_high_over: "Strong overperf.",
+    status_over: "Overperformance",
+    status_slight_over: "Slight overperf.",
+    status_stable: "Stable",
+    status_slight_under: "Slight underperf.",
+    status_under: "Underperformance",
+    status_high_under: "Strong underperf.",
+    // Timestamp
+    ts_prefix: "Last updated:",
+    // Topic names
+    topic_Mercato: "Transfer",
+    topic_Match: "Match",
+    topic_Blessure: "Injury",
+    topic_Tactique: "Tactics",
+    "topic_Sélection": "Squad",
+    topic_Rumeur: "Rumor",
+    topic_Interview: "Interview",
+    topic_Analyse: "Analysis",
+    "topic_Résultat": "Results",
+    topic_Formation: "Lineup",
+    topic_Autres: "Other",
+  },
+  fr: {
+    nav_checker: "URL Checker →",
+    all_sites: "Tous les sites",
+    period_yesterday: "Hier",
+    period_week: "Semaine",
+    period_month: "Mois",
+    dist_title: "Distribution des performances",
+    dist_subtitle: "Articles par tranche de sessions",
+    top_title: "Top articles",
+    top_subtitle: "Les plus performants sur la période",
+    index_title: "Index de performance",
+    index_subtitle: "Part de contenu vs part de trafic — index > 1 = surperformance",
+    tab_topic: "Par sujet",
+    tab_club: "Par club",
+    tab_competition: "Par compétition",
+    settings_title: "Paramètres",
+    settings_hint: "Stockée localement dans votre navigateur. Utilisée pour l'analyse IA.",
+    btn_cancel: "Annuler",
+    btn_save: "Enregistrer",
+    kpi_articles: "Articles",
+    kpi_sessions: "Sessions",
+    kpi_search: "Clics Search",
+    kpi_discover: "Clics Discover",
+    kpi_vs_prev: "vs période préc.",
+    insights_badge: "IA Insights",
+    insights_auto: "Analyse automatique",
+    insights_unavail: "Insights non disponibles pour cette période.",
+    th_sessions_bucket: "Sessions",
+    th_articles: "Articles",
+    th_pct_content: "% contenu",
+    th_sessions: "Sessions",
+    th_pct_sessions: "% sessions",
+    th_rank: "#",
+    th_article: "Article",
+    th_topic: "Sujet",
+    th_topic_dim: "Sujet",
+    th_club_dim: "Club",
+    th_competition_dim: "Compétition",
+    th_pct_traffic: "% trafic",
+    th_ratio: "Ratio",
+    th_index: "Index",
+    th_status: "Statut",
+    status_high_over: "Forte surperf.",
+    status_over: "Surperformance",
+    status_slight_over: "Légère surperf.",
+    status_stable: "Stable",
+    status_slight_under: "Légère sous-perf.",
+    status_under: "Sous-performance",
+    status_high_under: "Forte sous-perf.",
+    ts_prefix: "Dernière mise à jour :",
+    topic_Mercato: "Mercato",
+    topic_Match: "Match",
+    topic_Blessure: "Blessure",
+    topic_Tactique: "Tactique",
+    "topic_Sélection": "Sélection",
+    topic_Rumeur: "Rumeur",
+    topic_Interview: "Interview",
+    topic_Analyse: "Analyse",
+    "topic_Résultat": "Résultat",
+    topic_Formation: "Formation",
+    topic_Autres: "Autres",
+  },
+  "pt-br": {
+    nav_checker: "URL Checker →",
+    all_sites: "Todos os sites",
+    period_yesterday: "Ontem",
+    period_week: "Semana",
+    period_month: "Mês",
+    dist_title: "Distribuição de desempenho",
+    dist_subtitle: "Artigos por faixa de sessões",
+    top_title: "Top artigos",
+    top_subtitle: "Melhores desempenhos no período",
+    index_title: "Índice de desempenho",
+    index_subtitle: "Participação de conteúdo vs tráfego — índice > 1 = superdesempenho",
+    tab_topic: "Por tema",
+    tab_club: "Por clube",
+    tab_competition: "Por competição",
+    settings_title: "Configurações",
+    settings_hint: "Armazenada localmente no seu navegador. Usada para análise IA.",
+    btn_cancel: "Cancelar",
+    btn_save: "Salvar",
+    kpi_articles: "Artigos",
+    kpi_sessions: "Sessões",
+    kpi_search: "Cliques Search",
+    kpi_discover: "Cliques Discover",
+    kpi_vs_prev: "vs período ant.",
+    insights_badge: "IA Insights",
+    insights_auto: "Análise automática",
+    insights_unavail: "Insights não disponíveis para este período.",
+    th_sessions_bucket: "Sessões",
+    th_articles: "Artigos",
+    th_pct_content: "% conteúdo",
+    th_sessions: "Sessões",
+    th_pct_sessions: "% sessões",
+    th_rank: "#",
+    th_article: "Artigo",
+    th_topic: "Tema",
+    th_topic_dim: "Tema",
+    th_club_dim: "Clube",
+    th_competition_dim: "Competição",
+    th_pct_traffic: "% tráfego",
+    th_ratio: "Ratio",
+    th_index: "Índice",
+    th_status: "Status",
+    status_high_over: "Forte superdesemp.",
+    status_over: "Superdesempenho",
+    status_slight_over: "Leve superdesemp.",
+    status_stable: "Estável",
+    status_slight_under: "Leve subdesemp.",
+    status_under: "Subdesempenho",
+    status_high_under: "Forte subdesemp.",
+    ts_prefix: "Última atualização:",
+    topic_Mercato: "Transferências",
+    topic_Match: "Partida",
+    topic_Blessure: "Lesão",
+    topic_Tactique: "Tática",
+    "topic_Sélection": "Convocação",
+    topic_Rumeur: "Rumor",
+    topic_Interview: "Entrevista",
+    topic_Analyse: "Análise",
+    "topic_Résultat": "Resultados",
+    topic_Formation: "Escalação",
+    topic_Autres: "Outros",
+  }
+};
+
+let LANG = localStorage.getItem('media_dashboard_lang') || 'en';
+
+function t(key, replacements) {
+  let s = (T[LANG] && T[LANG][key]) || T.en[key] || key;
+  if (replacements) {
+    for (const [k, v] of Object.entries(replacements)) {
+      s = s.replace('{' + k + '}', v);
+    }
+  }
+  return s;
+}
+
+function topicName(rawName) {
+  return t('topic_' + rawName) || rawName;
+}
+
+function applyTranslations() {
+  document.querySelectorAll('[data-t]').forEach(el => {
+    el.textContent = t(el.dataset.t);
+  });
+  document.querySelectorAll('[data-t-option]').forEach(el => {
+    el.textContent = t(el.dataset.tOption);
+  });
+}
+
+// ══════════════════════════════════════════════
+// SETTINGS
+// ══════════════════════════════════════════════
+function openSettings() { document.getElementById('settingsModal').classList.add('active'); }
+function closeSettings() { document.getElementById('settingsModal').classList.remove('active'); }
+function saveSettings() {
+  const key = document.getElementById('settingsApiKey').value.trim();
+  if (key) localStorage.setItem('media_dashboard_openai_key', key);
+  else localStorage.removeItem('media_dashboard_openai_key');
+  closeSettings();
+}
+
 // ══════════════════════════════════════════════
 // FAKE DATA — Replace with data.json fetch
 // ══════════════════════════════════════════════
@@ -616,8 +939,7 @@ tbody tr:hover { background: var(--surface-2); }
 const DATA = {
   last_updated: "2026-08-17T07:30:00",
   sites: ["FootMercato", "Foot01", "SportBuzz"],
-  
-  // ── KPIs per site per period ──
+
   kpis: {
     FootMercato: {
       yesterday: { articles: 87, sessions: 142300, search_clicks: 89400, discover_clicks: 52100, prev_articles: 82, prev_sessions: 138700, prev_search: 91200, prev_discover: 48300 },
@@ -636,7 +958,6 @@ const DATA = {
     }
   },
 
-  // ── Session distribution per site per period ──
   distribution: {
     FootMercato: {
       yesterday: [
@@ -709,7 +1030,6 @@ const DATA = {
     }
   },
 
-  // ── Performance Index: topic / club / competition ──
   index: {
     FootMercato: {
       yesterday: {
@@ -817,7 +1137,6 @@ const DATA = {
     }
   },
 
-  // ── Top Articles ──
   topArticles: {
     FootMercato: {
       yesterday: [
@@ -855,61 +1174,43 @@ const DATA = {
     }
   },
 
-  // ── AI Insights ──
   insights: {
     FootMercato: {
-      yesterday: `<strong>FootMercato hier :</strong> Le contenu <strong>Mercato</strong> reste votre locomotive — <span class="highlight-num">21.8%</span> des articles pour <span class="highlight-up">41.8%</span> du trafic Discover (index 1.92). L'article Osimhen a capté à lui seul 20% des sessions du site. En revanche, le contenu <strong>Tactique</strong> et <strong>Analyse</strong> sous-performe nettement en Discover (index <span class="highlight-down">0.39</span> et <span class="highlight-down">0.40</span>) — ces formats marchent mieux en Search pur. <strong>RC Lens</strong> surperforme discrètement (index 1.26 en sessions avec seulement 5.7% du contenu) — piste éditoriale à creuser. <strong>Champions League</strong> capte <span class="highlight-up">20.2%</span> des sessions avec <span class="highlight-num">13.8%</span> du contenu — le ratio le plus favorable toutes compétitions confondues.`
+      yesterday: `<strong>FootMercato yesterday:</strong> <strong>Transfer</strong> content remains your main driver — <span class="highlight-num">21.8%</span> of articles for <span class="highlight-up">41.8%</span> of Discover traffic (index 1.92). The Osimhen article alone captured 20% of site sessions. Meanwhile, <strong>Tactics</strong> and <strong>Analysis</strong> content clearly underperforms in Discover (index <span class="highlight-down">0.39</span> and <span class="highlight-down">0.40</span>) — these formats work better in pure Search. <strong>RC Lens</strong> quietly overperforms (index 1.26 in sessions with only 5.7% of content) — worth exploring editorially. <strong>Champions League</strong> captures <span class="highlight-up">20.2%</span> of sessions with <span class="highlight-num">13.8%</span> of content — the best ratio across all competitions.`
     },
     Foot01: {
-      yesterday: `<strong>Foot01 hier :</strong> Forte dépendance au <strong>Mercato</strong> — <span class="highlight-num">24.1%</span> du contenu mais <span class="highlight-up">45.3%</span> du Discover (index 1.88). Attention : hors mercato, le site manque de relais de croissance Discover. Le <strong>PSG</strong> reste le club n°1 en volume et en trafic (index 1.38 en sessions). Alerte : le contenu <strong>Tactique</strong> représente 5.6% du volume mais ne capte que <span class="highlight-down">3.1%</span> des sessions — à recadrer ou abandonner. <strong>Champions League</strong> index <span class="highlight-up">1.33</span> en sessions : même constat que FootMercato, la C1 surperforme malgré un volume modeste.`
+      yesterday: `<strong>Foot01 yesterday:</strong> High dependence on <strong>Transfer</strong> content — <span class="highlight-num">24.1%</span> of articles but <span class="highlight-up">45.3%</span> of Discover (index 1.88). Warning: outside transfer news, the site lacks Discover growth drivers. <strong>PSG</strong> remains the #1 club by volume and traffic (index 1.38 in sessions). Alert: <strong>Tactics</strong> content represents 5.6% of volume but captures only <span class="highlight-down">3.1%</span> of sessions — reconsider or drop. <strong>Champions League</strong> index <span class="highlight-up">1.33</span> in sessions: same finding as FootMercato, UCL overperforms despite modest volume.`
     },
     SportBuzz: {
-      yesterday: `<strong>SportBuzz hier :</strong> Journée exceptionnelle avec <span class="highlight-num">198k sessions</span> (+5.8% vs veille). Le scoop Osimhen a tout tiré : 42k sessions pour un seul article. La couverture <strong>international</strong> (Liga, Premier League) est un vrai différenciateur — <span class="highlight-num">Real Madrid</span> et <span class="highlight-num">FC Barcelone</span> captent 20.3% des sessions avec 16% du contenu. <strong>Discover</strong> : le Mercato atteint un index de <span class="highlight-up">2.04</span>, le plus élevé des 3 sites. Point de vigilance : <span class="highlight-down">51.8%</span> de vos articles font moins de 100 sessions — le taux le plus élevé du réseau.`
+      yesterday: `<strong>SportBuzz yesterday:</strong> Exceptional day with <span class="highlight-num">198k sessions</span> (+5.8% vs previous day). The Osimhen scoop drove everything: 42k sessions for a single article. <strong>International</strong> coverage (Liga, Premier League) is a real differentiator — <span class="highlight-num">Real Madrid</span> and <span class="highlight-num">FC Barcelona</span> capture 20.3% of sessions with 16% of content. <strong>Discover</strong>: Transfer reaches an index of <span class="highlight-up">2.04</span>, the highest across all 3 sites. Watch out: <span class="highlight-down">51.8%</span> of your articles get fewer than 100 sessions — the highest rate in the network.`
     },
     all: {
-      yesterday: `<strong>Réseau — vue d'ensemble :</strong> Total <span class="highlight-num">408 900 sessions</span> hier sur les 3 sites, porté par l'actualité Osimhen et la blessure de Mbappé. Le <strong>Mercato</strong> représente en moyenne 21% du contenu mais capte <span class="highlight-up">36%</span> des sessions — c'est le sujet roi, tous sites confondus. La <strong>Champions League</strong> surperforme partout (index moyen 1.4) malgré un volume modeste : c'est la piste de croissance la plus évidente à exploiter. <strong>Tactique</strong> et <strong>Analyse</strong> sous-performent systématiquement en Discover (index moyen <span class="highlight-down">0.45</span>) mais tiennent en Search — ces contenus ont un profil SEO, pas social. En cross-site : <strong>SportBuzz</strong> a le meilleur reach mais le pire ratio articles utiles (52% sous 100 sessions). <strong>FootMercato</strong> a le meilleur rendement par article. <strong>Foot01</strong> est le plus dépendant au PSG/OM (37% du trafic sur 2 clubs).`
+      yesterday: `<strong>Network overview:</strong> Total <span class="highlight-num">408,900 sessions</span> yesterday across all 3 sites, driven by the Osimhen story and the Mbappé injury. <strong>Transfer</strong> content averages 21% of output but captures <span class="highlight-up">36%</span> of sessions — the top-performing topic across all sites. <strong>Champions League</strong> overperforms everywhere (average index 1.4) despite modest volume: the most obvious growth opportunity. <strong>Tactics</strong> and <strong>Analysis</strong> systematically underperform in Discover (average index <span class="highlight-down">0.45</span>) but hold in Search — these are SEO formats, not social. Cross-site: <strong>SportBuzz</strong> has the best reach but the worst useful-article ratio (52% under 100 sessions). <strong>FootMercato</strong> has the best per-article yield. <strong>Foot01</strong> is most dependent on PSG/OM (37% of traffic from 2 clubs).`
     }
   }
 };
 
-// Fill in last_week and last_month index data by reusing yesterday with slight variations
-// (In production, this comes from real aggregated data)
-function generatePeriodVariant(base, variance) {
-  return base.map(row => {
-    const factor = 0.85 + Math.random() * 0.3;
-    return {
-      ...row,
-      articles: Math.round(row.articles * (5 + Math.random() * 3)),
-      search_clicks: Math.round(row.search_clicks * (5 + Math.random() * 3)),
-      discover_clicks: Math.round(row.discover_clicks * (5 + Math.random() * 3)),
-      sessions: Math.round(row.sessions * (5 + Math.random() * 3))
-    };
-  });
-}
-
+// Fill in period variants
 for (const site of DATA.sites) {
   if (!DATA.index[site].last_week) {
     DATA.index[site].last_week = {};
     DATA.index[site].last_month = {};
     for (const dim of ['topic', 'club', 'competition']) {
-      const base = DATA.index[site].yesterday[dim];
-      DATA.index[site].last_week[dim] = base; // same structure, different KPIs
-      DATA.index[site].last_month[dim] = base;
+      DATA.index[site].last_week[dim] = DATA.index[site].yesterday[dim];
+      DATA.index[site].last_month[dim] = DATA.index[site].yesterday[dim];
     }
   }
-  // Insights placeholders for other periods
   if (!DATA.insights[site].last_week) {
-    DATA.insights[site].last_week = DATA.insights[site].yesterday.replace('hier', 'cette semaine');
-    DATA.insights[site].last_month = DATA.insights[site].yesterday.replace('hier', 'ce mois-ci');
+    DATA.insights[site].last_week = DATA.insights[site].yesterday.replace('yesterday', 'this week');
+    DATA.insights[site].last_month = DATA.insights[site].yesterday.replace('yesterday', 'this month');
   }
-  // Top articles placeholders
   if (!DATA.topArticles[site].last_week) {
     DATA.topArticles[site].last_week = DATA.topArticles[site].yesterday;
     DATA.topArticles[site].last_month = DATA.topArticles[site].yesterday;
   }
 }
-DATA.insights.all.last_week = DATA.insights.all.yesterday.replace('hier', 'cette semaine');
-DATA.insights.all.last_month = DATA.insights.all.yesterday.replace('hier', 'ce mois-ci');
+DATA.insights.all.last_week = DATA.insights.all.yesterday.replace('yesterday', 'this week');
+DATA.insights.all.last_month = DATA.insights.all.yesterday.replace('yesterday', 'this month');
 
 // ══════════════════════════════════════════════
 // STATE
@@ -953,17 +1254,17 @@ function topicClass(topic) {
 }
 
 function getStatus(index) {
-  if (index >= 1.8) return { label: 'Forte surperf.', cls: 'status-high-over' };
-  if (index >= 1.35) return { label: 'Surperformance', cls: 'status-over' };
-  if (index >= 1.12) return { label: 'Légère surperf.', cls: 'status-slight-over' };
-  if (index >= 0.88) return { label: 'Stable', cls: 'status-stable' };
-  if (index >= 0.65) return { label: 'Légère sous-perf.', cls: 'status-slight-under' };
-  if (index >= 0.4)  return { label: 'Sous-performance', cls: 'status-under' };
-  return { label: 'Forte sous-perf.', cls: 'status-high-under' };
+  if (index >= 1.8) return { label: t('status_high_over'), cls: 'status-high-over' };
+  if (index >= 1.35) return { label: t('status_over'), cls: 'status-over' };
+  if (index >= 1.12) return { label: t('status_slight_over'), cls: 'status-slight-over' };
+  if (index >= 0.88) return { label: t('status_stable'), cls: 'status-stable' };
+  if (index >= 0.65) return { label: t('status_slight_under'), cls: 'status-slight-under' };
+  if (index >= 0.4)  return { label: t('status_under'), cls: 'status-under' };
+  return { label: t('status_high_under'), cls: 'status-high-under' };
 }
 
 // ══════════════════════════════════════════════
-// AGGREGATION (for "all sites")
+// AGGREGATION
 // ══════════════════════════════════════════════
 function aggregateKpis(period) {
   const result = { articles: 0, sessions: 0, search_clicks: 0, discover_clicks: 0, prev_articles: 0, prev_sessions: 0, prev_search: 0, prev_discover: 0 };
@@ -1051,18 +1352,19 @@ function renderKPIs() {
   const k = site === 'all' ? aggregateKpis(period) : DATA.kpis[site][period];
 
   const items = [
-    { label: 'Articles', value: k.articles, prev: k.prev_articles },
-    { label: 'Sessions', value: k.sessions, prev: k.prev_sessions },
-    { label: 'Search Clicks', value: k.search_clicks, prev: k.prev_search },
-    { label: 'Discover Clicks', value: k.discover_clicks, prev: k.prev_discover }
+    { label: t('kpi_articles'), value: k.articles, prev: k.prev_articles },
+    { label: t('kpi_sessions'), value: k.sessions, prev: k.prev_sessions },
+    { label: t('kpi_search'), value: k.search_clicks, prev: k.prev_search },
+    { label: t('kpi_discover'), value: k.discover_clicks, prev: k.prev_discover }
   ];
 
   document.getElementById('kpiRow').innerHTML = items.map(item => {
     const ch = change(item.value, item.prev);
+    const dotColor = ch.cls === 'up' ? 'green' : 'red';
     return `<div class="kpi-card">
       <div class="kpi-label">${item.label}</div>
       <div class="kpi-value">${fmt(item.value)}</div>
-      <div class="kpi-change ${ch.cls}">${ch.cls === 'up' ? '↑' : '↓'} ${ch.label} vs période préc.</div>
+      <div class="kpi-change ${ch.cls}"><span class="tl-dot sm ${dotColor}"></span> ${ch.cls === 'up' ? '↑' : '↓'} ${ch.label} ${t('kpi_vs_prev')}</div>
     </div>`;
   }).join('');
 }
@@ -1070,12 +1372,12 @@ function renderKPIs() {
 function renderInsights() {
   const { site, period } = state;
   const key = site === 'all' ? 'all' : site;
-  const text = DATA.insights[key]?.[period] || DATA.insights[key]?.yesterday || 'Insights non disponibles pour cette période.';
+  const text = DATA.insights[key]?.[period] || DATA.insights[key]?.yesterday || t('insights_unavail');
 
   document.getElementById('insightsCard').innerHTML = `
     <div class="insights-header">
-      <span class="insights-badge">✦ AI Insights</span>
-      <span class="insights-title">Analyse automatique</span>
+      <span class="insights-badge">✦ ${t('insights_badge')}</span>
+      <span class="insights-title">${t('insights_auto')}</span>
     </div>
     <div class="insights-body">${text}</div>
   `;
@@ -1088,11 +1390,11 @@ function renderDistribution() {
   document.getElementById('distTable').innerHTML = `
     <thead>
       <tr>
-        <th>Sessions</th>
-        <th class="right">Articles</th>
-        <th class="right">% contenu</th>
-        <th class="right">Sessions</th>
-        <th class="right">% sessions</th>
+        <th>${t('th_sessions_bucket')}</th>
+        <th class="right">${t('th_articles')}</th>
+        <th class="right">${t('th_pct_content')}</th>
+        <th class="right">${t('th_sessions')}</th>
+        <th class="right">${t('th_pct_sessions')}</th>
         <th style="width:120px"></th>
       </tr>
     </thead>
@@ -1102,7 +1404,7 @@ function renderDistribution() {
         <td class="right">${r.articles}</td>
         <td class="right dim">${pct(r.pct_articles)}</td>
         <td class="right">${fmt(r.sessions)}</td>
-        <td class="right" style="font-weight:600; color: ${r.pct_sessions > 30 ? 'var(--green)' : r.pct_sessions < 5 ? 'var(--red)' : 'var(--text)'}">${pct(r.pct_sessions)}</td>
+        <td class="right" style="font-weight:600; color: ${r.pct_sessions > 30 ? 'var(--green)' : r.pct_sessions < 5 ? 'var(--red)' : 'var(--text)'}"><span style="display:inline-flex;align-items:center;gap:5px"><span class="tl-dot sm ${r.pct_sessions > 30 ? 'green' : r.pct_sessions < 5 ? 'red' : 'amber'}"></span>${pct(r.pct_sessions)}</span></td>
         <td><div class="dist-bar-wrap"><div class="dist-bar" style="width:${r.pct_sessions}%"></div></div></td>
       </tr>`).join('')}
     </tbody>
@@ -1121,17 +1423,17 @@ function renderTopArticles() {
   document.getElementById('topArticlesTable').innerHTML = `
     <thead>
       <tr>
-        <th style="width:30px">#</th>
-        <th>Article</th>
-        <th>Sujet</th>
-        <th class="right">Sessions</th>
+        <th style="width:30px">${t('th_rank')}</th>
+        <th>${t('th_article')}</th>
+        <th>${t('th_topic')}</th>
+        <th class="right">${t('kpi_sessions')}</th>
       </tr>
     </thead>
     <tbody>
       ${articles.slice(0, 8).map((a, i) => `<tr>
         <td><span class="article-rank">${i + 1}</span></td>
         <td><span class="article-title">${a.title}</span></td>
-        <td><span class="article-topic ${topicClass(a.topic)}">${a.topic}</span></td>
+        <td><span class="article-topic ${topicClass(a.topic)}">${topicName(a.topic)}</span></td>
         <td class="right" style="font-weight:600">${fmt(a.sessions)}</td>
       </tr>`).join('')}
     </tbody>
@@ -1147,17 +1449,17 @@ function renderIndex() {
     rows = DATA.index[site][period]?.[dimension] || DATA.index[site].yesterday[dimension] || [];
   }
 
-  // Compute shares and index based on selected metric
   const metricMap = {
-    search: { shareKey: 'share_search', clicksKey: 'search_clicks', label: 'Search Clicks' },
-    discover: { shareKey: 'share_discover', clicksKey: 'discover_clicks', label: 'Discover Clicks' },
-    sessions: { shareKey: 'share_sessions', clicksKey: 'sessions', label: 'Sessions' }
+    search: { shareKey: 'share_search', clicksKey: 'search_clicks', label: t('kpi_search') },
+    discover: { shareKey: 'share_discover', clicksKey: 'discover_clicks', label: t('kpi_discover') },
+    sessions: { shareKey: 'share_sessions', clicksKey: 'sessions', label: t('kpi_sessions') }
   };
   const m = metricMap[metric];
 
-  // Recalculate shares for aggregated data
   const totalContent = rows.reduce((s, r) => s + r.articles, 0);
   const totalMetric = rows.reduce((s, r) => s + r[m.clicksKey], 0);
+
+  const dimLabel = dimension === 'topic' ? t('th_topic_dim') : dimension === 'club' ? t('th_club_dim') : t('th_competition_dim');
 
   const enriched = rows.map(r => {
     const shareContent = r.articles / totalContent * 100;
@@ -1171,14 +1473,14 @@ function renderIndex() {
   document.getElementById('indexTable').innerHTML = `
     <thead>
       <tr>
-        <th style="min-width:120px">${dimension === 'topic' ? 'Sujet' : dimension === 'club' ? 'Club' : 'Compétition'}</th>
-        <th class="right">Articles</th>
-        <th class="right">% contenu</th>
+        <th style="min-width:120px">${dimLabel}</th>
+        <th class="right">${t('th_articles')}</th>
+        <th class="right">${t('th_pct_content')}</th>
         <th class="right">${m.label}</th>
-        <th class="right">% trafic</th>
-        <th class="right">Ratio</th>
-        <th style="min-width:160px">Index</th>
-        <th>Statut</th>
+        <th class="right">${t('th_pct_traffic')}</th>
+        <th class="right">${t('th_ratio')}</th>
+        <th style="min-width:160px">${t('th_index')}</th>
+        <th>${t('th_status')}</th>
       </tr>
     </thead>
     <tbody>
@@ -1186,8 +1488,9 @@ function renderIndex() {
         const barWidth = Math.min(Math.abs(r.index - 1) / (maxIndex - 1) * 50, 48);
         const isOver = r.index >= 1;
         const status = getStatus(r.index);
+        const displayName = dimension === 'topic' ? topicName(r.name) : r.name;
         return `<tr>
-          <td style="font-weight:500">${r.name}</td>
+          <td style="font-weight:500">${displayName}</td>
           <td class="right">${r.articles}</td>
           <td class="right dim">${pct(r.shareContent)}</td>
           <td class="right">${fmt(r[m.clicksKey])}</td>
@@ -1202,7 +1505,7 @@ function renderIndex() {
               </div>
             </div>
           </td>
-          <td><span class="status-badge ${status.cls}">${status.label}</span></td>
+          <td><span style="display:inline-flex;align-items:center;gap:6px"><span class="tl-dot sm ${r.index >= 1.12 ? 'green' : r.index >= 0.88 ? 'amber' : 'red'}"></span><span class="status-badge ${status.cls}">${status.label}</span></span></td>
         </tr>`;
       }).join('')}
     </tbody>
@@ -1211,7 +1514,10 @@ function renderIndex() {
 
 function renderTimestamp() {
   const d = new Date(DATA.last_updated);
-  document.getElementById('timestamp').textContent = `Dernière mise à jour : ${d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })} à ${d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}`;
+  const locale = LANG === 'fr' ? 'fr-FR' : LANG === 'pt-br' ? 'pt-BR' : 'en-US';
+  const dateStr = d.toLocaleDateString(locale, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  const timeStr = d.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
+  document.getElementById('timestamp').textContent = `${t('ts_prefix')} ${dateStr}, ${timeStr}`;
 }
 
 function renderAll() {
@@ -1271,9 +1577,28 @@ document.querySelectorAll('.metric-btn').forEach(btn => {
   });
 });
 
+// Language select
+document.getElementById('langSelect').value = LANG;
+document.getElementById('langSelect').addEventListener('change', e => {
+  LANG = e.target.value;
+  localStorage.setItem('media_dashboard_lang', LANG);
+  applyTranslations();
+  renderAll();
+});
+
+// Settings modal close on overlay click
+document.getElementById('settingsModal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeSettings();
+});
+
+// Load saved API key
+const savedKey = localStorage.getItem('media_dashboard_openai_key');
+if (savedKey) document.getElementById('settingsApiKey').value = savedKey;
+
 // ══════════════════════════════════════════════
 // INIT
 // ══════════════════════════════════════════════
+applyTranslations();
 renderAll();
 </script>
 </body>
