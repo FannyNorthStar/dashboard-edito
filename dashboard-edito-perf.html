@@ -89,11 +89,6 @@ body {
   gap: 12px;
 }
 
-.topbar .nav-link {
-  font-size: 13px; color: var(--text-muted);
-  text-decoration: none; font-weight: 500;
-}
-.topbar .nav-link:hover { color: var(--accent); }
 
 /* ── Selects ── */
 .topbar select, select.site-select {
@@ -607,7 +602,6 @@ tbody tr:hover { background: var(--surface-2); }
       <option value="pt-br">PT-BR</option>
     </select>
     <button class="settings-btn" onclick="openSettings()" title="Settings">&#9881;</button>
-    <a href="url-checker.html" class="nav-link" data-t="nav_checker">URL Checker &rarr;</a>
   </div>
 </div>
 
@@ -700,7 +694,6 @@ tbody tr:hover { background: var(--surface-2); }
 // ══════════════════════════════════════════════
 const T = {
   en: {
-    nav_checker: "URL Checker →",
     all_sites: "All sites",
     period_yesterday: "Yesterday",
     period_week: "Week",
@@ -770,7 +763,6 @@ const T = {
     topic_Autres: "Other",
   },
   fr: {
-    nav_checker: "URL Checker →",
     all_sites: "Tous les sites",
     period_yesterday: "Hier",
     period_week: "Semaine",
@@ -832,7 +824,6 @@ const T = {
     topic_Autres: "Autres",
   },
   "pt-br": {
-    nav_checker: "URL Checker →",
     all_sites: "Todos os sites",
     period_yesterday: "Ontem",
     period_week: "Semana",
