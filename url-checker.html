@@ -109,6 +109,26 @@ body {
   padding: 32px 24px 60px;
 }
 
+/* INPUT TABS */
+.input-tabs {
+  display: flex; gap: 0; margin-bottom: 16px;
+  border-bottom: 2px solid var(--border);
+}
+.input-tab {
+  padding: 8px 20px;
+  font-size: 13px; font-weight: 600; font-family: inherit;
+  background: none; border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: color 0.2s, border-color 0.2s;
+}
+.input-tab:hover { color: var(--text); }
+.input-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
 /* INPUT AREA */
 .input-section {
   background: var(--surface);
@@ -121,6 +141,68 @@ body {
 .input-section h2 {
   font-size: 15px; font-weight: 600;
   margin-bottom: 16px; color: var(--text);
+}
+.html-textarea {
+  width: 100%;
+  min-height: 160px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  font-size: 13px; font-family: 'Cascadia Code', 'Fira Code', monospace;
+  color: var(--text);
+  outline: none;
+  resize: vertical;
+  line-height: 1.5;
+  transition: border-color 0.2s;
+  margin-bottom: 12px;
+}
+.html-textarea::placeholder { color: var(--text-dim); }
+.html-textarea:focus { border-color: var(--accent); }
+
+/* SPELLCHECK */
+.spell-error-row {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--surface-2);
+  font-size: 13px;
+}
+.spell-error-row:last-child { border-bottom: none; }
+.spell-original {
+  text-decoration: line-through;
+  color: var(--red);
+  font-weight: 500;
+}
+.spell-arrow { color: var(--text-dim); flex-shrink: 0; }
+.spell-correction {
+  color: var(--green);
+  font-weight: 600;
+}
+.spell-context {
+  color: var(--text-muted);
+  font-size: 12px;
+  margin-top: 2px;
+}
+.spell-type {
+  font-size: 10px; font-weight: 600;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  background: var(--surface-2);
+  color: var(--text-muted);
+}
+.spell-lang-badge {
+  font-size: 11px; font-weight: 600;
+  background: var(--accent-glow);
+  color: var(--accent);
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+.spell-ok {
+  display: flex; align-items: center; gap: 8px;
+  padding: 16px 0;
+  font-size: 14px; color: var(--green); font-weight: 500;
 }
 .input-row {
   display: flex; gap: 10px;
@@ -452,6 +534,7 @@ body {
   .kpi-row { grid-template-columns: repeat(2, 1fr); }
   .topbar { padding: 12px 16px; gap: 8px; flex-wrap: wrap; }
   .container { padding: 20px 16px 40px; }
+  .spell-error-row { flex-wrap: wrap; }
 }
 </style>
 </head>
@@ -477,11 +560,24 @@ body {
 
   <div class="input-section">
     <h2 data-t="input_title">Analyze an article</h2>
-    <div class="input-row">
-      <input type="text" id="urlInput" data-t-placeholder="input_placeholder" placeholder="https://www.example.com/my-article" autocomplete="url">
-      <button class="btn" id="analyzeBtn" onclick="startAnalysis()">
-        <span id="btnText" data-t="btn_analyze">Analyze</span>
-        <div class="spinner" id="btnSpinner" style="display:none"></div>
+    <div class="input-tabs">
+      <button class="input-tab active" data-tab="url" onclick="switchTab('url')" data-t="tab_url">URL</button>
+      <button class="input-tab" data-tab="html" onclick="switchTab('html')" data-t="tab_html">HTML Code</button>
+    </div>
+    <div class="tab-panel active" id="panelUrl">
+      <div class="input-row">
+        <input type="text" id="urlInput" data-t-placeholder="input_placeholder" placeholder="https://www.example.com/my-article" autocomplete="url">
+        <button class="btn" id="analyzeBtn" onclick="startAnalysis()">
+          <span id="btnText" data-t="btn_analyze">Analyze</span>
+          <div class="spinner" id="btnSpinner" style="display:none"></div>
+        </button>
+      </div>
+    </div>
+    <div class="tab-panel" id="panelHtml">
+      <textarea class="html-textarea" id="htmlInput" data-t-placeholder="html_placeholder" placeholder="Paste your HTML source code here..."></textarea>
+      <button class="btn" id="analyzeBtnHtml" onclick="startAnalysis()" style="width:100%">
+        <span id="btnTextHtml" data-t="btn_analyze">Analyze</span>
+        <div class="spinner" id="btnSpinnerHtml" style="display:none"></div>
       </button>
     </div>
   </div>
@@ -522,6 +618,13 @@ body {
       </div>
       <div class="ai-body" id="aiBody"></div>
     </div>
+    <div class="card" id="spellCard" style="display:none">
+      <div class="card-header" onclick="toggleCard(this)">
+        <h3>✏️ <span data-t="spell_title">Spellcheck</span> <span class="count" id="spellCount"></span></h3>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="card-body" id="spellBody"></div>
+    </div>
   </div>
 
 </div>
@@ -549,7 +652,10 @@ body {
 const T = {
   en: {
     input_title: "Analyze an article",
+    tab_url: "URL",
+    tab_html: "HTML Code",
     input_placeholder: "https://www.example.com/my-article",
+    html_placeholder: "Paste your HTML source code here...",
     btn_analyze: "Analyze",
     btn_analyzing: "Analyzing...",
     discover_title: "Discover Eligibility",
@@ -645,10 +751,24 @@ const T = {
     ai_editorial_title: "Editorial review",
     ai_title_coherent: "Title coherent",
     ai_sourcing: "Sourcing present",
+    // Spellcheck
+    spell_title: "Spellcheck",
+    spell_lang: "Detected language",
+    spell_ok: "No spelling errors found.",
+    spell_errors: "{n} error(s) found",
+    spell_type_spelling: "spelling",
+    spell_type_grammar: "grammar",
+    spell_type_typo: "typo",
+    prog_spell: "Running spellcheck...",
+    err_empty_html: "Paste HTML code to analyze.",
+    kpi_spell: "Spelling",
   },
   fr: {
     input_title: "Analyser un article",
+    tab_url: "URL",
+    tab_html: "Code HTML",
     input_placeholder: "https://www.example.com/mon-article",
+    html_placeholder: "Collez votre code source HTML ici...",
     btn_analyze: "Analyser",
     btn_analyzing: "Analyse...",
     discover_title: "Éligibilité Discover",
@@ -741,10 +861,23 @@ const T = {
     ai_editorial_title: "Lecture éditoriale",
     ai_title_coherent: "Titre cohérent",
     ai_sourcing: "Sourcing présent",
+    spell_title: "Orthographe",
+    spell_lang: "Langue détectée",
+    spell_ok: "Aucune faute d'orthographe trouvée.",
+    spell_errors: "{n} erreur(s) trouvée(s)",
+    spell_type_spelling: "orthographe",
+    spell_type_grammar: "grammaire",
+    spell_type_typo: "coquille",
+    prog_spell: "Vérification orthographe...",
+    err_empty_html: "Collez du code HTML à analyser.",
+    kpi_spell: "Orthographe",
   },
   "pt-br": {
     input_title: "Analisar um artigo",
+    tab_url: "URL",
+    tab_html: "Código HTML",
     input_placeholder: "https://www.example.com/meu-artigo",
+    html_placeholder: "Cole o código-fonte HTML aqui...",
     btn_analyze: "Analisar",
     btn_analyzing: "Analisando...",
     discover_title: "Elegibilidade Discover",
@@ -837,6 +970,16 @@ const T = {
     ai_editorial_title: "Revisão editorial",
     ai_title_coherent: "Título coerente",
     ai_sourcing: "Fontes presentes",
+    spell_title: "Ortografia",
+    spell_lang: "Idioma detectado",
+    spell_ok: "Nenhum erro ortográfico encontrado.",
+    spell_errors: "{n} erro(s) encontrado(s)",
+    spell_type_spelling: "ortografia",
+    spell_type_grammar: "gramática",
+    spell_type_typo: "digitação",
+    prog_spell: "Verificando ortografia...",
+    err_empty_html: "Cole o código HTML para analisar.",
+    kpi_spell: "Ortografia",
   }
 };
 
@@ -864,6 +1007,15 @@ function applyTranslations() {
 // ========== CONFIG ==========
 const CORS_PROXY = 'https://api.allorigins.win/raw?url=';
 const OPENAI_MODEL = 'gpt-4o';
+
+// ========== TAB SWITCHING ==========
+let activeTab = 'url';
+function switchTab(tab) {
+  activeTab = tab;
+  document.querySelectorAll('.input-tab').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  document.getElementById('panelUrl').classList.toggle('active', tab === 'url');
+  document.getElementById('panelHtml').classList.toggle('active', tab === 'html');
+}
 
 // ========== INIT ==========
 document.addEventListener('DOMContentLoaded', () => {
@@ -919,24 +1071,38 @@ function setLoading(on) {
   document.getElementById('analyzeBtn').disabled = on;
   document.getElementById('btnText').textContent = on ? t('btn_analyzing') : t('btn_analyze');
   document.getElementById('btnSpinner').style.display = on ? 'block' : 'none';
+  document.getElementById('analyzeBtnHtml').disabled = on;
+  document.getElementById('btnTextHtml').textContent = on ? t('btn_analyzing') : t('btn_analyze');
+  document.getElementById('btnSpinnerHtml').style.display = on ? 'block' : 'none';
 }
 
 // ========== MAIN FLOW ==========
 async function startAnalysis() {
-  const url = document.getElementById('urlInput').value.trim();
-  if (!url) { showError(t('err_empty')); return; }
-  if (!url.startsWith('http')) { showError(t('err_url')); return; }
+  let url, html;
+
+  if (activeTab === 'url') {
+    url = document.getElementById('urlInput').value.trim();
+    if (!url) { showError(t('err_empty')); return; }
+    if (!url.startsWith('http')) { showError(t('err_url')); return; }
+  } else {
+    html = document.getElementById('htmlInput').value.trim();
+    if (!html) { showError(t('err_empty_html')); return; }
+    url = '(pasted HTML)';
+  }
 
   clearError();
   setLoading(true);
   document.getElementById('results').classList.remove('active');
   document.getElementById('progressBar').classList.remove('active');
+  document.getElementById('spellCard').style.display = 'none';
 
   const apiKey = localStorage.getItem('media_dashboard_openai_key') || '';
 
   try {
-    setProgress(10, t('prog_fetch'));
-    const html = await fetchPage(url);
+    if (activeTab === 'url') {
+      setProgress(10, t('prog_fetch'));
+      html = await fetchPage(url);
+    }
 
     setProgress(30, t('prog_html'));
     const parser = new DOMParser();
@@ -945,22 +1111,25 @@ async function startAnalysis() {
     setProgress(40, t('prog_discover'));
     const discoverChecks = runDiscoverChecks(doc, url);
 
-    setProgress(55, t('prog_content'));
+    setProgress(50, t('prog_content'));
     const contentChecks = runContentChecks(doc, url);
 
-    setProgress(70, t('prog_prep'));
+    setProgress(60, t('prog_prep'));
     const title = extractTitle(doc);
+    const bodyText = extractBodyText(doc);
 
     let aiResult = null;
+    let spellResult = null;
     if (apiKey) {
-      setProgress(75, t('prog_ai'));
-      const bodyText = extractBodyText(doc);
+      setProgress(65, t('prog_ai'));
       aiResult = await runAIAnalysis(apiKey, url, title, bodyText);
+      setProgress(85, t('prog_spell'));
+      spellResult = await runSpellcheck(apiKey, bodyText, doc);
       setProgress(95, t('prog_done'));
     }
 
     setProgress(100, t('prog_done'));
-    renderResults(url, title, discoverChecks, contentChecks, aiResult);
+    renderResults(url, title, discoverChecks, contentChecks, aiResult, spellResult);
   } catch (err) {
     showError('Error: ' + err.message);
     document.getElementById('progressBar').classList.remove('active');
@@ -979,11 +1148,11 @@ async function fetchPage(url) {
 // ========== TITLE EXTRACTION ==========
 function extractTitle(doc) {
   const og = doc.querySelector('meta[property="og:title"]');
-  if (og && og.content) return og.content;
+  if (og && og.content) return decodeEntities(og.content);
   const tt = doc.querySelector('title');
-  if (tt) return tt.textContent.trim();
+  if (tt) return decodeEntities(tt.textContent.trim());
   const h1 = doc.querySelector('h1');
-  if (h1) return h1.textContent.trim();
+  if (h1) return decodeEntities(h1.textContent.trim());
   return '(title not found)';
 }
 
@@ -1266,8 +1435,92 @@ On te donne le titre, l'URL et le texte d'un article. Analyse-le selon deux axes
   return JSON.parse(tc.function.arguments);
 }
 
+// ========== LANGUAGE DETECTION ==========
+function detectLanguageHint(doc) {
+  const htmlLang = (doc.documentElement?.getAttribute('lang') || '').trim().toLowerCase();
+  if (htmlLang) return htmlLang;
+  const ogLocale = doc.querySelector('meta[property="og:locale"]');
+  if (ogLocale) return (ogLocale.getAttribute('content') || '').replace('_', '-').toLowerCase();
+  const contentLang = doc.querySelector('meta[http-equiv="content-language"]');
+  if (contentLang) return (contentLang.getAttribute('content') || '').toLowerCase();
+  return '';
+}
+
+// ========== SPELLCHECK ==========
+async function runSpellcheck(apiKey, bodyText, doc) {
+  const words = bodyText.split(/\s+/);
+  const truncated = words.slice(0, 4000).join(' ');
+  if (truncated.length < 20) return null;
+
+  const langHint = detectLanguageHint(doc);
+  const langLine = langHint
+    ? `The article language appears to be: ${langHint}. Confirm or correct this detection.`
+    : `Detect the article language automatically from the text content.`;
+
+  const spellPrompt = `You are a multilingual proofreader. ${langLine}
+
+Find ALL spelling errors, typos, and grammar mistakes in the article text below. For each error, provide:
+- The exact original word/phrase as it appears
+- The corrected version
+- A short excerpt of the sentence for context (max 80 chars around the error)
+- The type: "spelling", "grammar", or "typo"
+
+Be thorough but precise. Only flag real errors. Do not flag proper nouns, brand names, player names, team names, or foreign words used intentionally. Do not flag stylistic choices. Focus on genuine mistakes.
+
+Respond ONLY via the spellcheck_report tool.`;
+
+  const spellSchema = {
+    type: "function",
+    function: {
+      name: "spellcheck_report",
+      description: "Spelling and grammar check results",
+      parameters: {
+        type: "object",
+        properties: {
+          detected_language: { type: "string", description: "ISO language code detected (e.g. fr, en, pt-br, it, es)" },
+          errors: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                original: { type: "string" },
+                correction: { type: "string" },
+                context: { type: "string" },
+                type: { type: "string", enum: ["spelling", "grammar", "typo"] }
+              },
+              required: ["original", "correction", "context", "type"]
+            }
+          }
+        },
+        required: ["detected_language", "errors"]
+      }
+    }
+  };
+
+  const resp = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
+    body: JSON.stringify({
+      model: OPENAI_MODEL,
+      messages: [
+        { role: 'system', content: spellPrompt },
+        { role: 'user', content: truncated }
+      ],
+      tools: [spellSchema],
+      tool_choice: { type: "function", function: { name: "spellcheck_report" } },
+      temperature: 0.1
+    })
+  });
+
+  if (!resp.ok) return null;
+  const data = await resp.json();
+  const tc = data.choices?.[0]?.message?.tool_calls?.[0];
+  if (!tc) return null;
+  try { return JSON.parse(tc.function.arguments); } catch(e) { return null; }
+}
+
 // ========== RENDER RESULTS ==========
-function renderResults(url, title, discoverChecks, contentChecks, aiResult) {
+function renderResults(url, title, discoverChecks, contentChecks, aiResult, spellResult) {
   document.getElementById('results').classList.add('active');
   document.getElementById('resultTitle').textContent = title;
   document.getElementById('resultUrl').textContent = url;
@@ -1289,6 +1542,10 @@ function renderResults(url, title, discoverChecks, contentChecks, aiResult) {
     if (aiResult.search?.score_lisibilite_mot_cle != null)
       kpis.push({ label: t('kpi_seo'), value: aiResult.search.score_lisibilite_mot_cle, color: aiResult.search.score_lisibilite_mot_cle>=60?'green':aiResult.search.score_lisibilite_mot_cle>=30?'amber':'red' });
   }
+  if (spellResult) {
+    const errCount = spellResult.errors?.length || 0;
+    kpis.push({ label: t('kpi_spell'), value: errCount, color: errCount===0?'green':errCount<=3?'amber':'red' });
+  }
   document.getElementById('kpiRow').innerHTML = kpis.map(k => `<div class="kpi-card"><div class="kpi-value ${k.color}"><span class="tl-dot ${k.color}"></span>${k.value}</div><div class="kpi-label">${k.label}</div></div>`).join('');
 
   const discoverColor = discoverOk===discoverTotal?'green':discoverOk>=discoverTotal-2?'amber':'red';
@@ -1299,7 +1556,35 @@ function renderResults(url, title, discoverChecks, contentChecks, aiResult) {
   const aiSection = document.getElementById('aiSection');
   if (aiResult) { aiSection.style.display = 'block'; renderAI(aiResult); }
   else aiSection.style.display = 'none';
+
+  const spellCard = document.getElementById('spellCard');
+  if (spellResult) { spellCard.style.display = 'block'; renderSpellcheck(spellResult); }
+  else spellCard.style.display = 'none';
 }
+
+function renderSpellcheck(spell) {
+  const errors = spell.errors || [];
+  const lang = spell.detected_language || '?';
+  const countColor = errors.length === 0 ? 'green' : errors.length <= 3 ? 'amber' : 'red';
+  document.getElementById('spellCount').innerHTML = `<span class="spell-lang-badge">${esc(lang.toUpperCase())}</span> <span class="tl-dot ${countColor}" style="width:8px;height:8px"></span> ${errors.length === 0 ? t('spell_ok').split('.')[0] : t('spell_errors', {n: errors.length})}`;
+
+  const body = document.getElementById('spellBody');
+  if (errors.length === 0) {
+    body.innerHTML = `<div class="spell-ok"><span class="tl-dot green"></span> ${t('spell_ok')}</div>`;
+    return;
+  }
+
+  body.innerHTML = errors.map(e => `<div class="spell-error-row">
+    <span class="spell-type">${t('spell_type_' + e.type) || e.type}</span>
+    <div style="flex:1">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <span class="spell-original">${esc(e.original)}</span>
+        <span class="spell-arrow">→</span>
+        <span class="spell-correction">${esc(e.correction)}</span>
+      </div>
+      <div class="spell-context">"...${esc(e.context)}..."</div>
+    </div>
+  </div>`).join('');
 
 function renderAI(ai) {
   const body = document.getElementById('aiBody');
@@ -1332,6 +1617,7 @@ function renderAI(ai) {
 }
 
 function esc(str) { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
+function decodeEntities(s) { const t = document.createElement('textarea'); t.innerHTML = s; return t.value; }
 </script>
 </body>
 </html>
