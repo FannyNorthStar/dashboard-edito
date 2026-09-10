@@ -109,25 +109,15 @@ body {
   padding: 32px 24px 60px;
 }
 
-/* INPUT TABS */
-.input-tabs {
-  display: flex; gap: 0; margin-bottom: 16px;
-  border-bottom: 2px solid var(--border);
+/* DIVIDER */
+.input-divider {
+  display: flex; align-items: center; gap: 12px;
+  margin: 16px 0;
+  color: var(--text-muted); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
 }
-.input-tab {
-  padding: 8px 20px;
-  font-size: 13px; font-weight: 600; font-family: inherit;
-  background: none; border: none;
-  color: var(--text-muted);
-  cursor: pointer;
-  border-bottom: 2px solid transparent;
-  margin-bottom: -2px;
-  transition: color 0.2s, border-color 0.2s;
+.input-divider::before, .input-divider::after {
+  content: ''; flex: 1; height: 1px; background: var(--border);
 }
-.input-tab:hover { color: var(--text); }
-.input-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
-.tab-panel { display: none; }
-.tab-panel.active { display: block; }
 
 /* INPUT AREA */
 .input-section {
@@ -560,26 +550,15 @@ body {
 
   <div class="input-section">
     <h2 data-t="input_title">Analyze an article</h2>
-    <div class="input-tabs">
-      <button class="input-tab active" data-tab="url" onclick="switchTab('url')" data-t="tab_url">URL</button>
-      <button class="input-tab" data-tab="html" onclick="switchTab('html')" data-t="tab_html">HTML Code</button>
+    <div class="input-row">
+      <input type="text" id="urlInput" data-t-placeholder="input_placeholder" placeholder="https://www.example.com/my-article" autocomplete="url">
     </div>
-    <div class="tab-panel active" id="panelUrl">
-      <div class="input-row">
-        <input type="text" id="urlInput" data-t-placeholder="input_placeholder" placeholder="https://www.example.com/my-article" autocomplete="url">
-        <button class="btn" id="analyzeBtn" onclick="startAnalysis()">
-          <span id="btnText" data-t="btn_analyze">Analyze</span>
-          <div class="spinner" id="btnSpinner" style="display:none"></div>
-        </button>
-      </div>
-    </div>
-    <div class="tab-panel" id="panelHtml">
-      <textarea class="html-textarea" id="htmlInput" data-t-placeholder="html_placeholder" placeholder="Paste your HTML source code here..."></textarea>
-      <button class="btn" id="analyzeBtnHtml" onclick="startAnalysis()" style="width:100%">
-        <span id="btnTextHtml" data-t="btn_analyze">Analyze</span>
-        <div class="spinner" id="btnSpinnerHtml" style="display:none"></div>
-      </button>
-    </div>
+    <div class="input-divider" data-t="input_or">OR</div>
+    <textarea class="html-textarea" id="htmlInput" data-t-placeholder="html_placeholder" placeholder="Paste your HTML source code here..."></textarea>
+    <button class="btn" id="analyzeBtn" onclick="startAnalysis()" style="width:100%">
+      <span id="btnText" data-t="btn_analyze">Analyze</span>
+      <div class="spinner" id="btnSpinner" style="display:none"></div>
+    </button>
   </div>
 
   <div class="error-box" id="errorBox"></div>
@@ -652,8 +631,7 @@ body {
 const T = {
   en: {
     input_title: "Analyze an article",
-    tab_url: "URL",
-    tab_html: "HTML Code",
+    input_or: "OR",
     input_placeholder: "https://www.example.com/my-article",
     html_placeholder: "Paste your HTML source code here...",
     btn_analyze: "Analyze",
@@ -765,8 +743,7 @@ const T = {
   },
   fr: {
     input_title: "Analyser un article",
-    tab_url: "URL",
-    tab_html: "Code HTML",
+    input_or: "OU",
     input_placeholder: "https://www.example.com/mon-article",
     html_placeholder: "Collez votre code source HTML ici...",
     btn_analyze: "Analyser",
@@ -874,8 +851,7 @@ const T = {
   },
   "pt-br": {
     input_title: "Analisar um artigo",
-    tab_url: "URL",
-    tab_html: "Código HTML",
+    input_or: "OU",
     input_placeholder: "https://www.example.com/meu-artigo",
     html_placeholder: "Cole o código-fonte HTML aqui...",
     btn_analyze: "Analisar",
@@ -1008,14 +984,8 @@ function applyTranslations() {
 const CORS_PROXY = 'https://api.allorigins.win/raw?url=';
 const OPENAI_MODEL = 'gpt-4o';
 
-// ========== TAB SWITCHING ==========
-let activeTab = 'url';
-function switchTab(tab) {
-  activeTab = tab;
-  document.querySelectorAll('.input-tab').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
-  document.getElementById('panelUrl').classList.toggle('active', tab === 'url');
-  document.getElementById('panelHtml').classList.toggle('active', tab === 'html');
-}
+// ========== INPUT MODE ==========
+// No tabs — both fields visible. URL takes priority if both filled.
 
 // ========== INIT ==========
 document.addEventListener('DOMContentLoaded', () => {
@@ -1071,23 +1041,23 @@ function setLoading(on) {
   document.getElementById('analyzeBtn').disabled = on;
   document.getElementById('btnText').textContent = on ? t('btn_analyzing') : t('btn_analyze');
   document.getElementById('btnSpinner').style.display = on ? 'block' : 'none';
-  document.getElementById('analyzeBtnHtml').disabled = on;
-  document.getElementById('btnTextHtml').textContent = on ? t('btn_analyzing') : t('btn_analyze');
-  document.getElementById('btnSpinnerHtml').style.display = on ? 'block' : 'none';
 }
 
 // ========== MAIN FLOW ==========
 async function startAnalysis() {
-  let url, html;
+  let url = document.getElementById('urlInput').value.trim();
+  let html = document.getElementById('htmlInput').value.trim();
+  let mode = 'url';
 
-  if (activeTab === 'url') {
-    url = document.getElementById('urlInput').value.trim();
-    if (!url) { showError(t('err_empty')); return; }
+  // URL takes priority if filled; otherwise use HTML
+  if (url) {
     if (!url.startsWith('http')) { showError(t('err_url')); return; }
-  } else {
-    html = document.getElementById('htmlInput').value.trim();
-    if (!html) { showError(t('err_empty_html')); return; }
+    mode = 'url';
+  } else if (html) {
+    mode = 'html';
     url = '(pasted HTML)';
+  } else {
+    showError(t('err_empty')); return;
   }
 
   clearError();
@@ -1099,7 +1069,7 @@ async function startAnalysis() {
   const apiKey = localStorage.getItem('media_dashboard_openai_key') || '';
 
   try {
-    if (activeTab === 'url') {
+    if (mode === 'url') {
       setProgress(10, t('prog_fetch'));
       html = await fetchPage(url);
     }
@@ -1585,6 +1555,7 @@ function renderSpellcheck(spell) {
       <div class="spell-context">"...${esc(e.context)}..."</div>
     </div>
   </div>`).join('');
+}
 
 function renderAI(ai) {
   const body = document.getElementById('aiBody');
