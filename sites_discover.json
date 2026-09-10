@@ -1,0 +1,69 @@
+{
+  "topmercato": {
+    "nom": "Topmercato",
+    "domaine": "topmercato.com",
+    "discover_csv": "https://docs.google.com/spreadsheets/d/e/2PACX-1vSzDGCChRg2qmqFMxm9Y55B3VF_shHhTzrjMIg5e--9jG3lcGkUWfEX4pXajCRgCuRAq6RKOYIsRBDm/pub?gid=1061840185&single=true&output=csv"
+  },
+  "trivela": {
+    "nom": "Trivela",
+    "domaine": "trivela.com.br",
+    "discover_csv": "https://docs.google.com/spreadsheets/d/e/2PACX-1vSzDGCChRg2qmqFMxm9Y55B3VF_shHhTzrjMIg5e--9jG3lcGkUWfEX4pXajCRgCuRAq6RKOYIsRBDm/pub?gid=56128978&single=true&output=csv"
+  },
+  "sportsmole": {
+    "nom": "Sportsmole",
+    "domaine": "sportsmole.co.uk",
+    "discover_csv": "https://docs.google.com/spreadsheets/d/e/2PACX-1vSzDGCChRg2qmqFMxm9Y55B3VF_shHhTzrjMIg5e--9jG3lcGkUWfEX4pXajCRgCuRAq6RKOYIsRBDm/pub?gid=629964905&single=true&output=csv"
+  },
+  "umdoisesportes": {
+    "nom": "Um Dois Esportes",
+    "domaine": "umdoisesportes.com.br",
+    "discover_csv": "https://docs.google.com/spreadsheets/d/e/2PACX-1vSzDGCChRg2qmqFMxm9Y55B3VF_shHhTzrjMIg5e--9jG3lcGkUWfEX4pXajCRgCuRAq6RKOYIsRBDm/pub?gid=992609634&single=true&output=csv"
+  },
+  "vringe": {
+    "nom": "Vringe",
+    "domaine": "vringe.com",
+    "discover_csv": "https://docs.google.com/spreadsheets/d/e/2PACX-1vSzDGCChRg2qmqFMxm9Y55B3VF_shHhTzrjMIg5e--9jG3lcGkUWfEX4pXajCRgCuRAq6RKOYIsRBDm/pub?gid=509137887&single=true&output=csv"
+  },
+  "afrikfootfr": {
+    "nom": "Afrik-Foot FR",
+    "domaine": "afrik-foot.com",
+    "discover_csv": "https://docs.google.com/spreadsheets/d/e/2PACX-1vSzDGCChRg2qmqFMxm9Y55B3VF_shHhTzrjMIg5e--9jG3lcGkUWfEX4pXajCRgCuRAq6RKOYIsRBDm/pub?gid=160791836&single=true&output=csv"
+  },
+  "afrikfootng": {
+    "nom": "Afrik-Foot Nigeria",
+    "domaine": "afrik-foot.com",
+    "prefixe": "en-ng",
+    "discover_csv": "https://docs.google.com/spreadsheets/d/e/2PACX-1vSzDGCChRg2qmqFMxm9Y55B3VF_shHhTzrjMIg5e--9jG3lcGkUWfEX4pXajCRgCuRAq6RKOYIsRBDm/pub?gid=294512204&single=true&output=csv"
+  },
+  "afrikfootza": {
+    "nom": "Afrik-Foot Afrique du Sud",
+    "domaine": "afrik-foot.com",
+    "prefixe": "en-za",
+    "discover_csv": "https://docs.google.com/spreadsheets/d/e/2PACX-1vSzDGCChRg2qmqFMxm9Y55B3VF_shHhTzrjMIg5e--9jG3lcGkUWfEX4pXajCRgCuRAq6RKOYIsRBDm/pub?gid=1805968773&single=true&output=csv"
+  },
+  "solobasket": {
+    "nom": "Solobasket",
+    "domaine": "solobasket.com",
+    "discover_csv": "https://docs.google.com/spreadsheets/d/e/2PACX-1vSzDGCChRg2qmqFMxm9Y55B3VF_shHhTzrjMIg5e--9jG3lcGkUWfEX4pXajCRgCuRAq6RKOYIsRBDm/pub?gid=1495868695&single=true&output=csv"
+  },
+  "fotbalportal": {
+    "nom": "Fotbalportal",
+    "domaine": "fotbalportal.cz",
+    "discover_csv": "https://docs.google.com/spreadsheets/d/e/2PACX-1vSzDGCChRg2qmqFMxm9Y55B3VF_shHhTzrjMIg5e--9jG3lcGkUWfEX4pXajCRgCuRAq6RKOYIsRBDm/pub?gid=633759033&single=true&output=csv"
+  },
+  "footballwhispers": {
+    "nom": "Football Whispers",
+    "domaine": "footballwhispers.com",
+    "discover_csv": "https://docs.google.com/spreadsheets/d/e/2PACX-1vSzDGCChRg2qmqFMxm9Y55B3VF_shHhTzrjMIg5e--9jG3lcGkUWfEX4pXajCRgCuRAq6RKOYIsRBDm/pub?gid=1495935356&single=true&output=csv"
+  },
+  "footballgroundguide": {
+    "nom": "Football Ground Guide",
+    "domaine": "footballgroundguide.com",
+    "discover_csv": "https://docs.google.com/spreadsheets/d/e/2PACX-1vSzDGCChRg2qmqFMxm9Y55B3VF_shHhTzrjMIg5e--9jG3lcGkUWfEX4pXajCRgCuRAq6RKOYIsRBDm/pub?gid=485234698&single=true&output=csv"
+  },
+  "mrfixitstips": {
+    "nom": "MrFixitsTips",
+    "domaine": "mrfixitstips.co.uk",
+    "discover_csv": "https://docs.google.com/spreadsheets/d/e/2PACX-1vSzDGCChRg2qmqFMxm9Y55B3VF_shHhTzrjMIg5e--9jG3lcGkUWfEX4pXajCRgCuRAq6RKOYIsRBDm/pub?gid=5479426&single=true&output=csv"
+  }
+}

@@ -1,0 +1,88 @@
+{
+  "sportsmole": {
+    "type_url": "sportsmole",
+    "domaine": "sportsmole.co.uk",
+    "types_contenu": [
+      "preview",
+      "news",
+      "feature",
+      "predicted-lineups",
+      "injuries-and-suspensions",
+      "head-to-head",
+      "team-news",
+      "result",
+      "match-analysis",
+      "transfer-talk",
+      "injury-news"
+    ]
+  },
+  "trivela": {
+    "type_url": "trivela",
+    "domaine": "trivela.com.br"
+  },
+  "umdoisesportes": {
+    "type_url": "umdoisesportes",
+    "domaine": "umdoisesportes.com.br",
+    "clubs": ["athletico", "coritiba", "parana-clube"],
+    "derbys": {
+      "atletiba": ["athletico", "coritiba"]
+    },
+    "segment_chronique": "colunas-e-blogs",
+    "topics": [
+      "copa-do-mundo",
+      "futebol-paranaense",
+      "campeonatos",
+      "selecao-brasileira",
+      "futebol-brasileiro",
+      "palpites-de-futebol",
+      "mercado-da-bola",
+      "futebol",
+      "futebol-europeu",
+      "podcasts",
+      "mais-esportes",
+      "apostas"
+    ]
+  },
+  "vringe": {
+    "type_url": "vringe",
+    "domaine": "vringe.com"
+  },
+  "topmercato": {
+    "type_url": "plat",
+    "domaine": "topmercato.com"
+  },
+  "afrikfootfr": {
+    "type_url": "plat",
+    "domaine": "afrik-foot.com"
+  },
+  "afrikfootng": {
+    "type_url": "prefixe",
+    "domaine": "afrik-foot.com",
+    "prefixe": "en-ng"
+  },
+  "afrikfootza": {
+    "type_url": "prefixe",
+    "domaine": "afrik-foot.com",
+    "prefixe": "en-za"
+  },
+  "solobasket": {
+    "type_url": "trivela",
+    "domaine": "solobasket.com"
+  },
+  "fotbalportal": {
+    "type_url": "trivela",
+    "domaine": "fotbalportal.cz"
+  },
+  "footballwhispers": {
+    "type_url": "plat",
+    "domaine": "footballwhispers.com"
+  },
+  "footballgroundguide": {
+    "type_url": "plat",
+    "domaine": "footballgroundguide.com"
+  },
+  "mrfixitstips": {
+    "type_url": "categorie_racine",
+    "domaine": "mrfixitstips.co.uk"
+  }
+}

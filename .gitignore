@@ -1,0 +1,5 @@
+# Ne jamais committer de clés/secrets (le dépôt est public)
+.env
+*.key
+__pycache__/
+*.pyc

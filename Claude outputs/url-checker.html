@@ -1,0 +1,1331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>URL Checker — Media Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #F5F6FA;
+  --surface: #FFFFFF;
+  --surface-2: #F0F1F5;
+  --surface-3: #E8E9EF;
+  --border: #E2E4EA;
+  --border-light: #D0D3DC;
+  --text: #1A1D2E;
+  --text-muted: #6B7085;
+  --text-dim: #9B9FB2;
+  --accent: #6366F1;
+  --accent-glow: rgba(99,102,241,0.1);
+  --accent-hover: #5558E3;
+  --green: #10B981;
+  --green-bg: rgba(16,185,129,0.08);
+  --red: #EF4444;
+  --red-bg: rgba(239,68,68,0.08);
+  --amber: #F59E0B;
+  --amber-bg: rgba(245,158,11,0.08);
+  --radius: 10px;
+  --radius-sm: 6px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.03);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.06);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  line-height: 1.5;
+}
+
+/* TOPBAR */
+.topbar {
+  position: sticky; top: 0; z-index: 100;
+  display: flex; align-items: center; gap: 16px;
+  padding: 14px 28px;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+}
+.topbar .logo {
+  font-weight: 700; font-size: 16px; letter-spacing: -0.3px;
+  color: var(--text);
+  display: flex; align-items: center; gap: 8px;
+}
+.topbar .logo-icon {
+  width: 26px; height: 26px;
+  background: var(--accent);
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 14px;
+}
+.topbar .badge {
+  font-size: 11px; font-weight: 600;
+  background: var(--accent-glow);
+  color: var(--accent);
+  padding: 3px 10px; border-radius: 20px;
+}
+.topbar-right {
+  margin-left: auto;
+  display: flex; align-items: center; gap: 12px;
+}
+.topbar .nav-link {
+  font-size: 13px; color: var(--text-muted);
+  text-decoration: none; font-weight: 500;
+}
+.topbar .nav-link:hover { color: var(--accent); }
+
+/* LANGUAGE & SETTINGS SELECTS */
+.topbar select {
+  appearance: none;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 12px; font-weight: 500;
+  padding: 6px 28px 6px 10px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%236B7085' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+}
+.topbar select:hover { border-color: var(--accent); }
+.topbar select:focus { outline: none; border-color: var(--accent); }
+
+.settings-btn {
+  background: none; border: none;
+  color: var(--text-muted); cursor: pointer;
+  font-size: 18px; padding: 4px;
+  border-radius: 4px;
+  transition: color 0.2s;
+}
+.settings-btn:hover { color: var(--accent); }
+
+/* CONTAINER */
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 32px 24px 60px;
+}
+
+/* INPUT AREA */
+.input-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow);
+}
+.input-section h2 {
+  font-size: 15px; font-weight: 600;
+  margin-bottom: 16px; color: var(--text);
+}
+.input-row {
+  display: flex; gap: 10px;
+}
+.input-row input[type="text"] {
+  flex: 1;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  font-size: 14px; font-family: inherit;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.2s;
+}
+.input-row input::placeholder { color: var(--text-dim); }
+.input-row input:focus { border-color: var(--accent); }
+
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--accent);
+  color: #fff; border: none;
+  border-radius: var(--radius-sm);
+  padding: 10px 22px;
+  font-size: 14px; font-weight: 600; font-family: inherit;
+  cursor: pointer;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+.btn:hover { background: var(--accent-hover); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn .spinner {
+  width: 14px; height: 14px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* PROGRESS */
+.progress-bar { display: none; margin-bottom: 24px; }
+.progress-bar.active { display: block; }
+.progress-track {
+  width: 100%; height: 4px;
+  background: var(--surface-2);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%; width: 0%;
+  background: var(--accent);
+  border-radius: 2px;
+  transition: width 0.3s;
+}
+.progress-label {
+  font-size: 12px; color: var(--text-muted);
+  margin-top: 6px;
+}
+
+/* RESULTS */
+.results { display: none; }
+.results.active { display: block; }
+
+.result-header {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 20px; flex-wrap: wrap;
+}
+.result-title { font-size: 18px; font-weight: 700; }
+.result-url {
+  font-size: 12px; color: var(--text-muted);
+  word-break: break-all;
+}
+
+/* CARD */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 16px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer; user-select: none;
+}
+.card-header:hover { background: var(--surface-2); }
+.card-header h3 {
+  font-size: 14px; font-weight: 600;
+  display: flex; align-items: center; gap: 8px;
+}
+.card-header .count {
+  font-size: 12px; font-weight: 500;
+  color: var(--text-muted);
+}
+.card-header .chevron {
+  color: var(--text-dim);
+  transition: transform 0.2s;
+  font-size: 12px;
+}
+.card-header.collapsed .chevron { transform: rotate(-90deg); }
+.card-body { padding: 4px 20px 16px; }
+.card-header.collapsed + .card-body { display: none; }
+
+/* CHECK ROW */
+.check-row {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--surface-2);
+  font-size: 13px;
+}
+.check-row:last-child { border-bottom: none; }
+.status-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  margin-top: 5px;
+  flex-shrink: 0;
+}
+.status-dot.ok { background: var(--green); }
+.status-dot.warning { background: var(--amber); }
+.status-dot.fail { background: var(--red); }
+.status-dot.a_verifier { background: var(--text-dim); }
+.check-label {
+  font-weight: 500; color: var(--text);
+  min-width: 160px; flex-shrink: 0;
+}
+.check-detail { color: var(--text-muted); flex: 1; }
+
+/* KPI ROW */
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.kpi-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  text-align: center;
+  box-shadow: var(--shadow);
+}
+.kpi-value {
+  font-size: 28px; font-weight: 700; line-height: 1;
+}
+.kpi-value.green { color: var(--green); }
+.kpi-value.amber { color: var(--amber); }
+.kpi-value.red { color: var(--red); }
+.kpi-label {
+  font-size: 11px; color: var(--text-muted);
+  margin-top: 6px; text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* AI SECTION */
+.ai-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 16px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.ai-header {
+  display: flex; align-items: center; gap: 8px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.ai-header h3 { font-size: 14px; font-weight: 600; }
+.ai-header .ai-badge {
+  font-size: 10px; font-weight: 700;
+  background: linear-gradient(135deg, #6366F1, #8B5CF6);
+  color: #fff;
+  padding: 2px 8px; border-radius: 10px;
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+.ai-body { padding: 20px; }
+.ai-subsection { margin-bottom: 20px; }
+.ai-subsection:last-child { margin-bottom: 0; }
+.ai-subsection h4 {
+  font-size: 13px; font-weight: 600;
+  color: var(--accent); margin-bottom: 8px;
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+.ai-field {
+  display: flex; gap: 8px; margin-bottom: 6px;
+  font-size: 13px;
+}
+.ai-field-label {
+  color: var(--text-muted); min-width: 150px;
+  flex-shrink: 0; font-weight: 500;
+}
+.ai-field-value { color: var(--text); }
+.ai-field-value.bool-true { color: var(--green); }
+.ai-field-value.bool-false { color: var(--amber); }
+.tag {
+  display: inline-block;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 12px; color: var(--text);
+  margin: 2px 4px 2px 0;
+}
+.points-list { list-style: none; padding: 0; }
+.points-list li {
+  font-size: 13px; padding: 4px 0;
+  color: var(--text-muted);
+}
+.points-list li::before { margin-right: 6px; }
+.points-list.forts li::before { content: "✓"; color: var(--green); }
+.points-list.faibles li::before { content: "✗"; color: var(--red); }
+
+.editorial-row {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--surface-2);
+  font-size: 13px;
+}
+.editorial-row:last-child { border-bottom: none; }
+.editorial-status {
+  padding: 2px 10px; border-radius: 4px;
+  font-size: 11px; font-weight: 600;
+  text-transform: uppercase; flex-shrink: 0;
+}
+.editorial-status.ok { background: var(--green-bg); color: var(--green); }
+.editorial-status.warning { background: var(--amber-bg); color: var(--amber); }
+.editorial-status.fail { background: var(--red-bg); color: var(--red); }
+
+/* ERROR */
+.error-box {
+  display: none;
+  background: var(--red-bg);
+  border: 1px solid rgba(239,68,68,0.2);
+  border-radius: var(--radius-sm);
+  padding: 14px 18px;
+  font-size: 13px; color: var(--red);
+  margin-bottom: 16px;
+}
+.error-box.active { display: block; }
+
+/* MODAL */
+.modal-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.3);
+  z-index: 200;
+  align-items: center; justify-content: center;
+}
+.modal-overlay.active { display: flex; }
+.modal {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 28px;
+  width: 440px; max-width: 90vw;
+  box-shadow: var(--shadow-md);
+}
+.modal h3 {
+  font-size: 16px; font-weight: 600;
+  margin-bottom: 16px;
+}
+.modal label {
+  font-size: 13px; font-weight: 500;
+  color: var(--text-muted);
+  display: block; margin-bottom: 6px;
+}
+.modal input {
+  width: 100%;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  font-size: 13px; font-family: monospace;
+  color: var(--text);
+  outline: none;
+  margin-bottom: 8px;
+}
+.modal input:focus { border-color: var(--accent); }
+.modal .hint {
+  font-size: 11px; color: var(--text-dim);
+  margin-bottom: 16px;
+}
+.modal-actions {
+  display: flex; gap: 8px; justify-content: flex-end;
+}
+.modal-actions .btn-secondary {
+  background: var(--surface-2);
+  color: var(--text); border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 16px;
+  font-size: 13px; font-weight: 500; font-family: inherit;
+  cursor: pointer;
+}
+.modal-actions .btn-secondary:hover { background: var(--surface-3); }
+.modal-actions .btn {
+  padding: 8px 16px; font-size: 13px;
+}
+
+/* FOOTER */
+.footer {
+  text-align: center;
+  padding: 24px;
+  font-size: 11px; color: var(--text-dim);
+  border-top: 1px solid var(--border);
+  margin-top: 40px;
+}
+
+@media (max-width: 600px) {
+  .input-row { flex-direction: column; }
+  .check-label { min-width: auto; }
+  .check-row { flex-wrap: wrap; }
+  .ai-field { flex-direction: column; gap: 2px; }
+  .ai-field-label { min-width: auto; }
+  .kpi-row { grid-template-columns: repeat(2, 1fr); }
+  .topbar { padding: 12px 16px; gap: 8px; flex-wrap: wrap; }
+  .container { padding: 20px 16px 40px; }
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">
+    <div class="logo-icon">⊕</div>
+    Media Dashboard
+  </div>
+  <div class="badge">URL Checker</div>
+  <div class="topbar-right">
+    <select id="langSelect" title="Language">
+      <option value="en">EN</option>
+      <option value="fr">FR</option>
+      <option value="pt-br">PT-BR</option>
+    </select>
+    <button class="settings-btn" onclick="openSettings()" title="Settings">⚙</button>
+    <a href="dashboard-edito-perf.html" class="nav-link" data-t="nav_dashboard">← Dashboard</a>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="input-section">
+    <h2 data-t="input_title">Analyze an article</h2>
+    <div class="input-row">
+      <input type="text" id="urlInput" data-t-placeholder="input_placeholder" placeholder="https://www.example.com/my-article" autocomplete="url">
+      <button class="btn" id="analyzeBtn" onclick="startAnalysis()">
+        <span id="btnText" data-t="btn_analyze">Analyze</span>
+        <div class="spinner" id="btnSpinner" style="display:none"></div>
+      </button>
+    </div>
+  </div>
+
+  <div class="error-box" id="errorBox"></div>
+
+  <div class="progress-bar" id="progressBar">
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-label" id="progressLabel"></div>
+  </div>
+
+  <div class="results" id="results">
+    <div class="result-header">
+      <div>
+        <div class="result-title" id="resultTitle"></div>
+        <div class="result-url" id="resultUrl"></div>
+      </div>
+    </div>
+    <div class="kpi-row" id="kpiRow"></div>
+    <div class="card" id="discoverCard">
+      <div class="card-header" onclick="toggleCard(this)">
+        <h3>🔍 <span data-t="discover_title">Discover Eligibility</span> <span class="count" id="discoverCount"></span></h3>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="card-body" id="discoverBody"></div>
+    </div>
+    <div class="card" id="contentCard">
+      <div class="card-header" onclick="toggleCard(this)">
+        <h3>📝 <span data-t="content_title">Content Quality</span></h3>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="card-body" id="contentBody"></div>
+    </div>
+    <div class="ai-section" id="aiSection" style="display:none">
+      <div class="ai-header">
+        <h3>🤖 <span data-t="ai_title">AI Analysis</span></h3>
+        <span class="ai-badge">GPT-4o</span>
+      </div>
+      <div class="ai-body" id="aiBody"></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  Media Dashboard · URL Checker
+</div>
+
+<!-- SETTINGS MODAL -->
+<div class="modal-overlay" id="settingsModal">
+  <div class="modal">
+    <h3 data-t="settings_title">Settings</h3>
+    <label for="settingsApiKey">OpenAI API Key</label>
+    <input type="password" id="settingsApiKey" placeholder="sk-proj-...">
+    <div class="hint" data-t="settings_hint">Stored locally in your browser only. Used for AI analysis (Search, Discover, editorial review).</div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeSettings()" data-t="btn_cancel">Cancel</button>
+      <button class="btn" onclick="saveSettings()" data-t="btn_save">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ========== TRANSLATIONS ==========
+const T = {
+  en: {
+    input_title: "Analyze an article",
+    input_placeholder: "https://www.example.com/my-article",
+    btn_analyze: "Analyze",
+    btn_analyzing: "Analyzing...",
+    nav_dashboard: "← Dashboard",
+    discover_title: "Discover Eligibility",
+    content_title: "Content Quality",
+    ai_title: "AI Analysis",
+    settings_title: "Settings",
+    settings_hint: "Stored locally in your browser only. Used for AI analysis (Search, Discover, editorial review).",
+    btn_cancel: "Cancel",
+    btn_save: "Save",
+    err_empty: "Enter a URL to analyze.",
+    err_url: "URL must start with http:// or https://",
+    err_fetch: "Could not fetch the page (HTTP {status}). Check the URL.",
+    err_openai: "OpenAI API error ({status}): {msg}",
+    err_no_tool: "No tool response from GPT-4o.",
+    prog_fetch: "Fetching the page...",
+    prog_html: "Parsing HTML...",
+    prog_discover: "Checking Discover eligibility...",
+    prog_content: "Checking content quality...",
+    prog_prep: "Preparing results...",
+    prog_ai: "Running AI analysis (GPT-4o)...",
+    prog_done: "Done!",
+    kpi_discover: "Discover",
+    kpi_words: "Words",
+    kpi_links: "Links",
+    kpi_h2: "H2",
+    kpi_discover_ai: "Discover Score AI",
+    kpi_seo: "SEO Readability",
+    // Discover checks
+    mip_label: "max-image-preview:large",
+    mip_ok: "Directive present. Google can show a large image in Discover.",
+    mip_fail: "Directive missing. BLOCKING: without it, no large image in Discover.",
+    noindex_label: "No noindex",
+    noindex_ok: "No noindex directive. Page can be indexed.",
+    noindex_fail: "BLOCKING: noindex directive found. Page is excluded from Discover.",
+    canonical_label: "Canonical",
+    canonical_ok: "Canonical points to this page.",
+    canonical_other: "Canonical points to: {target}",
+    canonical_absent: "No canonical tag found.",
+    og_label: "og:image",
+    og_ok: "og:image present: {url}",
+    og_absent: "No og:image tag found.",
+    dim_label: "Image ≥ 1200px",
+    dim_ok: "Declared dimensions: {w}×{h}px (≥ 1200px).",
+    dim_small: "Declared dimensions: {w}×{h}px. Google recommends ≥ 1200px wide.",
+    dim_no_og: "No og:image to check dimensions.",
+    dim_no_meta: "og:image dimensions not declared in meta tags. Manual check needed.",
+    jsonld_label: "JSON-LD Article",
+    jsonld_ok: "Schema found: {types}",
+    jsonld_absent: "No JSON-LD Article/NewsArticle found. Recommended for Discover.",
+    author_label: "Author",
+    author_ok: "Author identified: {name}",
+    author_meta: "Author (meta): {name}",
+    author_absent: "No author identified (no JSON-LD or meta author).",
+    date_label: "Publication date",
+    date_ok: "Date: {date}",
+    date_og: "Date (OG): {date}",
+    date_absent: "No publication date found.",
+    viewport_label: "Viewport (mobile)",
+    viewport_ok: "Viewport tag present. Mobile-friendly.",
+    viewport_absent: "No viewport tag. Mobile-friendly signal missing.",
+    // Content checks
+    wc_ok: "{n} words in the article body.",
+    wc_short: "{n} words. Short article (< 150 words).",
+    wc_empty: "No text detected in the article body.",
+    wc_label: "Word count",
+    https_label: "HTTPS",
+    https_ok: "URL is HTTPS.",
+    https_fail: "URL is not secure (HTTP).",
+    links_label: "Hyperlinks",
+    links_ok: "{n} link(s) in the body text.",
+    links_zero: " Adding internal links/sources improves SEO.",
+    h2_label: "Subheadings (H2)",
+    h2_detail: "{n} H2 subheading(s).",
+    img_label: "Images",
+    img_none: "No images in the body text.",
+    img_detail: "{credits}/{total} image(s) with alt/caption.",
+    embed_label: "Social embeds",
+    embed_detail: "{parts} (not counted in word count).",
+    // AI
+    ai_seo_title: "Search (SEO)",
+    ai_seo_pos: "Positionable SEO",
+    ai_seo_yes: "Yes",
+    ai_seo_no: "No",
+    ai_keyword: "Main keyword",
+    ai_cluster: "Thematic cluster",
+    ai_readability: "Readability score",
+    ai_justification: "Justification",
+    ai_discover_title: "Discover",
+    ai_score: "Score",
+    ai_strengths: "Strengths",
+    ai_weaknesses: "Weaknesses",
+    ai_entities_title: "Main entities",
+    ai_editorial_title: "Editorial review",
+    ai_title_coherent: "Title coherent",
+    ai_sourcing: "Sourcing present",
+  },
+  fr: {
+    input_title: "Analyser un article",
+    input_placeholder: "https://www.example.com/mon-article",
+    btn_analyze: "Analyser",
+    btn_analyzing: "Analyse...",
+    nav_dashboard: "← Dashboard",
+    discover_title: "Éligibilité Discover",
+    content_title: "Qualité du contenu",
+    ai_title: "Analyse IA",
+    settings_title: "Paramètres",
+    settings_hint: "Stockée localement dans votre navigateur. Utilisée pour l'analyse IA (Search, Discover, lecture éditoriale).",
+    btn_cancel: "Annuler",
+    btn_save: "Enregistrer",
+    err_empty: "Entrez une URL à analyser.",
+    err_url: "L'URL doit commencer par http:// ou https://",
+    err_fetch: "Impossible de récupérer la page (HTTP {status}). Vérifiez l'URL.",
+    err_openai: "Erreur OpenAI API ({status}) : {msg}",
+    err_no_tool: "Pas de réponse outil de GPT-4o.",
+    prog_fetch: "Récupération de la page...",
+    prog_html: "Analyse du HTML...",
+    prog_discover: "Vérification éligibilité Discover...",
+    prog_content: "Vérification qualité contenu...",
+    prog_prep: "Préparation des résultats...",
+    prog_ai: "Analyse IA en cours (GPT-4o)...",
+    prog_done: "Terminé !",
+    kpi_discover: "Discover",
+    kpi_words: "Mots",
+    kpi_links: "Liens",
+    kpi_h2: "H2",
+    kpi_discover_ai: "Score Discover IA",
+    kpi_seo: "Lisibilité SEO",
+    mip_label: "max-image-preview:large",
+    mip_ok: "Directive présente. Google peut afficher une grande image dans Discover.",
+    mip_fail: "Directive absente. BLOQUANT : sans elle, pas de grande image dans Discover.",
+    noindex_label: "Pas de noindex",
+    noindex_ok: "Aucune directive noindex. La page peut être indexée.",
+    noindex_fail: "BLOQUANT : directive noindex trouvée. La page est exclue de Discover.",
+    canonical_label: "Canonical",
+    canonical_ok: "Canonical pointe vers cette page.",
+    canonical_other: "Canonical pointe vers : {target}",
+    canonical_absent: "Aucune balise canonical trouvée.",
+    og_label: "og:image",
+    og_ok: "og:image présent : {url}",
+    og_absent: "Aucune balise og:image trouvée.",
+    dim_label: "Image ≥ 1200px",
+    dim_ok: "Dimensions déclarées : {w}×{h}px (≥ 1200px).",
+    dim_small: "Dimensions déclarées : {w}×{h}px. Google recommande ≥ 1200px de large.",
+    dim_no_og: "Pas d'og:image pour vérifier les dimensions.",
+    dim_no_meta: "Dimensions og:image non déclarées dans les meta tags. Vérification manuelle nécessaire.",
+    jsonld_label: "JSON-LD Article",
+    jsonld_ok: "Schéma trouvé : {types}",
+    jsonld_absent: "Aucun JSON-LD Article/NewsArticle trouvé. Recommandé pour Discover.",
+    author_label: "Auteur",
+    author_ok: "Auteur identifié : {name}",
+    author_meta: "Auteur (meta) : {name}",
+    author_absent: "Aucun auteur identifié (ni JSON-LD, ni meta author).",
+    date_label: "Date de publication",
+    date_ok: "Date : {date}",
+    date_og: "Date (OG) : {date}",
+    date_absent: "Aucune date de publication trouvée.",
+    viewport_label: "Viewport (mobile)",
+    viewport_ok: "Balise viewport présente. Page mobile-friendly.",
+    viewport_absent: "Pas de balise viewport. Signal mobile-friendly absent.",
+    wc_ok: "{n} mots dans le corps du texte.",
+    wc_short: "{n} mots. Article court (< 150 mots).",
+    wc_empty: "Aucun texte détecté dans le corps de l'article.",
+    wc_label: "Nombre de mots",
+    https_label: "HTTPS",
+    https_ok: "URL en HTTPS.",
+    https_fail: "URL non sécurisée (HTTP).",
+    links_label: "Hyperliens",
+    links_ok: "{n} lien(s) dans le corps du texte.",
+    links_zero: " Ajouter des liens internes/sources améliore le SEO.",
+    h2_label: "Sous-titres (H2)",
+    h2_detail: "{n} sous-titre(s) H2.",
+    img_label: "Images",
+    img_none: "Aucune image dans le corps du texte.",
+    img_detail: "{credits}/{total} image(s) avec alt/légende.",
+    embed_label: "Embeds sociaux",
+    embed_detail: "{parts} (non comptés dans les mots).",
+    ai_seo_title: "Search (SEO)",
+    ai_seo_pos: "Positionnable SEO",
+    ai_seo_yes: "Oui",
+    ai_seo_no: "Non",
+    ai_keyword: "Mot-clé principal",
+    ai_cluster: "Cluster thématique",
+    ai_readability: "Score lisibilité",
+    ai_justification: "Justification",
+    ai_discover_title: "Discover",
+    ai_score: "Score",
+    ai_strengths: "Points forts",
+    ai_weaknesses: "Points faibles",
+    ai_entities_title: "Entités principales",
+    ai_editorial_title: "Lecture éditoriale",
+    ai_title_coherent: "Titre cohérent",
+    ai_sourcing: "Sourcing présent",
+  },
+  "pt-br": {
+    input_title: "Analisar um artigo",
+    input_placeholder: "https://www.example.com/meu-artigo",
+    btn_analyze: "Analisar",
+    btn_analyzing: "Analisando...",
+    nav_dashboard: "← Dashboard",
+    discover_title: "Elegibilidade Discover",
+    content_title: "Qualidade do conteúdo",
+    ai_title: "Análise IA",
+    settings_title: "Configurações",
+    settings_hint: "Armazenada localmente no seu navegador. Usada para análise IA (Search, Discover, revisão editorial).",
+    btn_cancel: "Cancelar",
+    btn_save: "Salvar",
+    err_empty: "Insira uma URL para analisar.",
+    err_url: "A URL deve começar com http:// ou https://",
+    err_fetch: "Não foi possível acessar a página (HTTP {status}). Verifique a URL.",
+    err_openai: "Erro na API OpenAI ({status}): {msg}",
+    err_no_tool: "Sem resposta de ferramenta do GPT-4o.",
+    prog_fetch: "Buscando a página...",
+    prog_html: "Analisando HTML...",
+    prog_discover: "Verificando elegibilidade Discover...",
+    prog_content: "Verificando qualidade do conteúdo...",
+    prog_prep: "Preparando resultados...",
+    prog_ai: "Análise IA em andamento (GPT-4o)...",
+    prog_done: "Concluído!",
+    kpi_discover: "Discover",
+    kpi_words: "Palavras",
+    kpi_links: "Links",
+    kpi_h2: "H2",
+    kpi_discover_ai: "Score Discover IA",
+    kpi_seo: "Legibilidade SEO",
+    mip_label: "max-image-preview:large",
+    mip_ok: "Diretiva presente. Google pode exibir imagem grande no Discover.",
+    mip_fail: "Diretiva ausente. BLOQUEANTE: sem ela, sem imagem grande no Discover.",
+    noindex_label: "Sem noindex",
+    noindex_ok: "Nenhuma diretiva noindex. Página pode ser indexada.",
+    noindex_fail: "BLOQUEANTE: diretiva noindex encontrada. Página excluída do Discover.",
+    canonical_label: "Canonical",
+    canonical_ok: "Canonical aponta para esta página.",
+    canonical_other: "Canonical aponta para: {target}",
+    canonical_absent: "Nenhuma tag canonical encontrada.",
+    og_label: "og:image",
+    og_ok: "og:image presente: {url}",
+    og_absent: "Nenhuma tag og:image encontrada.",
+    dim_label: "Imagem ≥ 1200px",
+    dim_ok: "Dimensões declaradas: {w}×{h}px (≥ 1200px).",
+    dim_small: "Dimensões declaradas: {w}×{h}px. Google recomenda ≥ 1200px de largura.",
+    dim_no_og: "Sem og:image para verificar dimensões.",
+    dim_no_meta: "Dimensões og:image não declaradas nas meta tags. Verificação manual necessária.",
+    jsonld_label: "JSON-LD Article",
+    jsonld_ok: "Schema encontrado: {types}",
+    jsonld_absent: "Nenhum JSON-LD Article/NewsArticle encontrado. Recomendado para Discover.",
+    author_label: "Autor",
+    author_ok: "Autor identificado: {name}",
+    author_meta: "Autor (meta): {name}",
+    author_absent: "Nenhum autor identificado (sem JSON-LD ou meta author).",
+    date_label: "Data de publicação",
+    date_ok: "Data: {date}",
+    date_og: "Data (OG): {date}",
+    date_absent: "Nenhuma data de publicação encontrada.",
+    viewport_label: "Viewport (mobile)",
+    viewport_ok: "Tag viewport presente. Mobile-friendly.",
+    viewport_absent: "Sem tag viewport. Sinal mobile-friendly ausente.",
+    wc_ok: "{n} palavras no corpo do texto.",
+    wc_short: "{n} palavras. Artigo curto (< 150 palavras).",
+    wc_empty: "Nenhum texto detectado no corpo do artigo.",
+    wc_label: "Contagem de palavras",
+    https_label: "HTTPS",
+    https_ok: "URL em HTTPS.",
+    https_fail: "URL não segura (HTTP).",
+    links_label: "Hyperlinks",
+    links_ok: "{n} link(s) no corpo do texto.",
+    links_zero: " Adicionar links internos/fontes melhora o SEO.",
+    h2_label: "Subtítulos (H2)",
+    h2_detail: "{n} subtítulo(s) H2.",
+    img_label: "Imagens",
+    img_none: "Nenhuma imagem no corpo do texto.",
+    img_detail: "{credits}/{total} imagem(ns) com alt/legenda.",
+    embed_label: "Embeds sociais",
+    embed_detail: "{parts} (não contados nas palavras).",
+    ai_seo_title: "Search (SEO)",
+    ai_seo_pos: "Posicionável SEO",
+    ai_seo_yes: "Sim",
+    ai_seo_no: "Não",
+    ai_keyword: "Palavra-chave principal",
+    ai_cluster: "Cluster temático",
+    ai_readability: "Score de legibilidade",
+    ai_justification: "Justificativa",
+    ai_discover_title: "Discover",
+    ai_score: "Score",
+    ai_strengths: "Pontos fortes",
+    ai_weaknesses: "Pontos fracos",
+    ai_entities_title: "Entidades principais",
+    ai_editorial_title: "Revisão editorial",
+    ai_title_coherent: "Título coerente",
+    ai_sourcing: "Fontes presentes",
+  }
+};
+
+let LANG = localStorage.getItem('media_dashboard_lang') || 'en';
+
+function t(key, replacements) {
+  let s = (T[LANG] && T[LANG][key]) || T.en[key] || key;
+  if (replacements) {
+    for (const [k, v] of Object.entries(replacements)) {
+      s = s.replace('{' + k + '}', v);
+    }
+  }
+  return s;
+}
+
+function applyTranslations() {
+  document.querySelectorAll('[data-t]').forEach(el => {
+    el.textContent = t(el.dataset.t);
+  });
+  document.querySelectorAll('[data-t-placeholder]').forEach(el => {
+    el.placeholder = t(el.dataset.tPlaceholder);
+  });
+}
+
+// ========== CONFIG ==========
+const CORS_PROXY = 'https://api.allorigins.win/raw?url=';
+const OPENAI_MODEL = 'gpt-4o';
+
+// ========== INIT ==========
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('langSelect').value = LANG;
+  applyTranslations();
+  const saved = localStorage.getItem('media_dashboard_openai_key');
+  if (saved) document.getElementById('settingsApiKey').value = saved;
+  document.getElementById('urlInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') startAnalysis();
+  });
+  document.getElementById('settingsModal').addEventListener('click', e => {
+    if (e.target === e.currentTarget) closeSettings();
+  });
+});
+
+document.getElementById('langSelect').addEventListener('change', e => {
+  LANG = e.target.value;
+  localStorage.setItem('media_dashboard_lang', LANG);
+  applyTranslations();
+});
+
+// ========== SETTINGS ==========
+function openSettings() {
+  document.getElementById('settingsModal').classList.add('active');
+}
+function closeSettings() {
+  document.getElementById('settingsModal').classList.remove('active');
+}
+function saveSettings() {
+  const key = document.getElementById('settingsApiKey').value.trim();
+  if (key) localStorage.setItem('media_dashboard_openai_key', key);
+  else localStorage.removeItem('media_dashboard_openai_key');
+  closeSettings();
+}
+
+// ========== UI HELPERS ==========
+function toggleCard(header) { header.classList.toggle('collapsed'); }
+
+function setProgress(pct, label) {
+  document.getElementById('progressBar').classList.add('active');
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = label;
+}
+
+function showError(msg) {
+  const box = document.getElementById('errorBox');
+  box.textContent = msg;
+  box.classList.add('active');
+}
+function clearError() { document.getElementById('errorBox').classList.remove('active'); }
+
+function setLoading(on) {
+  document.getElementById('analyzeBtn').disabled = on;
+  document.getElementById('btnText').textContent = on ? t('btn_analyzing') : t('btn_analyze');
+  document.getElementById('btnSpinner').style.display = on ? 'block' : 'none';
+}
+
+// ========== MAIN FLOW ==========
+async function startAnalysis() {
+  const url = document.getElementById('urlInput').value.trim();
+  if (!url) { showError(t('err_empty')); return; }
+  if (!url.startsWith('http')) { showError(t('err_url')); return; }
+
+  clearError();
+  setLoading(true);
+  document.getElementById('results').classList.remove('active');
+  document.getElementById('progressBar').classList.remove('active');
+
+  const apiKey = localStorage.getItem('media_dashboard_openai_key') || '';
+
+  try {
+    setProgress(10, t('prog_fetch'));
+    const html = await fetchPage(url);
+
+    setProgress(30, t('prog_html'));
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+
+    setProgress(40, t('prog_discover'));
+    const discoverChecks = runDiscoverChecks(doc, url);
+
+    setProgress(55, t('prog_content'));
+    const contentChecks = runContentChecks(doc, url);
+
+    setProgress(70, t('prog_prep'));
+    const title = extractTitle(doc);
+
+    let aiResult = null;
+    if (apiKey) {
+      setProgress(75, t('prog_ai'));
+      const bodyText = extractBodyText(doc);
+      aiResult = await runAIAnalysis(apiKey, url, title, bodyText);
+      setProgress(95, t('prog_done'));
+    }
+
+    setProgress(100, t('prog_done'));
+    renderResults(url, title, discoverChecks, contentChecks, aiResult);
+  } catch (err) {
+    showError('Error: ' + err.message);
+    document.getElementById('progressBar').classList.remove('active');
+  } finally {
+    setLoading(false);
+  }
+}
+
+// ========== FETCH PAGE ==========
+async function fetchPage(url) {
+  const resp = await fetch(CORS_PROXY + encodeURIComponent(url));
+  if (!resp.ok) throw new Error(t('err_fetch', { status: resp.status }));
+  return await resp.text();
+}
+
+// ========== TITLE EXTRACTION ==========
+function extractTitle(doc) {
+  const og = doc.querySelector('meta[property="og:title"]');
+  if (og && og.content) return og.content;
+  const tt = doc.querySelector('title');
+  if (tt) return tt.textContent.trim();
+  const h1 = doc.querySelector('h1');
+  if (h1) return h1.textContent.trim();
+  return '(title not found)';
+}
+
+// ========== BODY TEXT EXTRACTION ==========
+function extractBodyText(doc) {
+  const CONTENT_KW = ['entry-content','post-content','article-content','article-body','post-body','td-post-content','single-content','content-single'];
+  const EXCLUDE_KW = ['related','sidebar','widget','nav','footer','header','comment','newsletter','social','share','author-bio','breadcrumb','menu','advertisement','publicite','pub','cookie','popup','modal','notification','banner','alert','search','tags','meta','pagination','pager','next','prev','similar','recommended','also-read','a-lire','sur-le-meme','plus-sur'];
+
+  let body = null;
+  for (const el of doc.querySelectorAll('div, section')) {
+    const cls = (el.className || '').toLowerCase();
+    if (CONTENT_KW.some(k => cls.includes(k))) { body = el; break; }
+  }
+  if (!body) body = doc.querySelector('article');
+  if (!body) body = doc.body || doc.documentElement;
+
+  const texts = [];
+  for (const p of body.querySelectorAll('p')) {
+    if (!isExcluded(p, body, EXCLUDE_KW)) texts.push(p.textContent.trim());
+  }
+  return texts.join('\n');
+}
+
+function isExcluded(el, boundary, keywords) {
+  let node = el.parentElement;
+  while (node && node !== boundary) {
+    const cls = (node.className || '').toLowerCase();
+    const id = (node.id || '').toLowerCase();
+    if (keywords.some(k => (cls + ' ' + id).includes(k))) return true;
+    node = node.parentElement;
+  }
+  return false;
+}
+
+// ========== DISCOVER CHECKS ==========
+function runDiscoverChecks(doc, url) {
+  const checks = [];
+  checks.push(checkMaxImagePreview(doc));
+  checks.push(checkNoindex(doc));
+  checks.push(checkCanonical(doc, url));
+  const [ogCheck, ogUrl] = checkOgImage(doc);
+  checks.push(ogCheck);
+  checks.push(checkOgDimensions(doc, ogUrl));
+  const [jsonldCheck, jsonldItems] = checkJsonLd(doc);
+  checks.push(jsonldCheck);
+  checks.push(checkAuthor(doc, jsonldItems));
+  checks.push(checkPublicationDate(doc, jsonldItems));
+  checks.push(checkViewport(doc));
+  return checks;
+}
+
+function checkMaxImagePreview(doc) {
+  for (const m of doc.querySelectorAll('meta[name]')) {
+    const n = (m.getAttribute('name')||'').toLowerCase();
+    if ((n==='robots'||n==='googlebot') && (m.getAttribute('content')||'').toLowerCase().includes('max-image-preview:large'))
+      return { label: t('mip_label'), status: 'ok', detail: t('mip_ok') };
+  }
+  return { label: t('mip_label'), status: 'fail', detail: t('mip_fail') };
+}
+function checkNoindex(doc) {
+  for (const m of doc.querySelectorAll('meta[name]')) {
+    const n = (m.getAttribute('name')||'').toLowerCase();
+    if ((n==='robots'||n==='googlebot') && (m.getAttribute('content')||'').toLowerCase().includes('noindex'))
+      return { label: t('noindex_label'), status: 'fail', detail: t('noindex_fail') };
+  }
+  return { label: t('noindex_label'), status: 'ok', detail: t('noindex_ok') };
+}
+function checkCanonical(doc, url) {
+  const link = doc.querySelector('link[rel="canonical"]');
+  if (link && link.getAttribute('href')) {
+    const tgt = link.getAttribute('href').trim().replace(/\/$/,'');
+    if (url.replace(/\/$/,'') === tgt || new URL(url).pathname.replace(/\/$/,'') === tgt)
+      return { label: t('canonical_label'), status: 'ok', detail: t('canonical_ok') };
+    return { label: t('canonical_label'), status: 'warning', detail: t('canonical_other', {target: tgt.substring(0,120)}) };
+  }
+  return { label: t('canonical_label'), status: 'warning', detail: t('canonical_absent') };
+}
+function checkOgImage(doc) {
+  const m = doc.querySelector('meta[property="og:image"]');
+  if (m && m.getAttribute('content')) {
+    const u = m.getAttribute('content').trim();
+    return [{ label: t('og_label'), status: 'ok', detail: t('og_ok', {url: u.substring(0,100)}) }, u];
+  }
+  return [{ label: t('og_label'), status: 'warning', detail: t('og_absent') }, null];
+}
+function checkOgDimensions(doc, ogUrl) {
+  const wm = doc.querySelector('meta[property="og:image:width"]');
+  const hm = doc.querySelector('meta[property="og:image:height"]');
+  if (wm && hm) {
+    const w = parseInt(wm.getAttribute('content')), h = parseInt(hm.getAttribute('content'));
+    if (!isNaN(w) && !isNaN(h)) {
+      if (w >= 1200) return { label: t('dim_label'), status: 'ok', detail: t('dim_ok', {w,h}) };
+      return { label: t('dim_label'), status: 'warning', detail: t('dim_small', {w,h}) };
+    }
+  }
+  if (!ogUrl) return { label: t('dim_label'), status: 'warning', detail: t('dim_no_og') };
+  return { label: t('dim_label'), status: 'warning', detail: t('dim_no_meta') };
+}
+function checkJsonLd(doc) {
+  const TYPES = ['article','newsarticle','blogposting','reportagenewsarticle','liveblogposting'];
+  const items = [], types = [];
+  for (const s of doc.querySelectorAll('script[type="application/ld+json"]')) {
+    try {
+      let d = JSON.parse(s.textContent);
+      let cands = Array.isArray(d) ? d : (d && typeof d==='object' ? (d['@graph']||[d]) : []);
+      for (const it of cands) {
+        if (!it || typeof it !== 'object') continue;
+        let tp = it['@type'];
+        if (Array.isArray(tp)) { for (const ti of tp) if (TYPES.includes(ti.toLowerCase())) { types.push(ti); items.push(it); } }
+        else if (typeof tp === 'string' && TYPES.includes(tp.toLowerCase())) { types.push(tp); items.push(it); }
+      }
+    } catch(e) {}
+  }
+  if (types.length) return [{ label: t('jsonld_label'), status: 'ok', detail: t('jsonld_ok', {types: [...new Set(types)].join(', ')}) }, items];
+  return [{ label: t('jsonld_label'), status: 'warning', detail: t('jsonld_absent') }, []];
+}
+function checkAuthor(doc, jsonldItems) {
+  for (const it of jsonldItems) {
+    const a = it.author;
+    if (a) {
+      let name = typeof a==='string' ? a : (Array.isArray(a) && a[0] ? (a[0].name||String(a[0])) : (typeof a==='object' ? a.name||'' : ''));
+      if (name.trim()) return { label: t('author_label'), status: 'ok', detail: t('author_ok', {name: name.trim().substring(0,80)}) };
+    }
+  }
+  const ma = doc.querySelector('meta[name="author"]');
+  if (ma && ma.getAttribute('content')) return { label: t('author_label'), status: 'ok', detail: t('author_meta', {name: ma.getAttribute('content').trim().substring(0,80)}) };
+  return { label: t('author_label'), status: 'warning', detail: t('author_absent') };
+}
+function checkPublicationDate(doc, jsonldItems) {
+  for (const it of jsonldItems) {
+    if (it.datePublished) return { label: t('date_label'), status: 'ok', detail: t('date_ok', {date: String(it.datePublished).substring(0,30)}) };
+  }
+  const mt = doc.querySelector('meta[property="article:published_time"]');
+  if (mt && mt.getAttribute('content')) return { label: t('date_label'), status: 'ok', detail: t('date_og', {date: mt.getAttribute('content').substring(0,30)}) };
+  return { label: t('date_label'), status: 'warning', detail: t('date_absent') };
+}
+function checkViewport(doc) {
+  if (doc.querySelector('meta[name="viewport"]')) return { label: t('viewport_label'), status: 'ok', detail: t('viewport_ok') };
+  return { label: t('viewport_label'), status: 'warning', detail: t('viewport_absent') };
+}
+
+// ========== CONTENT CHECKS ==========
+function runContentChecks(doc, url) {
+  const checks = [];
+  const EXCLUDE_KW = ['related','sidebar','widget','nav','footer','header','comment','newsletter','social','share','author-bio','breadcrumb','menu','advertisement','publicite','pub','cookie','popup','modal','notification','banner','alert','search','tags','meta','pagination','pager','next','prev','similar','recommended','also-read','a-lire','sur-le-meme','plus-sur'];
+  const CONTENT_KW = ['entry-content','post-content','article-content','article-body','post-body','td-post-content','single-content','content-single'];
+  let body = null;
+  for (const el of doc.querySelectorAll('div, section')) {
+    if (CONTENT_KW.some(k => (el.className||'').toLowerCase().includes(k))) { body = el; break; }
+  }
+  if (!body) body = doc.querySelector('article');
+  if (!body) body = doc.body || doc.documentElement;
+
+  const coreP = [];
+  for (const p of body.querySelectorAll('p')) { if (!isExcluded(p, body, EXCLUDE_KW)) coreP.push(p); }
+
+  const bodyText = coreP.map(p => p.textContent.trim()).join(' ');
+  const words = bodyText.split(/\s+/).filter(w => w.length > 0).length;
+  let wcS = 'ok', wcD = t('wc_ok', {n:words});
+  if (words === 0) { wcS = 'fail'; wcD = t('wc_empty'); }
+  else if (words < 150) { wcS = 'warning'; wcD = t('wc_short', {n:words}); }
+  checks.push({ key: 'word_count', label: t('wc_label'), status: wcS, detail: wcD, value: words });
+
+  const isHttps = url.startsWith('https://');
+  checks.push({ key: 'https', label: t('https_label'), status: isHttps?'ok':'fail', detail: isHttps?t('https_ok'):t('https_fail') });
+
+  const links = [];
+  for (const p of coreP) for (const a of p.querySelectorAll('a[href]')) links.push(a);
+  let ld = t('links_ok', {n:links.length});
+  if (links.length === 0) ld += t('links_zero');
+  checks.push({ key: 'hyperlinks', label: t('links_label'), status: links.length>0?'ok':'warning', detail: ld, value: links.length });
+
+  const coreH2 = [];
+  for (const h of body.querySelectorAll('h2')) { if (!isExcluded(h, body, EXCLUDE_KW)) coreH2.push(h); }
+  checks.push({ key: 'h2_count', label: t('h2_label'), status: 'ok', detail: t('h2_detail', {n:coreH2.length}), value: coreH2.length });
+
+  const imgs = body.querySelectorAll('img');
+  let imgCr = 0;
+  for (const img of imgs) {
+    const alt = (img.getAttribute('alt')||'').trim();
+    const fig = img.closest('figure');
+    const fc = fig ? fig.querySelector('figcaption') : null;
+    if (alt || (fc && fc.textContent.trim())) imgCr++;
+  }
+  if (imgs.length === 0) checks.push({ key: 'images', label: t('img_label'), status: 'warning', detail: t('img_none') });
+  else checks.push({ key: 'images', label: t('img_label'), status: imgCr===imgs.length?'ok':'warning', detail: t('img_detail', {credits:imgCr, total:imgs.length}), value: imgs.length });
+
+  const embeds = findSocialEmbeds(body);
+  if (embeds.total > 0) {
+    const parts = [];
+    if (embeds.tweet) parts.push(embeds.tweet + ' tweet(s)');
+    if (embeds.instagram) parts.push(embeds.instagram + ' Instagram');
+    if (embeds.facebook) parts.push(embeds.facebook + ' Facebook');
+    checks.push({ key: 'embeds', label: t('embed_label'), status: 'ok', detail: t('embed_detail', {parts: parts.join(', ')}) });
+  }
+  return checks;
+}
+
+function findSocialEmbeds(body) {
+  let tw=0, ig=0, fb=0;
+  for (const el of body.querySelectorAll('blockquote, div')) {
+    const c = (el.className||'').toLowerCase();
+    if (c.includes('twitter-tweet')||c.includes('twitter-video')) tw++;
+    else if (c.includes('instagram-media')) ig++;
+    else if (c.includes('fb-post')||c.includes('fb-video')) fb++;
+  }
+  for (const iframe of body.querySelectorAll('iframe[src]')) {
+    const s = (iframe.getAttribute('src')||'').toLowerCase();
+    if (s.includes('platform.twitter.com')||((s.includes('twitter.com')||s.includes('x.com'))&&s.includes('embed'))) tw++;
+    else if (s.includes('instagram.com')) ig++;
+    else if (s.includes('facebook.com/plugins')) fb++;
+  }
+  return { tweet:tw, instagram:ig, facebook:fb, total:tw+ig+fb };
+}
+
+// ========== AI ANALYSIS ==========
+async function runAIAnalysis(apiKey, url, title, bodyText) {
+  const words = bodyText.split(/\s+/);
+  const truncated = words.slice(0, 6000).join(' ');
+
+  const langInstruction = LANG === 'fr'
+    ? `\n\nRéponds en français dans les champs "justification" et "commentaire". Les champs mot_cle_principal, cluster_thematique et entites_principales doivent rester dans la langue d'origine de l'article.`
+    : LANG === 'pt-br'
+    ? `\n\nEscreva os campos "justification" e "commentaire" em português do Brasil. Os campos mot_cle_principal, cluster_thematique e entites_principales devem permanecer no idioma original do artigo.`
+    : `\n\nWrite the "justification" and "commentaire" fields in English. The mot_cle_principal, cluster_thematique and entites_principales fields must stay in the article's ORIGINAL language.`;
+
+  const systemPrompt = `Tu es un analyste éditorial SEO pour un réseau de sites d'actualité sportive.
+On te donne le titre, l'URL et le texte d'un article. Analyse-le selon deux axes, en répondant STRICTEMENT via l'outil rapport_ia (pas de texte libre) :
+
+1. SEARCH (SEO classique) : Détermine si l'article a une vocation de positionnement Search sur un mot-clé précis. Si oui, identifie le mot-clé principal ciblé et le cluster thématique. Donne un score_lisibilite_mot_cle de 0 à 100.
+
+2. DISCOVER : score de 0 à 100 sur le respect des guidelines Google Discover. Liste les points forts et les points faibles.
+
+3. ENTITÉS PRINCIPALES : 1 à 3 entités nommées PRÉCISES (noms propres). Jamais un mot générique.
+
+4. LECTURE ÉDITORIALE : 2 critères (statut "ok"/"warning"/"fail" + commentaire) :
+   - titre_coherent : le titre ne promet pas plus que l'article livre
+   - sourcing_present : au moins une source identifiable` + langInstruction;
+
+  const toolSchema = {
+    type: "function",
+    function: {
+      name: "rapport_ia",
+      description: "Rapport d'analyse Search (SEO) et Discover pour un article",
+      parameters: {
+        type: "object",
+        properties: {
+          search: { type: "object", properties: { positionnable_seo:{type:"boolean"}, mot_cle_principal:{type:["string","null"]}, cluster_thematique:{type:["string","null"]}, score_lisibilite_mot_cle:{type:["integer","null"]}, justification:{type:"string"} }, required:["positionnable_seo","mot_cle_principal","cluster_thematique","score_lisibilite_mot_cle","justification"] },
+          discover: { type: "object", properties: { score:{type:"integer"}, points_forts:{type:"array",items:{type:"string"}}, points_faibles:{type:"array",items:{type:"string"}}, justification:{type:"string"} }, required:["score","points_forts","points_faibles","justification"] },
+          entites_principales: { type: "array", items:{type:"string"} },
+          lecture_editoriale: { type: "object", properties: { titre_coherent:{type:"object",properties:{statut:{type:"string",enum:["ok","warning","fail"]},commentaire:{type:"string"}},required:["statut","commentaire"]}, sourcing_present:{type:"object",properties:{statut:{type:"string",enum:["ok","warning","fail"]},commentaire:{type:"string"}},required:["statut","commentaire"]} }, required:["titre_coherent","sourcing_present"] }
+        },
+        required: ["search","discover","entites_principales","lecture_editoriale"]
+      }
+    }
+  };
+
+  const resp = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
+    body: JSON.stringify({
+      model: OPENAI_MODEL,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: `TITRE : ${title}\nURL : ${url}\n\nTEXTE DE L'ARTICLE :\n${truncated}` }
+      ],
+      tools: [toolSchema],
+      tool_choice: { type: "function", function: { name: "rapport_ia" } },
+      temperature: 0.2
+    })
+  });
+
+  if (!resp.ok) {
+    const err = await resp.text();
+    throw new Error(t('err_openai', { status: resp.status, msg: err.substring(0, 200) }));
+  }
+  const data = await resp.json();
+  const tc = data.choices?.[0]?.message?.tool_calls?.[0];
+  if (!tc) throw new Error(t('err_no_tool'));
+  return JSON.parse(tc.function.arguments);
+}
+
+// ========== RENDER RESULTS ==========
+function renderResults(url, title, discoverChecks, contentChecks, aiResult) {
+  document.getElementById('results').classList.add('active');
+  document.getElementById('resultTitle').textContent = title;
+  document.getElementById('resultUrl').textContent = url;
+
+  const discoverOk = discoverChecks.filter(c => c.status === 'ok').length;
+  const discoverTotal = discoverChecks.length;
+  const wordCount = (contentChecks.find(c => c.key === 'word_count') || {}).value || 0;
+  const linkCount = (contentChecks.find(c => c.key === 'hyperlinks') || {}).value || 0;
+  const h2Count = (contentChecks.find(c => c.key === 'h2_count') || {}).value || 0;
+
+  let kpis = [
+    { label: t('kpi_discover'), value: `${discoverOk}/${discoverTotal}`, color: discoverOk===discoverTotal?'green':discoverOk>=discoverTotal-2?'amber':'red' },
+    { label: t('kpi_words'), value: wordCount, color: wordCount>=150?'green':wordCount>0?'amber':'red' },
+    { label: t('kpi_links'), value: linkCount, color: linkCount>0?'green':'amber' },
+    { label: t('kpi_h2'), value: h2Count, color: h2Count>0?'green':'amber' },
+  ];
+  if (aiResult) {
+    kpis.push({ label: t('kpi_discover_ai'), value: aiResult.discover?.score||'?', color: (aiResult.discover?.score||0)>=70?'green':(aiResult.discover?.score||0)>=40?'amber':'red' });
+    if (aiResult.search?.score_lisibilite_mot_cle != null)
+      kpis.push({ label: t('kpi_seo'), value: aiResult.search.score_lisibilite_mot_cle, color: aiResult.search.score_lisibilite_mot_cle>=60?'green':aiResult.search.score_lisibilite_mot_cle>=30?'amber':'red' });
+  }
+  document.getElementById('kpiRow').innerHTML = kpis.map(k => `<div class="kpi-card"><div class="kpi-value ${k.color}">${k.value}</div><div class="kpi-label">${k.label}</div></div>`).join('');
+
+  document.getElementById('discoverCount').textContent = `${discoverOk}/${discoverTotal} OK`;
+  document.getElementById('discoverBody').innerHTML = discoverChecks.map(c => `<div class="check-row"><div class="status-dot ${c.status}"></div><div class="check-label">${c.label}</div><div class="check-detail">${c.detail}</div></div>`).join('');
+  document.getElementById('contentBody').innerHTML = contentChecks.map(c => `<div class="check-row"><div class="status-dot ${c.status}"></div><div class="check-label">${c.label}</div><div class="check-detail">${c.detail}</div></div>`).join('');
+
+  const aiSection = document.getElementById('aiSection');
+  if (aiResult) { aiSection.style.display = 'block'; renderAI(aiResult); }
+  else aiSection.style.display = 'none';
+}
+
+function renderAI(ai) {
+  const body = document.getElementById('aiBody');
+  const s = ai.search||{}, d = ai.discover||{}, e = ai.entites_principales||[], l = ai.lecture_editoriale||{};
+  let html = '';
+
+  html += `<div class="ai-subsection"><h4>${t('ai_seo_title')}</h4>
+    <div class="ai-field"><div class="ai-field-label">${t('ai_seo_pos')}</div><div class="ai-field-value ${s.positionnable_seo?'bool-true':'bool-false'}">${s.positionnable_seo?t('ai_seo_yes'):t('ai_seo_no')}</div></div>`;
+  if (s.mot_cle_principal) html += `<div class="ai-field"><div class="ai-field-label">${t('ai_keyword')}</div><div class="ai-field-value"><span class="tag">${esc(s.mot_cle_principal)}</span></div></div>`;
+  if (s.cluster_thematique) html += `<div class="ai-field"><div class="ai-field-label">${t('ai_cluster')}</div><div class="ai-field-value"><span class="tag">${esc(s.cluster_thematique)}</span></div></div>`;
+  if (s.score_lisibilite_mot_cle != null) html += `<div class="ai-field"><div class="ai-field-label">${t('ai_readability')}</div><div class="ai-field-value">${s.score_lisibilite_mot_cle}/100</div></div>`;
+  html += `<div class="ai-field"><div class="ai-field-label">${t('ai_justification')}</div><div class="ai-field-value">${esc(s.justification||'')}</div></div></div>`;
+
+  html += `<div class="ai-subsection"><h4>${t('ai_discover_title')}</h4>
+    <div class="ai-field"><div class="ai-field-label">${t('ai_score')}</div><div class="ai-field-value" style="font-weight:700;font-size:20px;color:${d.score>=70?'var(--green)':d.score>=40?'var(--amber)':'var(--red)'}">${d.score||'?'}/100</div></div>`;
+  if (d.points_forts?.length) html += `<div class="ai-field" style="flex-direction:column;gap:4px"><div class="ai-field-label">${t('ai_strengths')}</div><ul class="points-list forts">${d.points_forts.map(p=>`<li>${esc(p)}</li>`).join('')}</ul></div>`;
+  if (d.points_faibles?.length) html += `<div class="ai-field" style="flex-direction:column;gap:4px"><div class="ai-field-label">${t('ai_weaknesses')}</div><ul class="points-list faibles">${d.points_faibles.map(p=>`<li>${esc(p)}</li>`).join('')}</ul></div>`;
+  html += `<div class="ai-field"><div class="ai-field-label">${t('ai_justification')}</div><div class="ai-field-value">${esc(d.justification||'')}</div></div></div>`;
+
+  if (e.length) html += `<div class="ai-subsection"><h4>${t('ai_entities_title')}</h4><div style="display:flex;gap:6px;flex-wrap:wrap">${e.map(x=>`<span class="tag">${esc(x)}</span>`).join('')}</div></div>`;
+
+  html += `<div class="ai-subsection"><h4>${t('ai_editorial_title')}</h4>`;
+  if (l.titre_coherent) html += `<div class="editorial-row"><span class="editorial-status ${l.titre_coherent.statut}">${l.titre_coherent.statut.toUpperCase()}</span><div class="check-label">${t('ai_title_coherent')}</div><div class="check-detail">${esc(l.titre_coherent.commentaire||'')}</div></div>`;
+  if (l.sourcing_present) html += `<div class="editorial-row"><span class="editorial-status ${l.sourcing_present.statut}">${l.sourcing_present.statut.toUpperCase()}</span><div class="check-label">${t('ai_sourcing')}</div><div class="check-detail">${esc(l.sourcing_present.commentaire||'')}</div></div>`;
+  html += '</div>';
+  body.innerHTML = html;
+}
+
+function esc(str) { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
+</script>
+</body>
+</html>
