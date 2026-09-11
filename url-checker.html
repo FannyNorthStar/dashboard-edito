@@ -592,6 +592,13 @@ body {
       </div>
       <div class="card-body" id="discoverBody"></div>
     </div>
+    <div class="card" id="discoverInsightsCard" style="display:none">
+      <div class="card-header" onclick="toggleCard(this)">
+        <h3>🤖 <span data-t="discover_insights_title">AI Discover Insights</span></h3>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="card-body" id="discoverInsightsBody"></div>
+    </div>
     <div class="card" id="contentCard">
       <div class="card-header" onclick="toggleCard(this)">
         <h3>🔧 <span data-t="content_title">Article Structure</span></h3>
@@ -629,6 +636,9 @@ body {
     <label for="settingsApiKey">OpenAI API Key</label>
     <input type="password" id="settingsApiKey" placeholder="sk-proj-...">
     <div class="hint" data-t="settings_hint">Stored locally in your browser only. Used for AI analysis (Search, Discover, editorial review).</div>
+    <label for="settingsSheetUrl" style="margin-top:16px" data-t="settings_sheet_label">Discover Data (Google Sheets URL)</label>
+    <input type="text" id="settingsSheetUrl" placeholder="https://docs.google.com/spreadsheets/d/...">
+    <div class="hint" data-t="settings_sheet_hint">Google Sheets with one tab per site. Columns: URL, Clicks, Impressions, CTR.</div>
     <div class="modal-actions">
       <button class="btn-secondary" onclick="closeSettings()" data-t="btn_cancel">Cancel</button>
       <button class="btn" onclick="saveSettings()" data-t="btn_save">Save</button>
@@ -765,6 +775,17 @@ const T = {
     err_empty_html: "Paste HTML code to analyze.",
     kpi_spell: "Spelling",
     kpi_quality: "Quality",
+    // Discover Insights
+    discover_insights_title: "AI Discover Insights",
+    settings_sheet_label: "Discover Data (Google Sheets URL)",
+    settings_sheet_hint: "Google Sheets with one tab per site. Columns: URL, Clicks, Impressions, CTR.",
+    prog_discover_auth: "Analyzing Discover authority...",
+    authority_strong: "Strong authority",
+    authority_moderate: "Moderate authority",
+    authority_weak: "Weak authority",
+    authority_nodata: "No data",
+    authority_90d: "Last 90 days",
+    authority_paragraph: "Your article is about {topic}. During the last 90 days, {count} article(s) about this topic were on Discover (out of {total} total). On average they had {impressions} impressions, {clicks} clicks, and a CTR of {ctr}%.",
   },
   fr: {
     input_title: "Analyser un article",
@@ -887,6 +908,16 @@ const T = {
     err_empty_html: "Collez du code HTML à analyser.",
     kpi_spell: "Orthographe",
     kpi_quality: "Qualité",
+    discover_insights_title: "Discover IA Insights",
+    settings_sheet_label: "Données Discover (URL Google Sheets)",
+    settings_sheet_hint: "Google Sheets avec un onglet par site. Colonnes : URL, Clics, Impressions, CTR.",
+    prog_discover_auth: "Analyse de l'autorité Discover...",
+    authority_strong: "Autorité forte",
+    authority_moderate: "Autorité modérée",
+    authority_weak: "Autorité faible",
+    authority_nodata: "Pas de données",
+    authority_90d: "90 derniers jours",
+    authority_paragraph: "Votre article porte sur {topic}. Au cours des 90 derniers jours, {count} article(s) sur ce sujet étaient sur Discover (sur {total} au total). En moyenne, ils ont eu {impressions} impressions, {clicks} clics et un CTR de {ctr} %.",
   },
   "pt-br": {
     input_title: "Analisar um artigo",
@@ -1009,6 +1040,16 @@ const T = {
     err_empty_html: "Cole o código HTML para analisar.",
     kpi_spell: "Ortografia",
     kpi_quality: "Qualidade",
+    discover_insights_title: "Discover IA Insights",
+    settings_sheet_label: "Dados Discover (URL Google Sheets)",
+    settings_sheet_hint: "Google Sheets com uma aba por site. Colunas: URL, Cliques, Impressões, CTR.",
+    prog_discover_auth: "Analisando autoridade no Discover...",
+    authority_strong: "Autoridade forte",
+    authority_moderate: "Autoridade moderada",
+    authority_weak: "Autoridade fraca",
+    authority_nodata: "Sem dados",
+    authority_90d: "Últimos 90 dias",
+    authority_paragraph: "Seu artigo é sobre {topic}. Nos últimos 90 dias, {count} artigo(s) sobre este tema estiveram no Discover (de {total} no total). Em média, tiveram {impressions} impressões, {clicks} cliques e um CTR de {ctr}%.",
   }
 };
 
@@ -1034,7 +1075,11 @@ function applyTranslations() {
 }
 
 // ========== CONFIG ==========
-const CORS_PROXY = 'https://api.allorigins.win/raw?url=';
+const CORS_PROXIES = [
+  url => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url),
+  url => 'https://corsproxy.io/?' + encodeURIComponent(url),
+  url => 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(url),
+];
 const OPENAI_MODEL = 'gpt-4o';
 
 // ========== INPUT MODE ==========
@@ -1046,6 +1091,8 @@ document.addEventListener('DOMContentLoaded', () => {
   applyTranslations();
   const saved = localStorage.getItem('media_dashboard_openai_key');
   if (saved) document.getElementById('settingsApiKey').value = saved;
+  const savedSheet = localStorage.getItem('media_dashboard_discover_sheet');
+  if (savedSheet) document.getElementById('settingsSheetUrl').value = savedSheet;
   document.getElementById('urlInput').addEventListener('keydown', e => {
     if (e.key === 'Enter') startAnalysis('url');
   });
@@ -1071,6 +1118,9 @@ function saveSettings() {
   const key = document.getElementById('settingsApiKey').value.trim();
   if (key) localStorage.setItem('media_dashboard_openai_key', key);
   else localStorage.removeItem('media_dashboard_openai_key');
+  const sheetUrl = document.getElementById('settingsSheetUrl').value.trim();
+  if (sheetUrl) localStorage.setItem('media_dashboard_discover_sheet', sheetUrl);
+  else localStorage.removeItem('media_dashboard_discover_sheet');
   closeSettings();
 }
 
@@ -1125,6 +1175,7 @@ async function startAnalysis(mode) {
   document.getElementById('progressBar').classList.remove('active');
   document.getElementById('spellBody').style.display = 'none';
   document.getElementById('qualityCard').style.display = 'none';
+  document.getElementById('discoverInsightsCard').style.display = 'none';
 
   const apiKey = localStorage.getItem('media_dashboard_openai_key') || '';
 
@@ -1151,18 +1202,23 @@ async function startAnalysis(mode) {
     let aiResult = null;
     let spellResult = null;
     let qualityResult = null;
+    let discoverAuthority = null;
     if (apiKey) {
-      setProgress(65, t('prog_ai'));
+      setProgress(62, t('prog_ai'));
       aiResult = await runAIAnalysis(apiKey, url, title, bodyText);
-      setProgress(80, t('prog_spell'));
+      setProgress(74, t('prog_spell'));
       spellResult = await runSpellcheck(apiKey, bodyText, doc);
-      setProgress(90, t('prog_quality'));
+      setProgress(82, t('prog_quality'));
       qualityResult = await runQualityCheck(apiKey, title, bodyText);
+      if (mode === 'url') {
+        setProgress(92, t('prog_discover_auth'));
+        discoverAuthority = await runDiscoverAuthority(apiKey, url, title);
+      }
       setProgress(98, t('prog_done'));
     }
 
     setProgress(100, t('prog_done'));
-    renderResults(url, title, discoverChecks, contentChecks, aiResult, spellResult, qualityResult);
+    renderResults(url, title, discoverChecks, contentChecks, aiResult, spellResult, qualityResult, discoverAuthority);
   } catch (err) {
     showError('Error: ' + err.message);
     document.getElementById('progressBar').classList.remove('active');
@@ -1173,10 +1229,36 @@ async function startAnalysis(mode) {
 }
 
 // ========== FETCH PAGE ==========
+async function fetchWithTimeout(url, timeoutMs = 15000) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), timeoutMs);
+  try {
+    const resp = await fetch(url, { signal: ctrl.signal });
+    clearTimeout(timer);
+    return resp;
+  } catch(e) {
+    clearTimeout(timer);
+    throw e;
+  }
+}
+
+async function fetchViaProxy(targetUrl) {
+  const errors = [];
+  for (let i = 0; i < CORS_PROXIES.length; i++) {
+    try {
+      const proxyUrl = CORS_PROXIES[i](targetUrl);
+      const resp = await fetchWithTimeout(proxyUrl, 15000);
+      if (resp.ok) return await resp.text();
+      errors.push(`Proxy ${i+1}: HTTP ${resp.status}`);
+    } catch(e) {
+      errors.push(`Proxy ${i+1}: ${e.name === 'AbortError' ? 'timeout' : e.message}`);
+    }
+  }
+  throw new Error(t('err_fetch', { status: errors.join(' / ') }));
+}
+
 async function fetchPage(url) {
-  const resp = await fetch(CORS_PROXY + encodeURIComponent(url));
-  if (!resp.ok) throw new Error(t('err_fetch', { status: resp.status }));
-  return await resp.text();
+  return await fetchViaProxy(url);
 }
 
 // ========== TITLE EXTRACTION ==========
@@ -1615,8 +1697,203 @@ Be strict but fair. News articles should be direct. Every sentence must carry in
   try { return JSON.parse(tc.function.arguments); } catch(e) { return null; }
 }
 
+// ========== DISCOVER AUTHORITY ==========
+const DOMAIN_TAB_MAP = {
+  'topmercato.com': 'TOPMERCATO',
+  'www.topmercato.com': 'TOPMERCATO',
+  'sportsmole.co.uk': 'SPORTSMOLE',
+  'www.sportsmole.co.uk': 'SPORTSMOLE',
+  'trivela.com.br': 'TRIVELA',
+  'www.trivela.com.br': 'TRIVELA',
+  'umdoisesportes.com.br': 'UMDOISESPORTES',
+  'www.umdoisesportes.com.br': 'UMDOISESPORTES',
+  'afrik-foot.com': 'AFRIKFOOTFR',
+  'www.afrik-foot.com': 'AFRIKFOOTFR',
+  'afrikfoot.com': 'AFRIKFOOTFR',
+  'za.afrik-foot.com': 'AFRIKFOOTZA',
+  'ng.afrik-foot.com': 'AFRIKFOOTNG',
+  'footballwhispers.com': 'FOOTBALLWHISPERS',
+  'www.footballwhispers.com': 'FOOTBALLWHISPERS',
+  'footballgroundguide.com': 'FOOTBALLGROUNDGUIDE',
+  'www.footballgroundguide.com': 'FOOTBALLGROUNDGUIDE',
+  'mrfixitstips.co.uk': 'MRFIXITSTIPS',
+  'www.mrfixitstips.co.uk': 'MRFIXITSTIPS',
+  'solobasket.com': 'SOLOBASKET',
+  'www.solobasket.com': 'SOLOBASKET',
+  'fotbalportal.cz': 'FOTBALPORTAL',
+  'www.fotbalportal.cz': 'FOTBALPORTAL',
+  'vrfringe.com': 'VRINGE',
+  'www.vrfringe.com': 'VRINGE',
+};
+
+function extractSheetId(url) {
+  const m = url.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/);
+  return m ? m[1] : url.trim();
+}
+
+function parseDiscoverCSV(text) {
+  const lines = text.split('\n').filter(l => l.trim());
+  if (lines.length < 2) return [];
+  const rows = [];
+  for (let i = 1; i < lines.length; i++) {
+    const parts = lines[i].match(/(".*?"|[^,]+)/g);
+    if (!parts || parts.length < 4) continue;
+    const urlVal = parts[0].replace(/^"|"$/g, '').trim();
+    if (!urlVal.startsWith('http')) continue;
+    const clicks = parseInt(parts[1].replace(/"/g, '').trim(), 10) || 0;
+    const impressions = parseInt(parts[2].replace(/"/g, '').trim(), 10) || 0;
+    const ctrStr = parts[3].replace(/"/g, '').replace('%', '').replace(',', '.').trim();
+    const ctr = parseFloat(ctrStr) || 0;
+    rows.push({ url: urlVal, clicks, impressions, ctr });
+  }
+  return rows;
+}
+
+const STOP_WORDS = new Set(['the','a','an','and','or','but','in','on','at','to','for','of','with','by','from','is','are','was','were','be','been','being','have','has','had','do','does','did','will','would','could','should','may','might','shall','can','not','no','nor','so','if','up','out','about','into','over','after','le','la','les','de','du','des','un','une','et','en','au','aux','par','pour','sur','dans','ce','se','il','que','qui','son','sa','ses','cette','est','o','os','as','um','uma','do','da','dos','das','no','na','nos','nas','em','por','com','para','que','se','seu','sua','seus','suas','este','esta','el','los','las','del','al','con','como','pero','mas','mercato','transfer','news','football','soccer','latest','update','report','exclusive']);
+
+function extractTopicKeywords(title) {
+  return title.toLowerCase()
+    .replace(/[''`]/g, "'")
+    .replace(/[^a-z0-9àâäéèêëïîôùûüÿçæœáãõúí' -]/g, ' ')
+    .split(/[\s-]+/)
+    .filter(w => w.length > 2 && !STOP_WORDS.has(w));
+}
+
+async function runDiscoverAuthority(apiKey, url, title) {
+  const sheetUrl = localStorage.getItem('media_dashboard_discover_sheet') || '';
+  if (!sheetUrl) return null;
+
+  let hostname;
+  try { hostname = new URL(url).hostname; } catch(e) { return null; }
+  const tab = DOMAIN_TAB_MAP[hostname] || DOMAIN_TAB_MAP[hostname.replace('www.', '')];
+  if (!tab) return null;
+
+  const sheetId = extractSheetId(sheetUrl);
+  const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(tab)}`;
+
+  let csvText;
+  try {
+    // Try direct first (works if sheet is public with CORS)
+    let resp = await fetch(csvUrl);
+    if (resp.ok) {
+      csvText = await resp.text();
+    } else {
+      csvText = await fetchViaProxy(csvUrl);
+    }
+  } catch(e) {
+    try {
+      csvText = await fetchViaProxy(csvUrl);
+    } catch(e2) { return null; }
+  }
+
+  const allRows = parseDiscoverCSV(csvText);
+  if (allRows.length === 0) return null;
+
+  const keywords = extractTopicKeywords(title);
+  if (keywords.length === 0) return null;
+
+  // Pre-filter: keep rows where URL slug contains at least 1 keyword
+  const candidates = allRows.filter(r => {
+    const slug = r.url.toLowerCase();
+    return keywords.some(kw => slug.includes(kw));
+  });
+
+  // Prepare compact data for AI: send slug + stats for candidates (max 150)
+  const subset = candidates.slice(0, 150);
+  const compactList = subset.map(r => {
+    const path = r.url.replace(/https?:\/\/[^/]+/, '');
+    return `${path} | ${r.clicks} | ${r.impressions}`;
+  }).join('\n');
+
+  const totalArticles = allRows.length;
+
+  const resp = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
+    body: JSON.stringify({
+      model: 'gpt-4o',
+      messages: [
+        { role: 'system', content: `You are a Discover performance analyst. The user is checking an article. You have Discover data for the last 90 days from the same site (${totalArticles} total articles on Discover).
+
+Given the article title and a list of URLs from the same site that were on Discover (pre-filtered by keyword), identify which URLs are truly about the SAME TOPIC (same team, player, event, or subject — not just vaguely related).
+
+Calculate stats only from matching articles. Return structured data.
+
+URL list format: path | clicks | impressions` },
+        { role: 'user', content: `Article title: "${title}"\n\nCandidate URLs (${subset.length} pre-filtered from ${totalArticles} total):\n${compactList || '(no keyword matches found)'}` }
+      ],
+      tools: [{
+        type: 'function',
+        function: {
+          name: 'discover_authority',
+          description: 'Report Discover authority for this topic',
+          parameters: {
+            type: 'object',
+            properties: {
+              topic: { type: 'string', description: 'The article topic in 2-5 words (e.g. "Chelsea transfer window", "Lamine Camara future")' },
+              matching_count: { type: 'integer', description: 'Number of URLs truly about the same topic' },
+              avg_clicks: { type: 'number', description: 'Average clicks per article for matching URLs' },
+              avg_impressions: { type: 'number', description: 'Average impressions per article for matching URLs' },
+              avg_ctr: { type: 'number', description: 'Average CTR percentage for matching URLs' },
+              authority_level: { type: 'string', enum: ['strong', 'moderate', 'weak', 'no_data'], description: 'How strong the site authority is for this topic on Discover' }
+            },
+            required: ['topic', 'matching_count', 'avg_clicks', 'avg_impressions', 'avg_ctr', 'authority_level']
+          }
+        }
+      }],
+      tool_choice: { type: 'function', function: { name: 'discover_authority' } },
+      temperature: 0.1
+    })
+  });
+
+  if (!resp.ok) return null;
+  const data = await resp.json();
+  const tc = data.choices?.[0]?.message?.tool_calls?.[0];
+  if (!tc) return null;
+  try {
+    const result = JSON.parse(tc.function.arguments);
+    result.total_articles = totalArticles;
+    result.site = tab;
+    return result;
+  } catch(e) { return null; }
+}
+
+function renderDiscoverInsights(d) {
+  const card = document.getElementById('discoverInsightsCard');
+  const body = document.getElementById('discoverInsightsBody');
+  if (!d) { card.style.display = 'none'; return; }
+  card.style.display = 'block';
+
+  const levelColors = { strong: 'green', moderate: 'amber', weak: 'red', no_data: 'red' };
+  const levelColor = levelColors[d.authority_level] || 'amber';
+  const levelLabels = {
+    strong: t('authority_strong'),
+    moderate: t('authority_moderate'),
+    weak: t('authority_weak'),
+    no_data: t('authority_nodata')
+  };
+
+  const para = t('authority_paragraph', {
+    topic: d.topic,
+    count: d.matching_count,
+    impressions: Math.round(d.avg_impressions).toLocaleString(),
+    clicks: Math.round(d.avg_clicks).toLocaleString(),
+    ctr: d.avg_ctr.toFixed(1),
+    total: d.total_articles
+  });
+
+  body.innerHTML = `
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+      <span class="tl-dot ${levelColor}"></span>
+      <strong>${levelLabels[d.authority_level] || d.authority_level}</strong>
+      <span style="color:var(--text-muted);font-size:12px;margin-left:auto">${d.site} · ${t('authority_90d')}</span>
+    </div>
+    <p style="color:var(--text);line-height:1.7;margin:0">${para}</p>
+  `;
+}
+
 // ========== RENDER RESULTS ==========
-function renderResults(url, title, discoverChecks, contentChecks, aiResult, spellResult, qualityResult) {
+function renderResults(url, title, discoverChecks, contentChecks, aiResult, spellResult, qualityResult, discoverAuthority) {
   document.getElementById('results').classList.add('active');
   document.getElementById('resultTitle').textContent = title;
   document.getElementById('resultUrl').textContent = url;
@@ -1664,6 +1941,8 @@ function renderResults(url, title, discoverChecks, contentChecks, aiResult, spel
   const qualityCard = document.getElementById('qualityCard');
   if (qualityResult) { qualityCard.style.display = 'block'; renderQuality(qualityResult); }
   else qualityCard.style.display = 'none';
+
+  renderDiscoverInsights(discoverAuthority);
 }
 
 function renderSpellcheck(spell) {
