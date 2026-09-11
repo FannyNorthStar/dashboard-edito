@@ -1076,9 +1076,11 @@ function applyTranslations() {
 
 // ========== CONFIG ==========
 const CORS_PROXIES = [
-  url => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url),
-  url => 'https://corsproxy.io/?' + encodeURIComponent(url),
-  url => 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(url),
+  { name:'allorigins-json', url: u => 'https://api.allorigins.win/get?url='+encodeURIComponent(u), json:true },
+  { name:'corsproxy.io',    url: u => 'https://corsproxy.io/?'+encodeURIComponent(u) },
+  { name:'allorigins-raw',  url: u => 'https://api.allorigins.win/raw?url='+encodeURIComponent(u) },
+  { name:'codetabs',        url: u => 'https://api.codetabs.com/v1/proxy?quest='+encodeURIComponent(u) },
+  { name:'corsproxy.org',   url: u => 'https://corsproxy.org/?'+encodeURIComponent(u) },
 ];
 const OPENAI_MODEL = 'gpt-4o';
 
@@ -1229,11 +1231,11 @@ async function startAnalysis(mode) {
 }
 
 // ========== FETCH PAGE ==========
-async function fetchWithTimeout(url, timeoutMs = 15000) {
+async function fetchWithTimeout(url, opts = {}, timeoutMs = 15000) {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), timeoutMs);
   try {
-    const resp = await fetch(url, { signal: ctrl.signal });
+    const resp = await fetch(url, { ...opts, signal: ctrl.signal });
     clearTimeout(timer);
     return resp;
   } catch(e) {
@@ -1244,14 +1246,27 @@ async function fetchWithTimeout(url, timeoutMs = 15000) {
 
 async function fetchViaProxy(targetUrl) {
   const errors = [];
-  for (let i = 0; i < CORS_PROXIES.length; i++) {
+  // 1. Try direct fetch first (works if site allows CORS)
+  try {
+    const resp = await fetchWithTimeout(targetUrl, { mode:'cors' }, 8000);
+    if (resp.ok) return await resp.text();
+  } catch(e) { /* expected CORS block, continue to proxies */ }
+
+  // 2. Try each proxy
+  for (const proxy of CORS_PROXIES) {
     try {
-      const proxyUrl = CORS_PROXIES[i](targetUrl);
-      const resp = await fetchWithTimeout(proxyUrl, 15000);
-      if (resp.ok) return await resp.text();
-      errors.push(`Proxy ${i+1}: HTTP ${resp.status}`);
+      const proxyUrl = proxy.url(targetUrl);
+      const resp = await fetchWithTimeout(proxyUrl, {}, 15000);
+      if (!resp.ok) { errors.push(`${proxy.name}: HTTP ${resp.status}`); continue; }
+      if (proxy.json) {
+        const j = await resp.json();
+        if (j && j.contents) return j.contents;
+        errors.push(`${proxy.name}: empty contents`);
+      } else {
+        return await resp.text();
+      }
     } catch(e) {
-      errors.push(`Proxy ${i+1}: ${e.name === 'AbortError' ? 'timeout' : e.message}`);
+      errors.push(`${proxy.name}: ${e.name === 'AbortError' ? 'timeout' : e.message}`);
     }
   }
   throw new Error(t('err_fetch', { status: errors.join(' / ') }));
@@ -1773,18 +1788,8 @@ async function runDiscoverAuthority(apiKey, url, title) {
 
   let csvText;
   try {
-    // Try direct first (works if sheet is public with CORS)
-    let resp = await fetch(csvUrl);
-    if (resp.ok) {
-      csvText = await resp.text();
-    } else {
-      csvText = await fetchViaProxy(csvUrl);
-    }
-  } catch(e) {
-    try {
-      csvText = await fetchViaProxy(csvUrl);
-    } catch(e2) { return null; }
-  }
+    csvText = await fetchViaProxy(csvUrl);
+  } catch(e) { return null; }
 
   const allRows = parseDiscoverCSV(csvText);
   if (allRows.length === 0) return null;
