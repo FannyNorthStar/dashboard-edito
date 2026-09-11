@@ -109,16 +109,6 @@ body {
   padding: 32px 24px 60px;
 }
 
-/* DIVIDER */
-.input-divider {
-  display: flex; align-items: center; gap: 12px;
-  margin: 16px 0;
-  color: var(--text-muted); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
-}
-.input-divider::before, .input-divider::after {
-  content: ''; flex: 1; height: 1px; background: var(--border);
-}
-
 /* INPUT AREA */
 .input-section {
   background: var(--surface);
@@ -128,75 +118,9 @@ body {
   margin-bottom: 24px;
   box-shadow: var(--shadow);
 }
-.input-label {
-  font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
-  color: var(--text-muted); margin: 0 0 10px 0;
-}
 .input-section h2 {
   font-size: 15px; font-weight: 600;
   margin-bottom: 16px; color: var(--text);
-}
-.html-textarea {
-  width: 100%;
-  min-height: 160px;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 12px 14px;
-  font-size: 13px; font-family: 'Cascadia Code', 'Fira Code', monospace;
-  color: var(--text);
-  outline: none;
-  resize: vertical;
-  line-height: 1.5;
-  transition: border-color 0.2s;
-  margin-bottom: 12px;
-}
-.html-textarea::placeholder { color: var(--text-dim); }
-.html-textarea:focus { border-color: var(--accent); }
-
-/* SPELLCHECK */
-.spell-error-row {
-  display: flex; align-items: flex-start; gap: 10px;
-  padding: 10px 0;
-  border-bottom: 1px solid var(--surface-2);
-  font-size: 13px;
-}
-.spell-error-row:last-child { border-bottom: none; }
-.spell-original {
-  text-decoration: line-through;
-  color: var(--red);
-  font-weight: 500;
-}
-.spell-arrow { color: var(--text-dim); flex-shrink: 0; }
-.spell-correction {
-  color: var(--green);
-  font-weight: 600;
-}
-.spell-context {
-  color: var(--text-muted);
-  font-size: 12px;
-  margin-top: 2px;
-}
-.spell-type {
-  font-size: 10px; font-weight: 600;
-  text-transform: uppercase;
-  padding: 2px 6px;
-  border-radius: 3px;
-  flex-shrink: 0;
-  background: var(--surface-2);
-  color: var(--text-muted);
-}
-.spell-lang-badge {
-  font-size: 11px; font-weight: 600;
-  background: var(--accent-glow);
-  color: var(--accent);
-  padding: 2px 8px;
-  border-radius: 10px;
-}
-.spell-ok {
-  display: flex; align-items: center; gap: 8px;
-  padding: 16px 0;
-  font-size: 14px; color: var(--green); font-weight: 500;
 }
 .input-row {
   display: flex; gap: 10px;
@@ -528,7 +452,6 @@ body {
   .kpi-row { grid-template-columns: repeat(2, 1fr); }
   .topbar { padding: 12px 16px; gap: 8px; flex-wrap: wrap; }
   .container { padding: 20px 16px 40px; }
-  .spell-error-row { flex-wrap: wrap; }
 }
 </style>
 </head>
@@ -553,17 +476,14 @@ body {
 <div class="container">
 
   <div class="input-section">
-    <h3 class="input-label" data-t="label_live">Live Article Checker</h3>
+    <h2 data-t="input_title">Analyze an article</h2>
     <div class="input-row">
       <input type="text" id="urlInput" data-t-placeholder="input_placeholder" placeholder="https://www.example.com/my-article" autocomplete="url">
+      <button class="btn" id="analyzeBtn" onclick="startAnalysis()">
+        <span id="btnText" data-t="btn_analyze">Analyze</span>
+        <div class="spinner" id="btnSpinner" style="display:none"></div>
+      </button>
     </div>
-    <div class="input-divider" data-t="input_or">OR</div>
-    <h3 class="input-label" data-t="label_draft">Draft Checker</h3>
-    <textarea class="html-textarea" id="htmlInput" data-t-placeholder="html_placeholder" placeholder="Paste your HTML source code here..."></textarea>
-    <button class="btn" id="analyzeBtn" onclick="startAnalysis()" style="width:100%">
-      <span id="btnText" data-t="btn_analyze">Analyze</span>
-      <div class="spinner" id="btnSpinner" style="display:none"></div>
-    </button>
   </div>
 
   <div class="error-box" id="errorBox"></div>
@@ -590,18 +510,10 @@ body {
     </div>
     <div class="card" id="contentCard">
       <div class="card-header" onclick="toggleCard(this)">
-        <h3>🔧 <span data-t="content_title">Article Structure</span></h3>
+        <h3>📝 <span data-t="content_title">Content Quality</span></h3>
         <span class="chevron">▼</span>
       </div>
       <div class="card-body" id="contentBody"></div>
-      <div class="card-body" id="spellBody" style="display:none; border-top:1px solid var(--border)"></div>
-    </div>
-    <div class="card" id="qualityCard" style="display:none">
-      <div class="card-header" onclick="toggleCard(this)">
-        <h3>📝 <span data-t="quality_title">Content Quality</span> <span class="count" id="qualityCount"></span></h3>
-        <span class="chevron">▼</span>
-      </div>
-      <div class="card-body" id="qualityBody"></div>
     </div>
     <div class="ai-section" id="aiSection" style="display:none">
       <div class="ai-header">
@@ -637,24 +549,11 @@ body {
 const T = {
   en: {
     input_title: "Analyze an article",
-    label_live: "Live Article Checker",
-    label_draft: "Draft Checker",
-    input_or: "OR",
     input_placeholder: "https://www.example.com/my-article",
-    html_placeholder: "Paste your HTML source code here...",
     btn_analyze: "Analyze",
     btn_analyzing: "Analyzing...",
     discover_title: "Discover Eligibility",
-    content_title: "Article Structure",
-    quality_title: "Content Quality",
-    quality_title_align: "Title & lead alignment",
-    quality_title_ok: "Title, lead and body are well aligned.",
-    quality_fluff: "Fluff detection",
-    quality_fluff_ok: "No fluff detected. The article is direct and concise.",
-    quality_fluff_found: "{n} fluff issue(s) found",
-    quality_align_ok: "Aligned",
-    quality_align_partial: "Partially aligned",
-    quality_align_misaligned: "Misaligned",
+    content_title: "Content Quality",
     ai_title: "AI Analysis",
     settings_title: "Settings",
     settings_hint: "Stored locally in your browser only. Used for AI analysis (Search, Discover, editorial review).",
@@ -746,40 +645,14 @@ const T = {
     ai_editorial_title: "Editorial review",
     ai_title_coherent: "Title coherent",
     ai_sourcing: "Sourcing present",
-    // Spellcheck
-    spell_title: "Spellcheck",
-    spell_lang: "Detected language",
-    spell_ok: "No spelling errors found.",
-    spell_errors: "{n} error(s) found",
-    spell_type_spelling: "spelling",
-    spell_type_grammar: "grammar",
-    spell_type_typo: "typo",
-    prog_spell: "Running spellcheck...",
-    prog_quality: "Checking content quality...",
-    err_empty_html: "Paste HTML code to analyze.",
-    kpi_spell: "Spelling",
-    kpi_quality: "Quality",
   },
   fr: {
     input_title: "Analyser un article",
-    label_live: "Vérificateur d'article en ligne",
-    label_draft: "Vérificateur de brouillon",
-    input_or: "OU",
     input_placeholder: "https://www.example.com/mon-article",
-    html_placeholder: "Collez votre code source HTML ici...",
     btn_analyze: "Analyser",
     btn_analyzing: "Analyse...",
     discover_title: "Éligibilité Discover",
-    content_title: "Structure de l'article",
-    quality_title: "Qualité du contenu",
-    quality_title_align: "Alignement titre & chapô",
-    quality_title_ok: "Le titre, le chapô et le corps sont bien alignés.",
-    quality_fluff: "Détection de remplissage",
-    quality_fluff_ok: "Pas de remplissage détecté. L'article est direct et concis.",
-    quality_fluff_found: "{n} problème(s) de remplissage",
-    quality_align_ok: "Aligné",
-    quality_align_partial: "Partiellement aligné",
-    quality_align_misaligned: "Désaligné",
+    content_title: "Qualité du contenu",
     ai_title: "Analyse IA",
     settings_title: "Paramètres",
     settings_hint: "Stockée localement dans votre navigateur. Utilisée pour l'analyse IA (Search, Discover, lecture éditoriale).",
@@ -868,39 +741,14 @@ const T = {
     ai_editorial_title: "Lecture éditoriale",
     ai_title_coherent: "Titre cohérent",
     ai_sourcing: "Sourcing présent",
-    spell_title: "Orthographe",
-    spell_lang: "Langue détectée",
-    spell_ok: "Aucune faute d'orthographe trouvée.",
-    spell_errors: "{n} erreur(s) trouvée(s)",
-    spell_type_spelling: "orthographe",
-    spell_type_grammar: "grammaire",
-    spell_type_typo: "coquille",
-    prog_spell: "Vérification orthographe...",
-    prog_quality: "Vérification qualité du contenu...",
-    err_empty_html: "Collez du code HTML à analyser.",
-    kpi_spell: "Orthographe",
-    kpi_quality: "Qualité",
   },
   "pt-br": {
     input_title: "Analisar um artigo",
-    label_live: "Verificador de artigo publicado",
-    label_draft: "Verificador de rascunho",
-    input_or: "OU",
     input_placeholder: "https://www.example.com/meu-artigo",
-    html_placeholder: "Cole o código-fonte HTML aqui...",
     btn_analyze: "Analisar",
     btn_analyzing: "Analisando...",
     discover_title: "Elegibilidade Discover",
-    content_title: "Estrutura do artigo",
-    quality_title: "Qualidade do conteúdo",
-    quality_title_align: "Alinhamento título & lead",
-    quality_title_ok: "Título, lead e corpo estão bem alinhados.",
-    quality_fluff: "Detecção de enchimento",
-    quality_fluff_ok: "Nenhum enchimento detectado. O artigo é direto e conciso.",
-    quality_fluff_found: "{n} problema(s) de enchimento",
-    quality_align_ok: "Alinhado",
-    quality_align_partial: "Parcialmente alinhado",
-    quality_align_misaligned: "Desalinhado",
+    content_title: "Qualidade do conteúdo",
     ai_title: "Análise IA",
     settings_title: "Configurações",
     settings_hint: "Armazenada localmente no seu navegador. Usada para análise IA (Search, Discover, revisão editorial).",
@@ -989,18 +837,6 @@ const T = {
     ai_editorial_title: "Revisão editorial",
     ai_title_coherent: "Título coerente",
     ai_sourcing: "Fontes presentes",
-    spell_title: "Ortografia",
-    spell_lang: "Idioma detectado",
-    spell_ok: "Nenhum erro ortográfico encontrado.",
-    spell_errors: "{n} erro(s) encontrado(s)",
-    spell_type_spelling: "ortografia",
-    spell_type_grammar: "gramática",
-    spell_type_typo: "digitação",
-    prog_spell: "Verificando ortografia...",
-    prog_quality: "Verificando qualidade do conteúdo...",
-    err_empty_html: "Cole o código HTML para analisar.",
-    kpi_spell: "Ortografia",
-    kpi_quality: "Qualidade",
   }
 };
 
@@ -1028,9 +864,6 @@ function applyTranslations() {
 // ========== CONFIG ==========
 const CORS_PROXY = 'https://api.allorigins.win/raw?url=';
 const OPENAI_MODEL = 'gpt-4o';
-
-// ========== INPUT MODE ==========
-// No tabs — both fields visible. URL takes priority if both filled.
 
 // ========== INIT ==========
 document.addEventListener('DOMContentLoaded', () => {
@@ -1090,35 +923,20 @@ function setLoading(on) {
 
 // ========== MAIN FLOW ==========
 async function startAnalysis() {
-  let url = document.getElementById('urlInput').value.trim();
-  let html = document.getElementById('htmlInput').value.trim();
-  let mode = 'url';
-
-  // URL takes priority if filled; otherwise use HTML
-  if (url) {
-    if (!url.startsWith('http')) { showError(t('err_url')); return; }
-    mode = 'url';
-  } else if (html) {
-    mode = 'html';
-    url = '(pasted HTML)';
-  } else {
-    showError(t('err_empty')); return;
-  }
+  const url = document.getElementById('urlInput').value.trim();
+  if (!url) { showError(t('err_empty')); return; }
+  if (!url.startsWith('http')) { showError(t('err_url')); return; }
 
   clearError();
   setLoading(true);
   document.getElementById('results').classList.remove('active');
   document.getElementById('progressBar').classList.remove('active');
-  document.getElementById('spellBody').style.display = 'none';
-  document.getElementById('qualityCard').style.display = 'none';
 
   const apiKey = localStorage.getItem('media_dashboard_openai_key') || '';
 
   try {
-    if (mode === 'url') {
-      setProgress(10, t('prog_fetch'));
-      html = await fetchPage(url);
-    }
+    setProgress(10, t('prog_fetch'));
+    const html = await fetchPage(url);
 
     setProgress(30, t('prog_html'));
     const parser = new DOMParser();
@@ -1127,28 +945,22 @@ async function startAnalysis() {
     setProgress(40, t('prog_discover'));
     const discoverChecks = runDiscoverChecks(doc, url);
 
-    setProgress(50, t('prog_content'));
+    setProgress(55, t('prog_content'));
     const contentChecks = runContentChecks(doc, url);
 
-    setProgress(60, t('prog_prep'));
+    setProgress(70, t('prog_prep'));
     const title = extractTitle(doc);
-    const bodyText = extractBodyText(doc);
 
     let aiResult = null;
-    let spellResult = null;
-    let qualityResult = null;
     if (apiKey) {
-      setProgress(65, t('prog_ai'));
+      setProgress(75, t('prog_ai'));
+      const bodyText = extractBodyText(doc);
       aiResult = await runAIAnalysis(apiKey, url, title, bodyText);
-      setProgress(80, t('prog_spell'));
-      spellResult = await runSpellcheck(apiKey, bodyText, doc);
-      setProgress(90, t('prog_quality'));
-      qualityResult = await runQualityCheck(apiKey, title, bodyText);
-      setProgress(98, t('prog_done'));
+      setProgress(95, t('prog_done'));
     }
 
     setProgress(100, t('prog_done'));
-    renderResults(url, title, discoverChecks, contentChecks, aiResult, spellResult, qualityResult);
+    renderResults(url, title, discoverChecks, contentChecks, aiResult);
   } catch (err) {
     showError('Error: ' + err.message);
     document.getElementById('progressBar').classList.remove('active');
@@ -1454,154 +1266,8 @@ On te donne le titre, l'URL et le texte d'un article. Analyse-le selon deux axes
   return JSON.parse(tc.function.arguments);
 }
 
-// ========== LANGUAGE DETECTION ==========
-function detectLanguageHint(doc) {
-  const htmlLang = (doc.documentElement?.getAttribute('lang') || '').trim().toLowerCase();
-  if (htmlLang) return htmlLang;
-  const ogLocale = doc.querySelector('meta[property="og:locale"]');
-  if (ogLocale) return (ogLocale.getAttribute('content') || '').replace('_', '-').toLowerCase();
-  const contentLang = doc.querySelector('meta[http-equiv="content-language"]');
-  if (contentLang) return (contentLang.getAttribute('content') || '').toLowerCase();
-  return '';
-}
-
-// ========== SPELLCHECK ==========
-async function runSpellcheck(apiKey, bodyText, doc) {
-  const words = bodyText.split(/\s+/);
-  const truncated = words.slice(0, 4000).join(' ');
-  if (truncated.length < 20) return null;
-
-  const langHint = detectLanguageHint(doc);
-  const langLine = langHint
-    ? `The article language appears to be: ${langHint}. Confirm or correct this detection.`
-    : `Detect the article language automatically from the text content.`;
-
-  const spellPrompt = `You are a multilingual proofreader. ${langLine}
-
-Find ALL spelling errors, typos, and grammar mistakes in the article text below. For each error, provide:
-- The exact original word/phrase as it appears
-- The corrected version
-- A short excerpt of the sentence for context (max 80 chars around the error)
-- The type: "spelling", "grammar", or "typo"
-
-Be thorough but precise. Only flag real errors. Do not flag proper nouns, brand names, player names, team names, or foreign words used intentionally. Do not flag stylistic choices. Focus on genuine mistakes.
-
-Respond ONLY via the spellcheck_report tool.`;
-
-  const spellSchema = {
-    type: "function",
-    function: {
-      name: "spellcheck_report",
-      description: "Spelling and grammar check results",
-      parameters: {
-        type: "object",
-        properties: {
-          detected_language: { type: "string", description: "ISO language code detected (e.g. fr, en, pt-br, it, es)" },
-          errors: {
-            type: "array",
-            items: {
-              type: "object",
-              properties: {
-                original: { type: "string" },
-                correction: { type: "string" },
-                context: { type: "string" },
-                type: { type: "string", enum: ["spelling", "grammar", "typo"] }
-              },
-              required: ["original", "correction", "context", "type"]
-            }
-          }
-        },
-        required: ["detected_language", "errors"]
-      }
-    }
-  };
-
-  const resp = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
-    body: JSON.stringify({
-      model: OPENAI_MODEL,
-      messages: [
-        { role: 'system', content: spellPrompt },
-        { role: 'user', content: truncated }
-      ],
-      tools: [spellSchema],
-      tool_choice: { type: "function", function: { name: "spellcheck_report" } },
-      temperature: 0.1
-    })
-  });
-
-  if (!resp.ok) return null;
-  const data = await resp.json();
-  const tc = data.choices?.[0]?.message?.tool_calls?.[0];
-  if (!tc) return null;
-  try { return JSON.parse(tc.function.arguments); } catch(e) { return null; }
-}
-
-// ========== CONTENT QUALITY CHECK (AI) ==========
-async function runQualityCheck(apiKey, title, bodyText) {
-  const words = bodyText.split(/\s+/);
-  const excerpt = words.slice(0, 4000).join(' ');
-  // Extract first paragraph as chapô (lead)
-  const paragraphs = bodyText.split(/\n\s*\n/).filter(p => p.trim().length > 30);
-  const chapo = paragraphs[0] || '';
-
-  const resp = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
-    body: JSON.stringify({
-      model: OPENAI_MODEL,
-      messages: [
-        { role: 'system', content: `You are a senior editorial quality analyst. You receive an article's title, lead paragraph (chapô), and full body text. You must:
-1. Check if the title accurately reflects and aligns with the chapô and the full article content. Rate as "aligned", "partial", or "misaligned" with a clear explanation.
-2. Detect fluff: filler phrases, vague statements, unnecessary padding, clichés, or sentences that add no information. List each fluff instance with the exact quote and why it's fluff, plus a suggested rewrite or "delete".
-Be strict but fair. News articles should be direct. Every sentence must carry information.` },
-        { role: 'user', content: `TITLE: ${title}\n\nCHAPÔ (lead paragraph):\n${chapo}\n\nFULL ARTICLE:\n${excerpt}` }
-      ],
-      tools: [{
-        type: 'function',
-        function: {
-          name: 'quality_report',
-          description: 'Editorial quality analysis of article content',
-          parameters: {
-            type: 'object',
-            properties: {
-              title_alignment: {
-                type: 'object',
-                properties: {
-                  status: { type: 'string', enum: ['aligned', 'partial', 'misaligned'] },
-                  comment: { type: 'string' }
-                }, required: ['status', 'comment']
-              },
-              fluff: {
-                type: 'array',
-                items: {
-                  type: 'object',
-                  properties: {
-                    quote: { type: 'string', description: 'Exact text that is fluff' },
-                    reason: { type: 'string', description: 'Why it is fluff' },
-                    suggestion: { type: 'string', description: 'Rewrite or "delete"' }
-                  }, required: ['quote', 'reason', 'suggestion']
-                }
-              }
-            }, required: ['title_alignment', 'fluff']
-          }
-        }
-      }],
-      tool_choice: { type: 'function', function: { name: 'quality_report' } },
-      temperature: 0.2
-    })
-  });
-
-  if (!resp.ok) return null;
-  const data = await resp.json();
-  const tc = data.choices?.[0]?.message?.tool_calls?.[0];
-  if (!tc) return null;
-  try { return JSON.parse(tc.function.arguments); } catch(e) { return null; }
-}
-
 // ========== RENDER RESULTS ==========
-function renderResults(url, title, discoverChecks, contentChecks, aiResult, spellResult, qualityResult) {
+function renderResults(url, title, discoverChecks, contentChecks, aiResult) {
   document.getElementById('results').classList.add('active');
   document.getElementById('resultTitle').textContent = title;
   document.getElementById('resultUrl').textContent = url;
@@ -1623,14 +1289,6 @@ function renderResults(url, title, discoverChecks, contentChecks, aiResult, spel
     if (aiResult.search?.score_lisibilite_mot_cle != null)
       kpis.push({ label: t('kpi_seo'), value: aiResult.search.score_lisibilite_mot_cle, color: aiResult.search.score_lisibilite_mot_cle>=60?'green':aiResult.search.score_lisibilite_mot_cle>=30?'amber':'red' });
   }
-  if (spellResult) {
-    const errCount = spellResult.errors?.length || 0;
-    kpis.push({ label: t('kpi_spell'), value: errCount, color: errCount===0?'green':errCount<=3?'amber':'red' });
-  }
-  if (qualityResult) {
-    const qIssues = (qualityResult.title_alignment?.status !== 'aligned' ? 1 : 0) + (qualityResult.fluff?.length || 0);
-    kpis.push({ label: t('kpi_quality'), value: qIssues === 0 ? 'OK' : qIssues, color: qIssues===0?'green':qIssues<=2?'amber':'red' });
-  }
   document.getElementById('kpiRow').innerHTML = kpis.map(k => `<div class="kpi-card"><div class="kpi-value ${k.color}"><span class="tl-dot ${k.color}"></span>${k.value}</div><div class="kpi-label">${k.label}</div></div>`).join('');
 
   const discoverColor = discoverOk===discoverTotal?'green':discoverOk>=discoverTotal-2?'amber':'red';
@@ -1641,80 +1299,6 @@ function renderResults(url, title, discoverChecks, contentChecks, aiResult, spel
   const aiSection = document.getElementById('aiSection');
   if (aiResult) { aiSection.style.display = 'block'; renderAI(aiResult); }
   else aiSection.style.display = 'none';
-
-  const spellBody = document.getElementById('spellBody');
-  if (spellResult) { spellBody.style.display = 'block'; renderSpellcheck(spellResult); }
-  else spellBody.style.display = 'none';
-
-  const qualityCard = document.getElementById('qualityCard');
-  if (qualityResult) { qualityCard.style.display = 'block'; renderQuality(qualityResult); }
-  else qualityCard.style.display = 'none';
-}
-
-function renderSpellcheck(spell) {
-  const errors = spell.errors || [];
-  const lang = spell.detected_language || '?';
-  const countColor = errors.length === 0 ? 'green' : errors.length <= 3 ? 'amber' : 'red';
-  const countLabel = errors.length === 0 ? t('spell_ok').split('.')[0] : t('spell_errors', {n: errors.length});
-
-  const body = document.getElementById('spellBody');
-  let html = `<div class="check-row" style="font-weight:600;padding-bottom:4px"><div class="status-dot ${errors.length===0?'ok':'fail'}"></div><div class="check-label">✏️ ${t('spell_title')} <span class="spell-lang-badge" style="margin-left:6px">${esc(lang.toUpperCase())}</span></div><div class="check-detail"><span class="tl-dot ${countColor}" style="width:8px;height:8px"></span> ${countLabel}</div></div>`;
-
-  if (errors.length === 0) {
-    body.innerHTML = html;
-    return;
-  }
-
-  html += errors.map(e => `<div class="spell-error-row">
-    <span class="spell-type">${t('spell_type_' + e.type) || e.type}</span>
-    <div style="flex:1">
-      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-        <span class="spell-original">${esc(e.original)}</span>
-        <span class="spell-arrow">→</span>
-        <span class="spell-correction">${esc(e.correction)}</span>
-      </div>
-      <div class="spell-context">"...${esc(e.context)}..."</div>
-    </div>
-  </div>`).join('');
-  body.innerHTML = html;
-}
-
-function renderQuality(q) {
-  const body = document.getElementById('qualityBody');
-  const a = q.title_alignment || {};
-  const fluff = q.fluff || [];
-  const alignColor = a.status === 'aligned' ? 'green' : a.status === 'partial' ? 'amber' : 'red';
-  const alignLabel = a.status === 'aligned' ? t('quality_align_ok') : a.status === 'partial' ? t('quality_align_partial') : t('quality_align_misaligned');
-  const fluffColor = fluff.length === 0 ? 'green' : fluff.length <= 2 ? 'amber' : 'red';
-  const fluffLabel = fluff.length === 0 ? t('quality_fluff_ok') : t('quality_fluff_found', {n: fluff.length});
-
-  // Count for header
-  const totalIssues = (a.status !== 'aligned' ? 1 : 0) + fluff.length;
-  const countColor = totalIssues === 0 ? 'green' : totalIssues <= 2 ? 'amber' : 'red';
-  document.getElementById('qualityCount').innerHTML = `<span class="tl-dot ${countColor}" style="width:8px;height:8px"></span> ${totalIssues === 0 ? 'OK' : totalIssues + ' issue(s)'}`;
-
-  let html = '';
-  // Title alignment
-  html += `<div class="check-row"><div class="status-dot ${a.status==='aligned'?'ok':'fail'}"></div><div class="check-label" style="font-weight:600">${t('quality_title_align')}</div><div class="check-detail"><span class="tl-dot ${alignColor}" style="width:8px;height:8px"></span> ${alignLabel}</div></div>`;
-  if (a.comment) html += `<div style="padding:0 16px 12px 32px;color:var(--text-muted);font-size:13px">${esc(a.comment)}</div>`;
-
-  // Fluff
-  html += `<div class="check-row"><div class="status-dot ${fluff.length===0?'ok':'fail'}"></div><div class="check-label" style="font-weight:600">${t('quality_fluff')}</div><div class="check-detail"><span class="tl-dot ${fluffColor}" style="width:8px;height:8px"></span> ${fluffLabel}</div></div>`;
-
-  if (fluff.length > 0) {
-    html += fluff.map(f => `<div class="spell-error-row">
-      <span class="spell-type" style="background:var(--amber-bg,#FFF3CD);color:var(--amber,#B8860B)">Fluff</span>
-      <div style="flex:1">
-        <div class="spell-original" style="font-style:italic">"${esc(f.quote)}"</div>
-        <div class="spell-context" style="margin-top:4px">${esc(f.reason)}</div>
-        <div style="margin-top:4px;display:flex;align-items:center;gap:6px">
-          <span class="spell-arrow">→</span>
-          <span class="spell-correction">${esc(f.suggestion)}</span>
-        </div>
-      </div>
-    </div>`).join('');
-  }
-  body.innerHTML = html;
 }
 
 function renderAI(ai) {
