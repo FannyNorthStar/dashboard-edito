@@ -1128,6 +1128,35 @@ const CORS_PROXIES = [
 ];
 const OPENAI_MODEL = 'gpt-4o';
 
+// ========== OPENAI PROXY ==========
+async function callOpenAI(body) {
+  const proxy = localStorage.getItem('media_dashboard_cors_proxy')
+    || 'https://script.google.com/macros/s/AKfycbz8kiCJrdXSvPavmH9SCTqK2XIheP--lmdhOz9COsXdq4_B-wk6La9vmV_20DtogvziwQ/exec';
+  // Try GAS proxy first (key stored server-side)
+  try {
+    const resp = await fetchWithTimeout(proxy, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: typeof body === 'string' ? body : JSON.stringify(body),
+      redirect: 'follow'
+    }, 60000);
+    if (resp.ok) {
+      const j = await resp.json();
+      if (!j.error) return j;
+    }
+  } catch(e) { /* fall through to direct call */ }
+  // Fallback: direct OpenAI call with local API key
+  const apiKey = localStorage.getItem('media_dashboard_openai_key');
+  if (!apiKey) throw new Error('AI features require the CORS proxy to be configured with an OpenAI key, or a local API key in Settings.');
+  const resp = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
+    body: typeof body === 'string' ? body : JSON.stringify(body)
+  });
+  if (!resp.ok) throw new Error('OpenAI: HTTP ' + resp.status);
+  return await resp.json();
+}
+
 // ========== INPUT MODE ==========
 // No tabs — both fields visible. URL takes priority if both filled.
 
@@ -1228,8 +1257,6 @@ async function startAnalysis(mode) {
   document.getElementById('qualityCard').style.display = 'none';
   document.getElementById('discoverInsightsCard').style.display = 'none';
 
-  const apiKey = localStorage.getItem('media_dashboard_openai_key') || '';
-
   try {
     if (mode === 'url') {
       setProgress(10, t('prog_fetch'));
@@ -1254,18 +1281,20 @@ async function startAnalysis(mode) {
     let spellResult = null;
     let qualityResult = null;
     let discoverAuthority = null;
-    if (apiKey) {
+    try {
       setProgress(62, t('prog_ai'));
-      aiResult = await runAIAnalysis(apiKey, url, title, bodyText);
+      aiResult = await runAIAnalysis(url, title, bodyText);
       setProgress(74, t('prog_spell'));
-      spellResult = await runSpellcheck(apiKey, bodyText, doc);
+      spellResult = await runSpellcheck(bodyText, doc);
       setProgress(82, t('prog_quality'));
-      qualityResult = await runQualityCheck(apiKey, title, bodyText);
+      qualityResult = await runQualityCheck(title, bodyText);
       if (mode === 'url') {
         setProgress(92, t('prog_discover_auth'));
-        discoverAuthority = await runDiscoverAuthority(apiKey, url, title);
+        discoverAuthority = await runDiscoverAuthority(url, title);
       }
       setProgress(98, t('prog_done'));
+    } catch(aiErr) {
+      console.warn('AI analysis unavailable:', aiErr.message);
     }
 
     setProgress(100, t('prog_done'));
@@ -1565,7 +1594,7 @@ function findSocialEmbeds(body) {
 }
 
 // ========== AI ANALYSIS ==========
-async function runAIAnalysis(apiKey, url, title, bodyText) {
+async function runAIAnalysis(url, title, bodyText) {
   const words = bodyText.split(/\s+/);
   const truncated = words.slice(0, 6000).join(' ');
 
@@ -1606,26 +1635,16 @@ On te donne le titre, l'URL et le texte d'un article. Analyse-le selon deux axes
     }
   };
 
-  const resp = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
-    body: JSON.stringify({
-      model: OPENAI_MODEL,
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: `TITRE : ${title}\nURL : ${url}\n\nTEXTE DE L'ARTICLE :\n${truncated}` }
-      ],
-      tools: [toolSchema],
-      tool_choice: { type: "function", function: { name: "rapport_ia" } },
-      temperature: 0.2
-    })
+  const data = await callOpenAI({
+    model: OPENAI_MODEL,
+    messages: [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: `TITRE : ${title}\nURL : ${url}\n\nTEXTE DE L'ARTICLE :\n${truncated}` }
+    ],
+    tools: [toolSchema],
+    tool_choice: { type: "function", function: { name: "rapport_ia" } },
+    temperature: 0.2
   });
-
-  if (!resp.ok) {
-    const err = await resp.text();
-    throw new Error(t('err_openai', { status: resp.status, msg: err.substring(0, 200) }));
-  }
-  const data = await resp.json();
   const tc = data.choices?.[0]?.message?.tool_calls?.[0];
   if (!tc) throw new Error(t('err_no_tool'));
   return JSON.parse(tc.function.arguments);
@@ -1643,7 +1662,7 @@ function detectLanguageHint(doc) {
 }
 
 // ========== SPELLCHECK ==========
-async function runSpellcheck(apiKey, bodyText, doc) {
+async function runSpellcheck(bodyText, doc) {
   const words = bodyText.split(/\s+/);
   const truncated = words.slice(0, 4000).join(' ');
   if (truncated.length < 20) return null;
@@ -1662,6 +1681,8 @@ Find ALL spelling errors, typos, and grammar mistakes in the article text below.
 - The type: "spelling", "grammar", or "typo"
 
 Be thorough but precise. Only flag real errors. Do not flag proper nouns, brand names, player names, team names, or foreign words used intentionally. Do not flag stylistic choices. Focus on genuine mistakes.
+
+IMPORTANT: In French (and other Romance languages), missing accents on UPPERCASE letters is NOT an error. For example "L'Equipe" instead of "L'Équipe", "A" instead of "À", "SERIE A" instead of "SÉRIE A" — these are all acceptable. Never flag missing diacritics on capital letters.
 
 Respond ONLY via the spellcheck_report tool.`;
 
@@ -1693,10 +1714,9 @@ Respond ONLY via the spellcheck_report tool.`;
     }
   };
 
-  const resp = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
-    body: JSON.stringify({
+  let data;
+  try {
+    data = await callOpenAI({
       model: OPENAI_MODEL,
       messages: [
         { role: 'system', content: spellPrompt },
@@ -1705,34 +1725,32 @@ Respond ONLY via the spellcheck_report tool.`;
       tools: [spellSchema],
       tool_choice: { type: "function", function: { name: "spellcheck_report" } },
       temperature: 0.1
-    })
-  });
-
-  if (!resp.ok) return null;
-  const data = await resp.json();
+    });
+  } catch(e) { return null; }
   const tc = data.choices?.[0]?.message?.tool_calls?.[0];
   if (!tc) return null;
   try { return JSON.parse(tc.function.arguments); } catch(e) { return null; }
 }
 
 // ========== CONTENT QUALITY CHECK (AI) ==========
-async function runQualityCheck(apiKey, title, bodyText) {
+async function runQualityCheck(title, bodyText) {
   const words = bodyText.split(/\s+/);
   const excerpt = words.slice(0, 4000).join(' ');
   // Extract first paragraph as chapô (lead)
   const paragraphs = bodyText.split(/\n\s*\n/).filter(p => p.trim().length > 30);
   const chapo = paragraphs[0] || '';
 
-  const resp = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
-    body: JSON.stringify({
+  let data;
+  try {
+    data = await callOpenAI({
       model: OPENAI_MODEL,
       messages: [
         { role: 'system', content: `You are a senior editorial quality analyst. You receive an article's title, lead paragraph (chapô), and full body text. You must:
 1. Check if the title accurately reflects and aligns with the chapô and the full article content. Rate as "aligned", "partial", or "misaligned" with a clear explanation.
-2. Detect fluff: filler phrases, vague statements, unnecessary padding, clichés, or sentences that add no information. List each fluff instance with the exact quote and why it's fluff, plus a suggested rewrite or "delete".
-Be strict but fair. News articles should be direct. Every sentence must carry information.` },
+2. Detect fluff — but be SELECTIVE. Fluff means content that is genuinely unrelated to the news or pads a thin story to fill word count. Examples of REAL fluff: listing a person's entire career history when the news is about one event, describing where someone lives when it's irrelevant, generic "what an incredible story" filler, repeating the same point in different words.
+NOT fluff: providing context about who a player is or their current form, naming related players or teams involved, brief background that helps understand the news, quotes from sources even if they restate the point, transitional words like "pourtant" or "en effet". Only flag passages that a reader would genuinely skip because they add zero information.
+
+For each fluff instance, provide the exact quote, why it's fluff, and a suggested rewrite in BOTH English AND the article's native language (format: "EN: ... / FR: ..." or "EN: ... / PT: ..." etc).` },
         { role: 'user', content: `TITLE: ${title}\n\nCHAPÔ (lead paragraph):\n${chapo}\n\nFULL ARTICLE:\n${excerpt}` }
       ],
       tools: [{
@@ -1757,7 +1775,7 @@ Be strict but fair. News articles should be direct. Every sentence must carry in
                   properties: {
                     quote: { type: 'string', description: 'Exact text that is fluff' },
                     reason: { type: 'string', description: 'Why it is fluff' },
-                    suggestion: { type: 'string', description: 'Rewrite or "delete"' }
+                    suggestion: { type: 'string', description: 'Bilingual rewrite (EN: ... / native language: ...) or "delete"' }
                   }, required: ['quote', 'reason', 'suggestion']
                 }
               }
@@ -1767,11 +1785,8 @@ Be strict but fair. News articles should be direct. Every sentence must carry in
       }],
       tool_choice: { type: 'function', function: { name: 'quality_report' } },
       temperature: 0.2
-    })
-  });
-
-  if (!resp.ok) return null;
-  const data = await resp.json();
+    });
+  } catch(e) { return null; }
   const tc = data.choices?.[0]?.message?.tool_calls?.[0];
   if (!tc) return null;
   try { return JSON.parse(tc.function.arguments); } catch(e) { return null; }
@@ -1839,7 +1854,7 @@ function extractTopicKeywords(title) {
     .filter(w => w.length > 2 && !STOP_WORDS.has(w));
 }
 
-async function runDiscoverAuthority(apiKey, url, title) {
+async function runDiscoverAuthority(url, title) {
   const sheetUrl = localStorage.getItem('media_dashboard_discover_sheet') || '';
   if (!sheetUrl) return null;
 
@@ -1877,10 +1892,9 @@ async function runDiscoverAuthority(apiKey, url, title) {
 
   const totalArticles = allRows.length;
 
-  const resp = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
-    body: JSON.stringify({
+  let data;
+  try {
+    data = await callOpenAI({
       model: 'gpt-4o',
       messages: [
         { role: 'system', content: `You are a Discover performance analyst. The user is checking an article. You have Discover data for the last 90 days from the same site (${totalArticles} total articles on Discover).
@@ -1913,11 +1927,8 @@ URL list format: path | clicks | impressions` },
       }],
       tool_choice: { type: 'function', function: { name: 'discover_authority' } },
       temperature: 0.1
-    })
-  });
-
-  if (!resp.ok) return null;
-  const data = await resp.json();
+    });
+  } catch(e) { return null; }
   const tc = data.choices?.[0]?.message?.tool_calls?.[0];
   if (!tc) return null;
   try {
