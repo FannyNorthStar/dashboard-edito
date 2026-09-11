@@ -639,6 +639,9 @@ body {
     <label for="settingsSheetUrl" style="margin-top:16px" data-t="settings_sheet_label">Discover Data (Google Sheets URL)</label>
     <input type="text" id="settingsSheetUrl" placeholder="https://docs.google.com/spreadsheets/d/...">
     <div class="hint" data-t="settings_sheet_hint">Google Sheets with one tab per site. Columns: URL, Clicks, Impressions, CTR.</div>
+    <label for="settingsProxyUrl" style="margin-top:16px" data-t="settings_proxy_label">CORS Proxy (Google Apps Script URL)</label>
+    <input type="text" id="settingsProxyUrl" placeholder="https://script.google.com/macros/s/.../exec">
+    <div class="hint" data-t="settings_proxy_hint">Your own proxy for reliable page fetching. <a href="#" onclick="showProxyHelp();return false" data-t="settings_proxy_link">How to set up (30 sec)</a></div>
     <div class="modal-actions">
       <button class="btn-secondary" onclick="closeSettings()" data-t="btn_cancel">Cancel</button>
       <button class="btn" onclick="saveSettings()" data-t="btn_save">Save</button>
@@ -646,7 +649,39 @@ body {
   </div>
 </div>
 
+<!-- PROXY HELP MODAL -->
+<div class="modal-overlay" id="proxyHelpModal" style="display:none">
+  <div class="modal" style="max-width:560px">
+    <h3>Set up your CORS Proxy (30 sec)</h3>
+    <ol style="padding-left:20px;line-height:1.8;margin:12px 0">
+      <li>Go to <a href="https://script.google.com" target="_blank" rel="noopener">script.google.com</a> &rarr; <b>New project</b></li>
+      <li>Delete everything and paste this code:</li>
+    </ol>
+    <pre style="background:#f4f4f8;padding:12px;border-radius:8px;font-size:12px;overflow-x:auto;white-space:pre-wrap;margin:0 0 12px"><code>function doGet(e) {
+  var url = e.parameter.url;
+  if (!url) return ContentService.createTextOutput('Missing url param');
+  var resp = UrlFetchApp.fetch(url, {muteHttpExceptions:true, followRedirects:true});
+  var out = ContentService.createTextOutput(resp.getContentText());
+  out.setMimeType(ContentService.MimeType.TEXT);
+  return out;
+}</code></pre>
+    <ol start="3" style="padding-left:20px;line-height:1.8;margin:0 0 12px">
+      <li>Click <b>Deploy</b> &rarr; <b>New deployment</b></li>
+      <li>Type: <b>Web app</b> &rarr; Execute as: <b>Me</b> &rarr; Who has access: <b>Anyone</b></li>
+      <li>Click <b>Deploy</b>, authorize, copy the URL</li>
+      <li>Paste in Settings above &uarr;</li>
+    </ol>
+    <div class="modal-actions">
+      <button class="btn" onclick="document.getElementById('proxyHelpModal').style.display='none'">Got it</button>
+    </div>
+  </div>
+</div>
+
 <script>
+function showProxyHelp() {
+  document.getElementById('proxyHelpModal').style.display = 'flex';
+}
+
 // ========== TRANSLATIONS ==========
 const T = {
   en: {
@@ -779,6 +814,9 @@ const T = {
     discover_insights_title: "AI Discover Insights",
     settings_sheet_label: "Discover Data (Google Sheets URL)",
     settings_sheet_hint: "Google Sheets with one tab per site. Columns: URL, Clicks, Impressions, CTR.",
+    settings_proxy_label: "CORS Proxy (Google Apps Script URL)",
+    settings_proxy_hint: "Your own proxy for reliable page fetching.",
+    settings_proxy_link: "How to set up (30 sec)",
     prog_discover_auth: "Analyzing Discover authority...",
     authority_strong: "Strong authority",
     authority_moderate: "Moderate authority",
@@ -911,6 +949,9 @@ const T = {
     discover_insights_title: "Discover IA Insights",
     settings_sheet_label: "Données Discover (URL Google Sheets)",
     settings_sheet_hint: "Google Sheets avec un onglet par site. Colonnes : URL, Clics, Impressions, CTR.",
+    settings_proxy_label: "Proxy CORS (URL Google Apps Script)",
+    settings_proxy_hint: "Votre propre proxy pour un chargement fiable.",
+    settings_proxy_link: "Comment configurer (30 sec)",
     prog_discover_auth: "Analyse de l'autorité Discover...",
     authority_strong: "Autorité forte",
     authority_moderate: "Autorité modérée",
@@ -1043,6 +1084,9 @@ const T = {
     discover_insights_title: "Discover IA Insights",
     settings_sheet_label: "Dados Discover (URL Google Sheets)",
     settings_sheet_hint: "Google Sheets com uma aba por site. Colunas: URL, Cliques, Impressões, CTR.",
+    settings_proxy_label: "Proxy CORS (URL Google Apps Script)",
+    settings_proxy_hint: "Seu proxy próprio para carregamento confiável.",
+    settings_proxy_link: "Como configurar (30 seg)",
     prog_discover_auth: "Analisando autoridade no Discover...",
     authority_strong: "Autoridade forte",
     authority_moderate: "Autoridade moderada",
@@ -1095,6 +1139,8 @@ document.addEventListener('DOMContentLoaded', () => {
   if (saved) document.getElementById('settingsApiKey').value = saved;
   const savedSheet = localStorage.getItem('media_dashboard_discover_sheet');
   if (savedSheet) document.getElementById('settingsSheetUrl').value = savedSheet;
+  const savedProxy = localStorage.getItem('media_dashboard_cors_proxy');
+  if (savedProxy) document.getElementById('settingsProxyUrl').value = savedProxy;
   document.getElementById('urlInput').addEventListener('keydown', e => {
     if (e.key === 'Enter') startAnalysis('url');
   });
@@ -1123,6 +1169,9 @@ function saveSettings() {
   const sheetUrl = document.getElementById('settingsSheetUrl').value.trim();
   if (sheetUrl) localStorage.setItem('media_dashboard_discover_sheet', sheetUrl);
   else localStorage.removeItem('media_dashboard_discover_sheet');
+  const proxyUrl = document.getElementById('settingsProxyUrl').value.trim();
+  if (proxyUrl) localStorage.setItem('media_dashboard_cors_proxy', proxyUrl);
+  else localStorage.removeItem('media_dashboard_cors_proxy');
   closeSettings();
 }
 
@@ -1246,13 +1295,29 @@ async function fetchWithTimeout(url, opts = {}, timeoutMs = 15000) {
 
 async function fetchViaProxy(targetUrl) {
   const errors = [];
-  // 1. Try direct fetch first (works if site allows CORS)
+
+  // 1. Try custom Google Apps Script proxy first (most reliable)
+  const DEFAULT_PROXY = 'https://script.google.com/macros/s/AKfycbz8kiCJrdXSvPavmH9SCTqK2XIheP--lmdhOz9COsXdq4_B-wk6La9vmV_20DtogvziwQ/exec';
+  const customProxy = localStorage.getItem('media_dashboard_cors_proxy') || DEFAULT_PROXY;
+  if (customProxy) {
+    try {
+      const sep = customProxy.includes('?') ? '&' : '?';
+      const proxyUrl = customProxy + sep + 'url=' + encodeURIComponent(targetUrl);
+      const resp = await fetchWithTimeout(proxyUrl, { redirect:'follow' }, 20000);
+      if (resp.ok) return await resp.text();
+      errors.push(`custom: HTTP ${resp.status}`);
+    } catch(e) {
+      errors.push(`custom: ${e.name === 'AbortError' ? 'timeout' : e.message}`);
+    }
+  }
+
+  // 2. Try direct fetch (works if site allows CORS)
   try {
     const resp = await fetchWithTimeout(targetUrl, { mode:'cors' }, 8000);
     if (resp.ok) return await resp.text();
   } catch(e) { /* expected CORS block, continue to proxies */ }
 
-  // 2. Try each proxy
+  // 3. Try each free proxy
   for (const proxy of CORS_PROXIES) {
     try {
       const proxyUrl = proxy.url(targetUrl);
