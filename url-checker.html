@@ -850,12 +850,12 @@ const T = {
     settings_proxy_hint: "Your own proxy for reliable page fetching.",
     settings_proxy_link: "How to set up (30 sec)",
     prog_discover_auth: "Analyzing Discover authority...",
-    authority_strong: "Strong authority",
-    authority_moderate: "Moderate authority",
-    authority_weak: "Weak authority",
+    authority_on_discover: "On Discover",
+    authority_not_on_discover: "Not on Discover",
     authority_nodata: "No data",
     authority_90d: "Last 90 days",
-    authority_paragraph: "Your article is about {topic}. During the last 90 days, {count} article(s) about this topic were on Discover (out of {total} total). On average they had {impressions} impressions, {clicks} clicks, and a CTR of {ctr}%.",
+    authority_para_on: "{count} article(s) about {topic} were on Discover in the last 90 days (out of {total} total on the site).",
+    authority_para_off: "No articles about {topic} were found on Discover in the last 90 days. The site has {total} article(s) on Discover overall.",
   },
   fr: {
     input_title: "Analyser un article",
@@ -1001,12 +1001,12 @@ const T = {
     settings_proxy_hint: "Votre propre proxy pour un chargement fiable.",
     settings_proxy_link: "Comment configurer (30 sec)",
     prog_discover_auth: "Analyse de l'autorité Discover...",
-    authority_strong: "Autorité forte",
-    authority_moderate: "Autorité modérée",
-    authority_weak: "Autorité faible",
+    authority_on_discover: "Sur Discover",
+    authority_not_on_discover: "Pas sur Discover",
     authority_nodata: "Pas de données",
     authority_90d: "90 derniers jours",
-    authority_paragraph: "Votre article porte sur {topic}. Au cours des 90 derniers jours, {count} article(s) sur ce sujet étaient sur Discover (sur {total} au total). En moyenne, ils ont eu {impressions} impressions, {clicks} clics et un CTR de {ctr} %.",
+    authority_para_on: "{count} article(s) sur {topic} étaient sur Discover au cours des 90 derniers jours (sur {total} au total sur le site).",
+    authority_para_off: "Aucun article sur {topic} n'a été trouvé sur Discover au cours des 90 derniers jours. Le site a {total} article(s) sur Discover au total.",
   },
   "pt-br": {
     input_title: "Analisar um artigo",
@@ -1152,12 +1152,12 @@ const T = {
     settings_proxy_hint: "Seu proxy próprio para carregamento confiável.",
     settings_proxy_link: "Como configurar (30 seg)",
     prog_discover_auth: "Analisando autoridade no Discover...",
-    authority_strong: "Autoridade forte",
-    authority_moderate: "Autoridade moderada",
-    authority_weak: "Autoridade fraca",
+    authority_on_discover: "No Discover",
+    authority_not_on_discover: "Fora do Discover",
     authority_nodata: "Sem dados",
     authority_90d: "Últimos 90 dias",
-    authority_paragraph: "Seu artigo é sobre {topic}. Nos últimos 90 dias, {count} artigo(s) sobre este tema estiveram no Discover (de {total} no total). Em média, tiveram {impressions} impressões, {clicks} cliques e um CTR de {ctr}%.",
+    authority_para_on: "{count} artigo(s) sobre {topic} estiveram no Discover nos últimos 90 dias (de {total} no total do site).",
+    authority_para_off: "Nenhum artigo sobre {topic} foi encontrado no Discover nos últimos 90 dias. O site tem {total} artigo(s) no Discover no total.",
   },
   es: {
     input_title: "Analizar un artículo",
@@ -1303,12 +1303,12 @@ const T = {
     settings_proxy_hint: "Tu propio proxy para carga fiable.",
     settings_proxy_link: "Cómo configurar (30 seg)",
     prog_discover_auth: "Analizando autoridad en Discover...",
-    authority_strong: "Autoridad fuerte",
-    authority_moderate: "Autoridad moderada",
-    authority_weak: "Autoridad débil",
+    authority_on_discover: "En Discover",
+    authority_not_on_discover: "No en Discover",
     authority_nodata: "Sin datos",
     authority_90d: "Últimos 90 días",
-    authority_paragraph: "Tu artículo trata sobre {topic}. En los últimos 90 días, {count} artículo(s) sobre este tema estuvieron en Discover (de {total} en total). En promedio tuvieron {impressions} impresiones, {clicks} clics y un CTR de {ctr}%.",
+    authority_para_on: "{count} artículo(s) sobre {topic} estuvieron en Discover en los últimos 90 días (de {total} en total en el sitio).",
+    authority_para_off: "No se encontraron artículos sobre {topic} en Discover en los últimos 90 días. El sitio tiene {total} artículo(s) en Discover en total.",
   },
   it: {
     input_title: "Analizza un articolo",
@@ -1454,12 +1454,12 @@ const T = {
     settings_proxy_hint: "Il tuo proxy personale per un caricamento affidabile.",
     settings_proxy_link: "Come configurare (30 sec)",
     prog_discover_auth: "Analisi autorità Discover...",
-    authority_strong: "Autorità forte",
-    authority_moderate: "Autorità moderata",
-    authority_weak: "Autorità debole",
+    authority_on_discover: "Su Discover",
+    authority_not_on_discover: "Non su Discover",
     authority_nodata: "Nessun dato",
     authority_90d: "Ultimi 90 giorni",
-    authority_paragraph: "Il tuo articolo riguarda {topic}. Negli ultimi 90 giorni, {count} articolo/i su questo argomento erano su Discover (su {total} totali). In media hanno avuto {impressions} impressioni, {clicks} clic e un CTR del {ctr}%.",
+    authority_para_on: "{count} articolo/i su {topic} erano su Discover negli ultimi 90 giorni (su {total} totali nel sito).",
+    authority_para_off: "Nessun articolo su {topic} trovato su Discover negli ultimi 90 giorni. Il sito ha {total} articolo/i su Discover in totale.",
   },
   ru: {
     input_title: "Анализ статьи",
@@ -1605,12 +1605,12 @@ const T = {
     settings_proxy_hint: "Ваш собственный прокси для надёжной загрузки.",
     settings_proxy_link: "Как настроить (30 сек)",
     prog_discover_auth: "Анализ авторитета в Discover...",
-    authority_strong: "Сильный авторитет",
-    authority_moderate: "Средний авторитет",
-    authority_weak: "Слабый авторитет",
+    authority_on_discover: "В Discover",
+    authority_not_on_discover: "Не в Discover",
     authority_nodata: "Нет данных",
     authority_90d: "Последние 90 дней",
-    authority_paragraph: "Ваша статья о {topic}. За последние 90 дней {count} статей на эту тему были в Discover (из {total} всего). В среднем они получили {impressions} показов, {clicks} кликов и CTR {ctr}%.",
+    authority_para_on: "{count} статей о {topic} были в Discover за последние 90 дней (из {total} всего на сайте).",
+    authority_para_off: "Статей о {topic} в Discover за последние 90 дней не найдено. На сайте {total} статей в Discover всего.",
   },
   uk: {
     input_title: "Аналіз статті",
@@ -1756,12 +1756,12 @@ const T = {
     settings_proxy_hint: "Ваш власний проксі для надійного завантаження.",
     settings_proxy_link: "Як налаштувати (30 сек)",
     prog_discover_auth: "Аналіз авторитету в Discover...",
-    authority_strong: "Сильний авторитет",
-    authority_moderate: "Середній авторитет",
-    authority_weak: "Слабкий авторитет",
+    authority_on_discover: "У Discover",
+    authority_not_on_discover: "Не у Discover",
     authority_nodata: "Немає даних",
     authority_90d: "Останні 90 днів",
-    authority_paragraph: "Ваша стаття про {topic}. За останні 90 днів {count} статей на цю тему були в Discover (з {total} усього). В середньому вони отримали {impressions} показів, {clicks} кліків та CTR {ctr}%.",
+    authority_para_on: "{count} статей про {topic} були у Discover за останні 90 днів (з {total} усього на сайті).",
+    authority_para_off: "Статей про {topic} у Discover за останні 90 днів не знайдено. На сайті {total} статей у Discover загалом.",
   },
   pl: {
     input_title: "Analiza artykułu",
@@ -1907,12 +1907,12 @@ const T = {
     settings_proxy_hint: "Własny proxy do niezawodnego ładowania.",
     settings_proxy_link: "Jak skonfigurować (30 sek)",
     prog_discover_auth: "Analiza autorytetu w Discover...",
-    authority_strong: "Silny autorytet",
-    authority_moderate: "Umiarkowany autorytet",
-    authority_weak: "Słaby autorytet",
+    authority_on_discover: "W Discover",
+    authority_not_on_discover: "Nie w Discover",
     authority_nodata: "Brak danych",
     authority_90d: "Ostatnie 90 dni",
-    authority_paragraph: "Twój artykuł dotyczy {topic}. W ciągu ostatnich 90 dni {count} artykułów na ten temat było w Discover (z {total} ogółem). Średnio miały {impressions} wyświetleń, {clicks} kliknięć i CTR {ctr}%.",
+    authority_para_on: "{count} artykułów o {topic} było w Discover w ciągu ostatnich 90 dni (z {total} ogółem na stronie).",
+    authority_para_off: "Nie znaleziono artykułów o {topic} w Discover w ciągu ostatnich 90 dni. Strona ma {total} artykułów w Discover ogółem.",
   },
   cs: {
     input_title: "Analýza článku",
@@ -2058,12 +2058,12 @@ const T = {
     settings_proxy_hint: "Vlastní proxy pro spolehlivé načítání.",
     settings_proxy_link: "Jak nastavit (30 sec)",
     prog_discover_auth: "Analýza autority v Discover...",
-    authority_strong: "Silná autorita",
-    authority_moderate: "Střední autorita",
-    authority_weak: "Slabá autorita",
+    authority_on_discover: "Na Discover",
+    authority_not_on_discover: "Není na Discover",
     authority_nodata: "Žádná data",
     authority_90d: "Posledních 90 dní",
-    authority_paragraph: "Váš článek je o {topic}. Za posledních 90 dní bylo {count} článků na toto téma v Discover (z {total} celkem). Průměrně měly {impressions} zobrazení, {clicks} kliknutí a CTR {ctr}%.",
+    authority_para_on: "{count} článků o {topic} bylo na Discover za posledních 90 dní (z {total} celkem na webu).",
+    authority_para_off: "Žádné články o {topic} nebyly nalezeny na Discover za posledních 90 dní. Web má {total} článků na Discover celkem.",
   }
 };
 
@@ -2909,6 +2909,12 @@ For each padding instance, provide the exact quote, which test(s) it fails, and 
 }
 
 // ========== DISCOVER AUTHORITY ==========
+function computeMedian(arr) {
+  if (!arr.length) return 0;
+  const s = [...arr].sort((a, b) => a - b);
+  const m = Math.floor(s.length / 2);
+  return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+}
 const DOMAIN_TAB_MAP = {
   'topmercato.com': 'TOPMERCATO',
   'www.topmercato.com': 'TOPMERCATO',
@@ -2990,6 +2996,16 @@ async function runDiscoverAuthority(url, title) {
   const allRows = parseDiscoverCSV(csvText);
   if (allRows.length === 0) return null;
 
+  // Compute site-wide stats for comparison
+  const siteStats = {
+    avg_impressions: allRows.reduce((a, r) => a + r.impressions, 0) / allRows.length,
+    avg_clicks: allRows.reduce((a, r) => a + r.clicks, 0) / allRows.length,
+    avg_ctr: allRows.reduce((a, r) => a + r.ctr, 0) / allRows.length,
+    median_impressions: computeMedian(allRows.map(r => r.impressions)),
+    median_clicks: computeMedian(allRows.map(r => r.clicks)),
+    median_ctr: computeMedian(allRows.map(r => r.ctr))
+  };
+
   const keywords = extractTopicKeywords(title);
   if (keywords.length === 0) return null;
 
@@ -3034,10 +3050,9 @@ URL list format: path | clicks | impressions` },
               matching_count: { type: 'integer', description: 'Number of URLs truly about the same topic' },
               avg_clicks: { type: 'number', description: 'Average clicks per article for matching URLs' },
               avg_impressions: { type: 'number', description: 'Average impressions per article for matching URLs' },
-              avg_ctr: { type: 'number', description: 'Average CTR percentage for matching URLs' },
-              authority_level: { type: 'string', enum: ['strong', 'moderate', 'weak', 'no_data'], description: 'How strong the site authority is for this topic on Discover' }
+              avg_ctr: { type: 'number', description: 'Average CTR percentage for matching URLs' }
             },
-            required: ['topic', 'matching_count', 'avg_clicks', 'avg_impressions', 'avg_ctr', 'authority_level']
+            required: ['topic', 'matching_count', 'avg_clicks', 'avg_impressions', 'avg_ctr']
           }
         }
       }],
@@ -3051,6 +3066,9 @@ URL list format: path | clicks | impressions` },
     const result = JSON.parse(tc.function.arguments);
     result.total_articles = totalArticles;
     result.site = tab;
+    result.site_stats = siteStats;
+    // Authority level computed from data, not GPT opinion
+    result.authority_level = result.matching_count > 0 ? 'on_discover' : 'not_on_discover';
     return result;
   } catch(e) { return null; }
 }
@@ -3061,32 +3079,58 @@ function renderDiscoverInsights(d) {
   if (!d) { card.style.display = 'none'; return; }
   card.style.display = 'block';
 
-  const levelColors = { strong: 'green', moderate: 'amber', weak: 'red', no_data: 'red' };
-  const levelColor = levelColors[d.authority_level] || 'amber';
-  const levelLabels = {
-    strong: t('authority_strong'),
-    moderate: t('authority_moderate'),
-    weak: t('authority_weak'),
-    no_data: t('authority_nodata')
-  };
+  const isOn = d.matching_count > 0;
+  const levelColor = isOn ? 'green' : 'red';
+  const levelLabel = isOn ? t('authority_on_discover') : t('authority_not_on_discover');
 
-  const para = t('authority_paragraph', {
-    topic: d.topic,
-    count: d.matching_count,
-    impressions: Math.round(d.avg_impressions).toLocaleString(),
-    clicks: Math.round(d.avg_clicks).toLocaleString(),
-    ctr: d.avg_ctr.toFixed(1),
-    total: d.total_articles
-  });
+  let html = `<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+    <span class="tl-dot ${levelColor}"></span>
+    <strong>${levelLabel}</strong>
+    <span style="color:var(--text-muted);font-size:12px;margin-left:auto">${d.site} · ${t('authority_90d')}</span>
+  </div>`;
 
-  body.innerHTML = `
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-      <span class="tl-dot ${levelColor}"></span>
-      <strong>${levelLabels[d.authority_level] || d.authority_level}</strong>
-      <span style="color:var(--text-muted);font-size:12px;margin-left:auto">${d.site} · ${t('authority_90d')}</span>
-    </div>
-    <p style="color:var(--text);line-height:1.7;margin:0">${para}</p>
-  `;
+  if (isOn && d.site_stats) {
+    const para = t('authority_para_on', { topic: d.topic, count: d.matching_count, total: d.total_articles });
+    html += `<p style="color:var(--text);line-height:1.7;margin:0 0 12px 0">${para}</p>`;
+
+    const ss = d.site_stats;
+    const metrics = [
+      { label: 'Impressions', topic: d.avg_impressions, avg: ss.avg_impressions, median: ss.median_impressions, fmt: v => Math.round(v).toLocaleString() },
+      { label: 'Clicks', topic: d.avg_clicks, avg: ss.avg_clicks, median: ss.median_clicks, fmt: v => Math.round(v).toLocaleString() },
+      { label: 'CTR', topic: d.avg_ctr, avg: ss.avg_ctr, median: ss.median_ctr, fmt: v => v.toFixed(1) + '%' }
+    ];
+
+    html += `<table style="width:100%;font-size:13px;border-collapse:collapse">
+      <thead><tr style="border-bottom:2px solid var(--border)">
+        <th style="padding:6px 8px;text-align:left;font-weight:600"></th>
+        <th style="padding:6px 8px;text-align:right;font-weight:600">Topic</th>
+        <th style="padding:6px 8px;text-align:right;font-weight:600">Site avg</th>
+        <th style="padding:6px 8px;text-align:right;font-weight:600">Site median</th>
+        <th style="padding:6px 8px;text-align:right;font-weight:600">vs avg</th>
+        <th style="padding:6px 8px;text-align:right;font-weight:600">vs median</th>
+      </tr></thead><tbody>`;
+
+    for (const m of metrics) {
+      const vsAvg = m.avg > 0 ? ((m.topic - m.avg) / m.avg * 100) : 0;
+      const vsMed = m.median > 0 ? ((m.topic - m.median) / m.median * 100) : 0;
+      const ac = vsAvg >= 0 ? 'var(--green,#22c55e)' : 'var(--red,#ef4444)';
+      const mc = vsMed >= 0 ? 'var(--green,#22c55e)' : 'var(--red,#ef4444)';
+      html += `<tr style="border-bottom:1px solid var(--border)">
+        <td style="padding:6px 8px;font-weight:600">${m.label}</td>
+        <td style="padding:6px 8px;text-align:right;font-weight:600">${m.fmt(m.topic)}</td>
+        <td style="padding:6px 8px;text-align:right">${m.fmt(m.avg)}</td>
+        <td style="padding:6px 8px;text-align:right">${m.fmt(m.median)}</td>
+        <td style="padding:6px 8px;text-align:right;color:${ac}">${vsAvg>=0?'▲':'▼'} ${vsAvg>=0?'+':''}${vsAvg.toFixed(0)}%</td>
+        <td style="padding:6px 8px;text-align:right;color:${mc}">${vsMed>=0?'▲':'▼'} ${vsMed>=0?'+':''}${vsMed.toFixed(0)}%</td>
+      </tr>`;
+    }
+    html += `</tbody></table>`;
+  } else {
+    const para = t('authority_para_off', { topic: d.topic, total: d.total_articles });
+    html += `<p style="color:var(--text);line-height:1.7;margin:0">${para}</p>`;
+  }
+
+  body.innerHTML = html;
 }
 
 // ========== RENDER RESULTS ==========
