@@ -551,13 +551,6 @@ body {
   </div>
   <div class="badge">URL Checker</div>
   <div class="topbar-right">
-    <select id="reviewerSelect" data-t-title="reviewer_label" title="Reviewer">
-      <option value="">—</option>
-      <option value="Johann">Johann</option>
-      <option value="Ed">Ed</option>
-      <option value="Barney">Barney</option>
-      <option value="Other">Other</option>
-    </select>
     <select id="langSelect" title="Language">
       <option value="en">EN</option>
       <option value="fr">FR</option>
@@ -2214,9 +2207,6 @@ async function callOpenAI(body) {
 // ========== INIT ==========
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('langSelect').value = LANG;
-  // Restore reviewer selection
-  const savedReviewer = localStorage.getItem('media_dashboard_reviewer') || '';
-  document.getElementById('reviewerSelect').value = savedReviewer;
   applyTranslations();
   const saved = localStorage.getItem('media_dashboard_openai_key');
   if (saved) document.getElementById('settingsApiKey').value = saved;
@@ -2238,9 +2228,8 @@ document.getElementById('langSelect').addEventListener('change', e => {
   applyTranslations();
 });
 
-document.getElementById('reviewerSelect').addEventListener('change', e => {
-  localStorage.setItem('media_dashboard_reviewer', e.target.value);
-});
+// Reviewer select is now rendered dynamically inside renderQuality()
+// Its change listener is attached there via onchange attribute
 
 // ========== SETTINGS ==========
 function openSettings() {
@@ -3212,6 +3201,19 @@ function renderQuality(q) {
 
   // Fluff
   html += `<div class="check-row"><div class="status-dot ${fluff.length===0?'ok':'fail'}"></div><div class="check-label" style="font-weight:600">${t('quality_fluff')}</div><div class="check-detail"><span class="tl-dot ${fluffColor}" style="width:8px;height:8px"></span> ${fluffLabel}</div></div>`;
+
+  // Reviewer selector — inside fluff section so it's contextually visible
+  const savedRev = localStorage.getItem('media_dashboard_reviewer') || '';
+  html += `<div style="padding:6px 16px 8px 32px;display:flex;align-items:center;gap:8px">
+    <label style="font-size:12px;font-weight:600;color:var(--text-dim)" for="reviewerSelect">${t('reviewer_label')}:</label>
+    <select id="reviewerSelect" onchange="localStorage.setItem('media_dashboard_reviewer',this.value)" style="padding:3px 8px;font-size:13px;border-radius:6px;border:1px solid var(--border);background:var(--card-bg);color:var(--text-main);cursor:pointer">
+      <option value=""${savedRev===''?' selected':''}>—</option>
+      <option value="Johann"${savedRev==='Johann'?' selected':''}>Johann</option>
+      <option value="Ed"${savedRev==='Ed'?' selected':''}>Ed</option>
+      <option value="Barney"${savedRev==='Barney'?' selected':''}>Barney</option>
+      <option value="Other"${savedRev==='Other'?' selected':''}>Other</option>
+    </select>
+  </div>`;
 
   if (fluff.length > 0) {
     html += fluff.map((f, i) => {
