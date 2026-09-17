@@ -2750,7 +2750,7 @@ async function runSpellcheck(bodyText, doc) {
 Find ALL spelling errors, typos, and grammar mistakes in the article text below. For each error, provide:
 - The exact original word/phrase as it appears
 - The corrected version
-- A short excerpt of the sentence for context (max 80 chars around the error)
+- A short excerpt of the sentence for context (at least 120 chars around the error — include enough words to see the full clause and subject)
 - The type: "spelling", "grammar", or "typo"
 
 Be thorough but precise. Only flag REAL errors that would confuse or mislead the reader. Do not flag proper nouns, brand names, player names, team names, or foreign words used intentionally. Do not flag stylistic choices or minor formatting preferences. Focus on genuine mistakes that hurt readability or credibility.
@@ -2762,6 +2762,7 @@ IMPORTANT — DO NOT FLAG THESE (they are NOT errors in sports writing):
 4. NICKNAMES: Clubs and players are often called by well-known nicknames. These are NOT errors. Examples: "Gunners" (Arsenal), "Reds" (Liverpool/Man Utd), "Blues" (Chelsea/Man City), "Toffees" (Everton), "Spurs" (Tottenham), "Magpies" (Newcastle), "Hammers" (West Ham), "Blaugrana" (Barcelona), "Merengues" (Real Madrid), "Rossoneri" (AC Milan), "Bianconeri" (Juventus), "Partenopei" (Napoli), "Les Bleus" (France), "Seleção" (Brazil), "Bafana Bafana" (South Africa), "Super Eagles" (Nigeria), "Amakhosi" (Kaizer Chiefs), "Bucs/Buccaneers" (Orlando Pirates), "Usuthu" (AmaZulu), "Timão" (Corinthians), "Mengão" (Flamengo), "Tricolor" (São Paulo/Fluminense), etc.
 5. SHORTENED NAMES: "CR7", "KDB", "VVD", "Messi", "Neymar", "Mbappé", "Salah" in headlines or text are fine.
 6. UPPERCASE ACCENTS: In French and Romance languages, missing accents on uppercase letters is standard ("L'Equipe" = "L'Équipe", "SERIE A" = "SÉRIE A").
+7. GENDER AGREEMENT ON PAST PARTICIPLES: In French/Italian/Spanish/Portuguese, past participle agreement (é/ée, amené/amenée, etc.) depends on the grammatical subject, which may be earlier in the sentence. If the visible context does not clearly show the subject's gender, do NOT flag it. "était amené" and "était amenée" can both be correct depending on context. Only flag when the subject is clearly visible AND the agreement is clearly wrong.
 
 GENERAL RULE: When in doubt, do NOT flag it. A false positive (flagging something correct) is worse than a false negative (missing a real error). Only flag things you are very confident are genuine mistakes.
 
@@ -2783,7 +2784,7 @@ Respond ONLY via the spellcheck_report tool.`;
               properties: {
                 original: { type: "string" },
                 correction: { type: "string" },
-                context: { type: "string" },
+                context: { type: "string", description: "At least 120 chars of surrounding text to show full clause and subject" },
                 type: { type: "string", enum: ["spelling", "grammar", "typo"] }
               },
               required: ["original", "correction", "context", "type"]
@@ -3215,7 +3216,9 @@ function renderQuality(q) {
   if (fluff.length > 0) {
     html += fluff.map((f, i) => {
       const fid = 'fluff_' + i + '_' + Date.now();
-      return `<div class="spell-error-row" id="${fid}" style="position:relative">
+      const quoteB64 = btoa(unescape(encodeURIComponent(f.quote || '')));
+      const testsB64 = btoa(unescape(encodeURIComponent(f.tests_failed || '')));
+      return `<div class="spell-error-row" id="${fid}" data-quote="${quoteB64}" data-tests="${testsB64}" style="position:relative">
       <span class="spell-type" style="background:var(--amber-bg,#FFF3CD);color:var(--amber,#B8860B)">Fluff</span>
       <div style="flex:1">
         <div class="spell-original" style="font-style:italic">"${esc(f.quote)}"</div>
@@ -3226,8 +3229,8 @@ function renderQuality(q) {
           <span class="spell-correction">${esc(f.suggestion)}</span>
         </div>
         <div style="margin-top:8px;display:flex;gap:8px">
-          <button class="fluff-feedback-btn fluff-confirm" onclick="fluffFeedback('${fid}','confirm',${JSON.stringify(esc(f.quote)).replace(/'/g, "\\'")},${JSON.stringify(esc(f.tests_failed||'')).replace(/'/g, "\\'")})" title="${t('fluff_ok_title')}">${t('fluff_ok_btn')}</button>
-          <button class="fluff-feedback-btn fluff-dismiss" onclick="fluffFeedback('${fid}','dismiss',${JSON.stringify(esc(f.quote)).replace(/'/g, "\\'")},${JSON.stringify(esc(f.tests_failed||'')).replace(/'/g, "\\'")})" title="${t('fluff_dismiss_title')}">${t('fluff_dismiss_btn')}</button>
+          <button class="fluff-feedback-btn fluff-confirm" onclick="fluffFeedback('${fid}','confirm')" title="${t('fluff_ok_title')}">${t('fluff_ok_btn')}</button>
+          <button class="fluff-feedback-btn fluff-dismiss" onclick="fluffFeedback('${fid}','dismiss')" title="${t('fluff_dismiss_title')}">${t('fluff_dismiss_btn')}</button>
         </div>
       </div>
     </div>`;
@@ -3286,13 +3289,15 @@ function renderAI(ai) {
 }
 
 // ========== FLUFF FEEDBACK ==========
-function fluffFeedback(fid, action, quote, tests) {
+function fluffFeedback(fid, action) {
   const row = document.getElementById(fid);
   if (!row) return;
   const articleUrl = document.getElementById('resultUrl')?.textContent || '';
   const domain = articleUrl ? new URL(articleUrl).hostname.replace('www.','') : '';
-  const decodedQuote = decodeEntities(quote);
-  const decodedTests = decodeEntities(tests || '');
+  // Read quote and tests from data attributes (base64-encoded to avoid escaping issues)
+  let decodedQuote = '', decodedTests = '';
+  try { decodedQuote = decodeURIComponent(escape(atob(row.dataset.quote || ''))); } catch(e) {}
+  try { decodedTests = decodeURIComponent(escape(atob(row.dataset.tests || ''))); } catch(e) {}
   const reviewer = document.getElementById('reviewerSelect')?.value || '';
   const verdict = action === 'confirm' ? 'YES fluff' : 'NO not fluff';
 
