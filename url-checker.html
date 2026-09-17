@@ -732,6 +732,9 @@ const T = {
     fluff_dismiss_title: "Dismiss this flag — the sentence is fine",
     fluff_confirmed: "Confirmed",
     fluff_dismissed: "Dismissed",
+    fluff_export_btn: "Export feedback",
+    fluff_export_title: "Download all fluff feedback as CSV",
+    fluff_export_entries: "entries",
     ai_title: "AI Analysis",
     settings_title: "Settings",
     settings_hint: "Stored locally in your browser only. Used for AI analysis (Search, Discover, editorial review).",
@@ -884,6 +887,9 @@ const T = {
     fluff_dismiss_title: "Ignorer ce signalement — la phrase est correcte",
     fluff_confirmed: "Confirmé",
     fluff_dismissed: "Ignoré",
+    fluff_export_btn: "Exporter les retours",
+    fluff_export_title: "Télécharger tous les retours fluff en CSV",
+    fluff_export_entries: "entrées",
     ai_title: "Analyse IA",
     settings_title: "Paramètres",
     settings_hint: "Stockée localement dans votre navigateur. Utilisée pour l'analyse IA (Search, Discover, lecture éditoriale).",
@@ -1030,6 +1036,9 @@ const T = {
     fluff_dismiss_title: "Ignorar este alerta — a frase está correta",
     fluff_confirmed: "Confirmado",
     fluff_dismissed: "Ignorado",
+    fluff_export_btn: "Exportar feedback",
+    fluff_export_title: "Baixar todos os feedbacks de enchimento em CSV",
+    fluff_export_entries: "entradas",
     ai_title: "Análise IA",
     settings_title: "Configurações",
     settings_hint: "Armazenada localmente no seu navegador. Usada para análise IA (Search, Discover, revisão editorial).",
@@ -1176,6 +1185,9 @@ const T = {
     fluff_dismiss_title: "Descartar esta alerta — la frase está bien",
     fluff_confirmed: "Confirmado",
     fluff_dismissed: "Descartado",
+    fluff_export_btn: "Exportar feedback",
+    fluff_export_title: "Descargar todos los comentarios de relleno en CSV",
+    fluff_export_entries: "entradas",
     ai_title: "Análisis IA",
     settings_title: "Ajustes",
     settings_hint: "Almacenado localmente en tu navegador. Usado para análisis IA (Search, Discover, revisión editorial).",
@@ -1322,6 +1334,9 @@ const T = {
     fluff_dismiss_title: "Ignora questa segnalazione — la frase è corretta",
     fluff_confirmed: "Confermato",
     fluff_dismissed: "Ignorato",
+    fluff_export_btn: "Esporta feedback",
+    fluff_export_title: "Scarica tutti i feedback sul riempitivo in CSV",
+    fluff_export_entries: "voci",
     ai_title: "Analisi IA",
     settings_title: "Impostazioni",
     settings_hint: "Salvate localmente nel tuo browser. Usate per l'analisi IA (Search, Discover, revisione editoriale).",
@@ -1468,6 +1483,9 @@ const T = {
     fluff_dismiss_title: "Отклонить — предложение нормальное",
     fluff_confirmed: "Подтверждено",
     fluff_dismissed: "Отклонено",
+    fluff_export_btn: "Экспорт отзывов",
+    fluff_export_title: "Скачать все отзывы о воде в CSV",
+    fluff_export_entries: "записей",
     ai_title: "ИИ-анализ",
     settings_title: "Настройки",
     settings_hint: "Хранится локально в вашем браузере. Используется для ИИ-анализа (Search, Discover, редакционная проверка).",
@@ -1614,6 +1632,9 @@ const T = {
     fluff_dismiss_title: "Відхилити — речення нормальне",
     fluff_confirmed: "Підтверджено",
     fluff_dismissed: "Відхилено",
+    fluff_export_btn: "Експорт відгуків",
+    fluff_export_title: "Завантажити всі відгуки про воду у CSV",
+    fluff_export_entries: "записів",
     ai_title: "ШІ-аналіз",
     settings_title: "Налаштування",
     settings_hint: "Зберігається локально у вашому браузері. Використовується для ШІ-аналізу (Search, Discover, редакційна перевірка).",
@@ -1760,6 +1781,9 @@ const T = {
     fluff_dismiss_title: "Odrzuć — zdanie jest w porządku",
     fluff_confirmed: "Potwierdzone",
     fluff_dismissed: "Odrzucone",
+    fluff_export_btn: "Eksportuj opinie",
+    fluff_export_title: "Pobierz wszystkie opinie o laniu wody jako CSV",
+    fluff_export_entries: "wpisów",
     ai_title: "Analiza AI",
     settings_title: "Ustawienia",
     settings_hint: "Przechowywane lokalnie w przeglądarce. Używane do analizy AI (Search, Discover, przegląd redakcyjny).",
@@ -1906,6 +1930,9 @@ const T = {
     fluff_dismiss_title: "Zamítnout — věta je v pořádku",
     fluff_confirmed: "Potvrzeno",
     fluff_dismissed: "Zamítnuto",
+    fluff_export_btn: "Exportovat zpětnou vazbu",
+    fluff_export_title: "Stáhnout všechny zpětné vazby o vatě jako CSV",
+    fluff_export_entries: "záznamů",
     ai_title: "AI analýza",
     settings_title: "Nastavení",
     settings_hint: "Uloženo lokálně ve vašem prohlížeči. Používáno pro AI analýzu (Search, Discover, redakční kontrola).",
@@ -2056,7 +2083,7 @@ const OPENAI_MODEL = 'gpt-4o';
 // ========== OPENAI PROXY ==========
 async function callOpenAI(body) {
   const proxy = localStorage.getItem('media_dashboard_cors_proxy')
-    || 'https://script.google.com/macros/s/AKfycbz8kiCJrdXSvPavmH9SCTqK2XIheP--lmdhOz9COsXdq4_B-wk6La9vmV_20DtogvziwQ/exec';
+    || 'https://script.google.com/macros/s/AKfycbydan3oxJpVWmT1VDWw3xKUWFqy7tW4Bkb2-guLhufwQItALaZpXTu2SlH2xKaQ_i77yg/exec';
   // Try GAS proxy first (key stored server-side)
   try {
     const resp = await fetchWithTimeout(proxy, {
@@ -2251,7 +2278,7 @@ async function fetchViaProxy(targetUrl) {
   const errors = [];
 
   // 1. Try custom Google Apps Script proxy first (most reliable)
-  const DEFAULT_PROXY = 'https://script.google.com/macros/s/AKfycbz8kiCJrdXSvPavmH9SCTqK2XIheP--lmdhOz9COsXdq4_B-wk6La9vmV_20DtogvziwQ/exec';
+  const DEFAULT_PROXY = 'https://script.google.com/macros/s/AKfycbydan3oxJpVWmT1VDWw3xKUWFqy7tW4Bkb2-guLhufwQItALaZpXTu2SlH2xKaQ_i77yg/exec';
   const customProxy = localStorage.getItem('media_dashboard_cors_proxy') || DEFAULT_PROXY;
   if (customProxy) {
     try {
@@ -3079,13 +3106,27 @@ function renderQuality(q) {
           <span class="spell-correction">${esc(f.suggestion)}</span>
         </div>
         <div style="margin-top:8px;display:flex;gap:8px">
-          <button class="fluff-feedback-btn fluff-confirm" onclick="fluffFeedback('${fid}','confirm',${JSON.stringify(esc(f.quote)).replace(/'/g, "\\'")})" title="${t('fluff_ok_title')}">${t('fluff_ok_btn')}</button>
-          <button class="fluff-feedback-btn fluff-dismiss" onclick="fluffFeedback('${fid}','dismiss',${JSON.stringify(esc(f.quote)).replace(/'/g, "\\'")})" title="${t('fluff_dismiss_title')}">${t('fluff_dismiss_btn')}</button>
+          <button class="fluff-feedback-btn fluff-confirm" onclick="fluffFeedback('${fid}','confirm',${JSON.stringify(esc(f.quote)).replace(/'/g, "\\'")},${JSON.stringify(esc(f.tests_failed||'')).replace(/'/g, "\\'")})" title="${t('fluff_ok_title')}">${t('fluff_ok_btn')}</button>
+          <button class="fluff-feedback-btn fluff-dismiss" onclick="fluffFeedback('${fid}','dismiss',${JSON.stringify(esc(f.quote)).replace(/'/g, "\\'")},${JSON.stringify(esc(f.tests_failed||'')).replace(/'/g, "\\'")})" title="${t('fluff_dismiss_title')}">${t('fluff_dismiss_btn')}</button>
         </div>
       </div>
     </div>`;
     }).join('');
   }
+
+  // Export feedback button (shown if there's any stored feedback)
+  try {
+    const fb = JSON.parse(localStorage.getItem('media_dashboard_fluff_feedback') || '[]');
+    if (fb.length > 0) {
+      const conf = fb.filter(e => e.action === 'confirm').length;
+      const dism = fb.filter(e => e.action === 'dismiss').length;
+      html += `<div style="padding:12px 16px 8px 16px;display:flex;align-items:center;gap:10px;border-top:1px solid var(--border);margin-top:8px">
+        <button onclick="exportFluffFeedback()" class="fluff-feedback-btn" style="padding:5px 14px;font-size:12px" title="${t('fluff_export_title')}">📊 ${t('fluff_export_btn')}</button>
+        <span style="font-size:11px;color:var(--text-dim)">${fb.length} ${t('fluff_export_entries')} (${conf} ✓ / ${dism} ✗)</span>
+      </div>`;
+    }
+  } catch(e) {}
+
   body.innerHTML = html;
 }
 
@@ -3120,17 +3161,24 @@ function renderAI(ai) {
 }
 
 // ========== FLUFF FEEDBACK ==========
-function fluffFeedback(fid, action, quote) {
+function fluffFeedback(fid, action, quote, tests) {
   const row = document.getElementById(fid);
   if (!row) return;
   try {
     const key = 'media_dashboard_fluff_feedback';
     const existing = JSON.parse(localStorage.getItem(key) || '[]');
-    const currentUrl = document.getElementById('resultUrl')?.textContent || '';
-    const domain = currentUrl ? new URL(currentUrl).hostname.replace('www.','') : '';
-    existing.push({ quote: decodeEntities(quote), action, domain, ts: Date.now() });
-    // Keep last 500 feedback entries
-    if (existing.length > 500) existing.splice(0, existing.length - 500);
+    const articleUrl = document.getElementById('resultUrl')?.textContent || '';
+    const domain = articleUrl ? new URL(articleUrl).hostname.replace('www.','') : '';
+    existing.push({
+      url: articleUrl,
+      domain,
+      quote: decodeEntities(quote),
+      tests_failed: decodeEntities(tests || ''),
+      action,
+      ts: Date.now()
+    });
+    // Keep last 1000 feedback entries
+    if (existing.length > 1000) existing.splice(0, existing.length - 1000);
     localStorage.setItem(key, JSON.stringify(existing));
   } catch(e) {}
   if (action === 'dismiss') {
@@ -3152,6 +3200,27 @@ function getFluffFeedbackStats() {
     const dismissed = entries.filter(e => e.action === 'dismiss').length;
     return { total: entries.length, confirmed, dismissed, entries };
   } catch(e) { return { total: 0, confirmed: 0, dismissed: 0, entries: [] }; }
+}
+
+function exportFluffFeedback() {
+  try {
+    const entries = JSON.parse(localStorage.getItem('media_dashboard_fluff_feedback') || '[]');
+    if (!entries.length) { alert('No feedback data yet.'); return; }
+    const csvQ = s => '"' + (s||'').replace(/"/g, '""') + '"';
+    const header = 'URL,Domain,Quote,Tests Failed,Verdict,Date';
+    const rows = entries.map(e => {
+      const date = new Date(e.ts).toISOString().slice(0,16).replace('T',' ');
+      const verdict = e.action === 'confirm' ? 'YES fluff' : 'NO not fluff';
+      return [csvQ(e.url), csvQ(e.domain), csvQ(e.quote), csvQ(e.tests_failed), csvQ(verdict), csvQ(date)].join(',');
+    });
+    const csv = header + '\n' + rows.join('\n');
+    const blob = new Blob(['﻿' + csv], {type:'text/csv;charset=utf-8'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'fluff_feedback_' + new Date().toISOString().slice(0,10) + '.csv';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  } catch(e) { alert('Export error: ' + e.message); }
 }
 
 function esc(str) { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
