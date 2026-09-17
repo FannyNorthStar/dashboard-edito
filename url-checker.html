@@ -3015,60 +3015,68 @@ async function runDiscoverAuthority(url, title) {
     return keywords.some(kw => slug.includes(kw));
   });
 
-  // Prepare compact data for AI: send slug + stats for candidates (max 150)
+  // Prepare compact data for AI: send indexed slug + stats for candidates (max 150)
   const subset = candidates.slice(0, 150);
-  const compactList = subset.map(r => {
+  const compactList = subset.map((r, i) => {
     const path = r.url.replace(/https?:\/\/[^/]+/, '');
-    return `${path} | ${r.clicks} | ${r.impressions}`;
+    return `[${i}] ${path} | ${r.clicks} | ${r.impressions}`;
   }).join('\n');
 
   const totalArticles = allRows.length;
 
+  // GPT only identifies which URLs match the topic — all math done in JS
   let data;
   try {
     data = await callOpenAI({
       model: 'gpt-4o',
       messages: [
-        { role: 'system', content: `You are a Discover performance analyst. The user is checking an article. You have Discover data for the last 90 days from the same site (${totalArticles} total articles on Discover).
+        { role: 'system', content: `You are a Discover performance analyst. The user is checking an article. You have a numbered list of Discover URLs from the same site (pre-filtered by keyword).
 
-Given the article title and a list of URLs from the same site that were on Discover (pre-filtered by keyword), identify which URLs are truly about the SAME TOPIC (same team, player, event, or subject — not just vaguely related).
+Identify which URLs are truly about the SAME TOPIC as the article (same team, player, event, or subject — not just vaguely related). Return the topic name and the indices of matching URLs. Do NOT compute any stats — just identify matches.
 
-Calculate stats only from matching articles. Return structured data.
-
-URL list format: path | clicks | impressions` },
+URL list format: [index] path | clicks | impressions` },
         { role: 'user', content: `Article title: "${title}"\n\nCandidate URLs (${subset.length} pre-filtered from ${totalArticles} total):\n${compactList || '(no keyword matches found)'}` }
       ],
       tools: [{
         type: 'function',
         function: {
-          name: 'discover_authority',
-          description: 'Report Discover authority for this topic',
+          name: 'discover_matches',
+          description: 'Return the topic and indices of matching URLs',
           parameters: {
             type: 'object',
             properties: {
               topic: { type: 'string', description: 'The article topic in 2-5 words (e.g. "Chelsea transfer window", "Lamine Camara future")' },
-              matching_count: { type: 'integer', description: 'Number of URLs truly about the same topic' },
-              avg_clicks: { type: 'number', description: 'Average clicks per article for matching URLs' },
-              avg_impressions: { type: 'number', description: 'Average impressions per article for matching URLs' },
-              avg_ctr: { type: 'number', description: 'Average CTR percentage for matching URLs' }
+              matching_indices: { type: 'array', items: { type: 'integer' }, description: 'Zero-based indices from the candidate list that are truly about the same topic. Empty array if none match.' }
             },
-            required: ['topic', 'matching_count', 'avg_clicks', 'avg_impressions', 'avg_ctr']
+            required: ['topic', 'matching_indices']
           }
         }
       }],
-      tool_choice: { type: 'function', function: { name: 'discover_authority' } },
+      tool_choice: { type: 'function', function: { name: 'discover_matches' } },
       temperature: 0.1
     });
   } catch(e) { return null; }
   const tc = data.choices?.[0]?.message?.tool_calls?.[0];
   if (!tc) return null;
   try {
-    const result = JSON.parse(tc.function.arguments);
-    result.total_articles = totalArticles;
-    result.site = tab;
-    result.site_stats = siteStats;
-    // Authority level computed from data, not GPT opinion
-    result.authority_level = result.matching_count > 0 ? 'on_discover' : 'not_on_discover';
+    const gpt = JSON.parse(tc.function.arguments);
+    const matchingRows = (gpt.matching_indices || [])
+      .filter(i => i >= 0 && i < subset.length)
+      .map(i => subset[i]);
+    const count = matchingRows.length;
+
+    // All stats computed in JS from actual CSV data
+    const result = {
+      topic: gpt.topic,
+      matching_count: count,
+      avg_clicks: count > 0 ? matchingRows.reduce((a, r) => a + r.clicks, 0) / count : 0,
+      avg_impressions: count > 0 ? matchingRows.reduce((a, r) => a + r.impressions, 0) / count : 0,
+      avg_ctr: count > 0 ? matchingRows.reduce((a, r) => a + r.ctr, 0) / count : 0,
+      total_articles: totalArticles,
+      site: tab,
+      site_stats: siteStats,
+      authority_level: count > 0 ? 'on_discover' : 'not_on_discover'
+    };
     return result;
   } catch(e) { return null; }
 }
