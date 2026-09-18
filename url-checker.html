@@ -821,6 +821,14 @@ body {
       </div>
       <div class="ai-body" id="aiBody"></div>
     </div>
+    <div class="card" id="anglesCard" style="display:none">
+      <div class="card-header" onclick="toggleCard(this)">
+        <h3>💡 <span data-t="angles_title">Suggested Angles</span></h3>
+        <span class="ai-badge">GPT-4o</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="card-body" id="anglesBody"></div>
+    </div>
   </div>
 
   <div class="results" id="kwResults" style="display:none"></div>
@@ -1052,6 +1060,11 @@ const T = {
     spell_type_typo: "typo",
     prog_spell: "Running spellcheck...",
     prog_quality: "Checking content quality...",
+    prog_angles: "Generating editorial angles...",
+    angles_title: "Suggested Angles",
+    angles_interconnect: "Interconnect (internal linking)",
+    angles_evergreen: "Evergreen (long-tail SEO)",
+    angles_magazine: "Magazine (deep-dive features)",
     err_empty_html: "Paste HTML code to analyze.",
     kpi_spell: "Spelling",
     kpi_quality: "Quality",
@@ -1252,6 +1265,11 @@ const T = {
     spell_type_typo: "coquille",
     prog_spell: "Vérification orthographe...",
     prog_quality: "Vérification qualité du contenu...",
+    prog_angles: "Génération des angles éditoriaux...",
+    angles_title: "Angles suggérés",
+    angles_interconnect: "Interconnexion (maillage interne)",
+    angles_evergreen: "Evergreen (SEO longue traîne)",
+    angles_magazine: "Magazine (articles de fond)",
     err_empty_html: "Collez du code HTML à analyser.",
     kpi_spell: "Orthographe",
     kpi_quality: "Qualité",
@@ -1449,6 +1467,11 @@ const T = {
     spell_type_typo: "digitação",
     prog_spell: "Verificando ortografia...",
     prog_quality: "Verificando qualidade do conteúdo...",
+    prog_angles: "Gerando ângulos editoriais...",
+    angles_title: "Ângulos sugeridos",
+    angles_interconnect: "Interconexão (links internos)",
+    angles_evergreen: "Evergreen (SEO de cauda longa)",
+    angles_magazine: "Magazine (reportagens aprofundadas)",
     err_empty_html: "Cole o código HTML para analisar.",
     kpi_spell: "Ortografia",
     kpi_quality: "Qualidade",
@@ -1647,6 +1670,11 @@ const T = {
     spell_type_typo: "error tipográfico",
     prog_spell: "Verificando ortografía...",
     prog_quality: "Verificando calidad del contenido...",
+    prog_angles: "Generando ángulos editoriales...",
+    angles_title: "Ángulos sugeridos",
+    angles_interconnect: "Interconexión (enlaces internos)",
+    angles_evergreen: "Evergreen (SEO de cola larga)",
+    angles_magazine: "Magazine (reportajes en profundidad)",
     kpi_spell: "Ortografía",
     kpi_quality: "Calidad",
     discover_insights_title: "Discover IA Insights",
@@ -1844,6 +1872,11 @@ const T = {
     spell_type_typo: "refuso",
     prog_spell: "Verifica ortografica...",
     prog_quality: "Verifica qualità del contenuto...",
+    prog_angles: "Generazione angoli editoriali...",
+    angles_title: "Angoli suggeriti",
+    angles_interconnect: "Interconnessione (link interni)",
+    angles_evergreen: "Evergreen (SEO a coda lunga)",
+    angles_magazine: "Magazine (approfondimenti)",
     kpi_spell: "Ortografia",
     kpi_quality: "Qualità",
     discover_insights_title: "Discover IA Insights",
@@ -2041,6 +2074,11 @@ const T = {
     spell_type_typo: "опечатка",
     prog_spell: "Проверка орфографии...",
     prog_quality: "Проверка качества контента...",
+    prog_angles: "Генерация редакционных ракурсов...",
+    angles_title: "Предложенные ракурсы",
+    angles_interconnect: "Взаимосвязь (внутренние ссылки)",
+    angles_evergreen: "Evergreen (длинный хвост SEO)",
+    angles_magazine: "Журнал (глубокие материалы)",
     kpi_spell: "Орфография",
     kpi_quality: "Качество",
     discover_insights_title: "Discover ИИ-аналитика",
@@ -2238,6 +2276,11 @@ const T = {
     spell_type_typo: "друкарська помилка",
     prog_spell: "Перевірка орфографії...",
     prog_quality: "Перевірка якості контенту...",
+    prog_angles: "Генерація редакційних ракурсів...",
+    angles_title: "Запропоновані ракурси",
+    angles_interconnect: "Взаємозв'язок (внутрішні посилання)",
+    angles_evergreen: "Evergreen (довгий хвіст SEO)",
+    angles_magazine: "Журнал (глибокі матеріали)",
     kpi_spell: "Орфографія",
     kpi_quality: "Якість",
     discover_insights_title: "Discover ШІ-аналітика",
@@ -2435,6 +2478,11 @@ const T = {
     spell_type_typo: "literówka",
     prog_spell: "Sprawdzanie ortografii...",
     prog_quality: "Sprawdzanie jakości treści...",
+    prog_angles: "Generowanie kątów redakcyjnych...",
+    angles_title: "Sugerowane kąty",
+    angles_interconnect: "Powiązania (linki wewnętrzne)",
+    angles_evergreen: "Evergreen (długi ogon SEO)",
+    angles_magazine: "Magazyn (pogłębione materiały)",
     kpi_spell: "Ortografia",
     kpi_quality: "Jakość",
     discover_insights_title: "Discover AI Insights",
@@ -2632,6 +2680,11 @@ const T = {
     spell_type_typo: "překlep",
     prog_spell: "Kontrola pravopisu...",
     prog_quality: "Kontrola kvality obsahu...",
+    prog_angles: "Generování redakčních úhlů...",
+    angles_title: "Navrhované úhly",
+    angles_interconnect: "Propojení (interní odkazy)",
+    angles_evergreen: "Evergreen (dlouhý ocas SEO)",
+    angles_magazine: "Magazín (hloubkové materiály)",
     kpi_spell: "Pravopis",
     kpi_quality: "Kvalita",
     discover_insights_title: "Discover AI Insights",
@@ -2982,6 +3035,7 @@ async function startAnalysis(mode) {
   document.getElementById('spellBody').style.display = 'none';
   document.getElementById('qualityCard').style.display = 'none';
   document.getElementById('discoverInsightsCard').style.display = 'none';
+  document.getElementById('anglesCard').style.display = 'none';
 
   try {
     if (mode === 'url') {
@@ -3006,6 +3060,7 @@ async function startAnalysis(mode) {
     let aiResult = null;
     let spellResult = null;
     let qualityResult = null;
+    let anglesResult = null;
     let discoverAuthority = null;
     let aiError = null, spellError = null, qualityError = null;
 
@@ -3034,6 +3089,13 @@ async function startAnalysis(mode) {
       console.warn('Quality check failed:', e.message);
     }
 
+    try {
+      setProgress(88, t('prog_angles'));
+      anglesResult = await generateEditorialAngles(title, bodyText, aiResult, url);
+    } catch(e) {
+      console.warn('Editorial angles failed:', e.message);
+    }
+
     if (mode === 'url') {
       try {
         setProgress(92, t('prog_discover_auth'));
@@ -3045,7 +3107,7 @@ async function startAnalysis(mode) {
     setProgress(98, t('prog_done'));
 
     setProgress(100, t('prog_done'));
-    renderResults(url, title, discoverChecks, contentChecks, aiResult, spellResult, qualityResult, discoverAuthority, { aiError, spellError, qualityError }, bodyText);
+    renderResults(url, title, discoverChecks, contentChecks, aiResult, spellResult, qualityResult, discoverAuthority, { aiError, spellError, qualityError }, bodyText, anglesResult);
   } catch (err) {
     showError('Error: ' + err.message);
     document.getElementById('progressBar').classList.remove('active');
@@ -3333,6 +3395,147 @@ Each idea should be a specific, publishable article title. Give 3-5 ideas per ca
   const tc = data.choices?.[0]?.message?.tool_calls?.[0];
   if (!tc) return null;
   return JSON.parse(tc.function.arguments);
+}
+
+// ========== EDITORIAL ANGLES (URL/Draft) ==========
+async function generateEditorialAngles(title, bodyText, aiResult, articleUrl) {
+  // Build context from AI analysis
+  const entities = (aiResult?.entites_principales || []).join(', ');
+  const keyword = aiResult?.search?.mot_cle_principal || '';
+  const cluster = aiResult?.search?.cluster_thematique || '';
+  const discoverScore = aiResult?.discover?.score || '';
+  const strengths = (aiResult?.discover?.points_forts || []).join('; ');
+  const weaknesses = (aiResult?.discover?.points_faibles || []).join('; ');
+
+  // Extract domain for context
+  let domain = '';
+  try { domain = articleUrl ? new URL(articleUrl).hostname.replace('www.','') : ''; } catch(e) {}
+
+  // Truncate body for prompt
+  const words = bodyText.split(/\s+/);
+  const excerpt = words.slice(0, 1500).join(' ');
+
+  const data = await callOpenAI({
+    model: 'gpt-4o',
+    messages: [
+      { role: 'system', content: `You are a senior sports editorial strategist. You just reviewed an article and need to suggest follow-up article angles the newsroom should consider.
+
+Your suggestions must be EDITORIALLY GROUNDED:
+- Based on what's ACTUALLY at stake right now for the teams/players/topics in the article
+- Consider the current sports calendar: league standings, upcoming fixtures, transfer windows, international breaks, tournaments
+- Think about what readers who just read THIS article would want to read next
+- Avoid generic angles that could apply to any team/player — be specific to the entities and context
+- Each suggestion should be a concrete, publishable article title in the article's language
+
+Generate 3 categories of follow-up ideas:
+1. INTERCONNECT articles: Related spin-off articles that create internal linking opportunities. These should complement the original article and drive readers deeper into the site. Think "if someone read this, they'd also want to know about..."
+2. EVERGREEN angles: Timeless, long-tail SEO angles around the same topic. These should rank for months/years. Think rankings, records, history, guides, explainers.
+3. MAGAZINE angles: Deeper investigation or feature-style angles. Think data analysis, tactical breakdowns, behind-the-scenes narratives, profile pieces.
+
+Give 3-4 ideas per category. Each idea should include:
+- A specific article title (in the article's language)
+- A one-sentence pitch explaining WHY this angle matters right now
+
+IMPORTANT: Do NOT suggest articles that essentially rewrite what the original article already covers. Suggest angles that ADD to the coverage.` },
+      { role: 'user', content: `ARTICLE TITLE: ${title}
+
+DOMAIN: ${domain || 'unknown'}
+MAIN KEYWORD: ${keyword}
+TOPIC CLUSTER: ${cluster}
+KEY ENTITIES: ${entities || 'unknown'}
+DISCOVER SCORE: ${discoverScore}/100
+STRENGTHS: ${strengths || 'n/a'}
+WEAKNESSES: ${weaknesses || 'n/a'}
+
+ARTICLE EXCERPT:
+${excerpt}` }
+    ],
+    tools: [{
+      type: 'function',
+      function: {
+        name: 'editorial_angles',
+        description: 'Generate editorially grounded follow-up article ideas in 3 categories',
+        parameters: {
+          type: 'object',
+          properties: {
+            interconnect: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  title: { type: 'string', description: 'Article title in the article language' },
+                  pitch: { type: 'string', description: 'One-sentence pitch: why this angle matters now' }
+                },
+                required: ['title', 'pitch']
+              },
+              description: 'Interconnect/spin-off article ideas (3-4)'
+            },
+            evergreen: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  title: { type: 'string', description: 'Article title in the article language' },
+                  pitch: { type: 'string', description: 'One-sentence pitch: why this angle has long-tail value' }
+                },
+                required: ['title', 'pitch']
+              },
+              description: 'Evergreen angle article ideas (3-4)'
+            },
+            magazine: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  title: { type: 'string', description: 'Article title in the article language' },
+                  pitch: { type: 'string', description: 'One-sentence pitch: why this deep-dive matters' }
+                },
+                required: ['title', 'pitch']
+              },
+              description: 'Magazine/feature angle article ideas (3-4)'
+            }
+          },
+          required: ['interconnect', 'evergreen', 'magazine']
+        }
+      }
+    }],
+    tool_choice: { type: 'function', function: { name: 'editorial_angles' } },
+    temperature: 0.7
+  });
+
+  const tc = data.choices?.[0]?.message?.tool_calls?.[0];
+  if (!tc) return null;
+  return JSON.parse(tc.function.arguments);
+}
+
+function renderAngles(angles) {
+  const card = document.getElementById('anglesCard');
+  const body = document.getElementById('anglesBody');
+  if (!angles) { card.style.display = 'none'; return; }
+  card.style.display = 'block';
+
+  // Merge all angle categories into a single flat list
+  const allIdeas = [];
+  for (const key of ['interconnect', 'evergreen', 'magazine']) {
+    const items = angles[key];
+    if (!items || items.length === 0) continue;
+    for (const idea of items) {
+      const ideaTitle = typeof idea === 'string' ? idea : idea.title;
+      const ideaPitch = typeof idea === 'string' ? '' : idea.pitch;
+      allIdeas.push({ title: ideaTitle, pitch: ideaPitch });
+    }
+  }
+
+  let html = `<div style="display:flex;flex-direction:column;gap:8px">`;
+  for (const idea of allIdeas) {
+    html += `<div style="padding:8px 12px;background:var(--surface-2);border-radius:var(--radius-sm);font-size:13px;line-height:1.5">
+      <div style="font-weight:600">${esc(idea.title)}</div>
+      ${idea.pitch ? `<div style="color:var(--text-muted);font-size:12px;margin-top:3px">${esc(idea.pitch)}</div>` : ''}
+    </div>`;
+  }
+  html += `</div>`;
+
+  body.innerHTML = html;
 }
 
 // ========== FETCH PAGE ==========
@@ -3855,7 +4058,7 @@ Apply these tests. A sentence must trigger 2-3 of these AND be genuinely harmful
 
 NOT padding: providing context about who a player is or their current form, naming related players or teams involved, brief background that helps understand the news, quotes from sources even if they restate a point, transitional words like "pourtant" or "en effet", scene-setting for context. Only flag sentences that genuinely add zero information AND would hurt Google's perception of the article.
 
-For each padding instance, provide: the exact quote, a category from this list (delete-test, any-team, obviousness, hope-want, restatement, generic-consequence, future-uncertainty, importance-no-explanation, momentum, determination, intrigue, challenge, opportunity, objective, context-free, evidence-free, repetition), the severity (high/medium/low), which test(s) it fails, and a suggested rewrite in BOTH English AND the article's native language (format: "EN: ... / FR: ..." or "EN: ... / PT: ..." etc). If the sentence should just be deleted, say "delete".` + calibration },
+For each padding instance, provide: the exact quote, a category from this list (delete-test, any-team, obviousness, hope-want, restatement, generic-consequence, future-uncertainty, importance-no-explanation, momentum, determination, intrigue, challenge, opportunity, objective, context-free, evidence-free, repetition), the severity (high/medium/low), which test(s) it fails, and a suggested rewrite in the same language as the article. If the sentence should just be deleted, say "delete".` + calibration },
         { role: 'user', content: `TITLE: ${title}\n\nCHAPÔ (lead paragraph):\n${chapo}\n\nFULL ARTICLE:\n${excerpt}` }
       ],
       tools: [{
@@ -3892,7 +4095,7 @@ For each padding instance, provide: the exact quote, a category from this list (
                     severity: { type: 'string', enum: ['high','medium','low'], description: 'How harmful this is to Google ranking: high=spam signal, medium=weakens quality, low=minor' },
                     tests_failed: { type: 'string', description: 'Which test(s) this sentence fails (e.g. "any-team, obviousness")' },
                     reason: { type: 'string', description: 'Brief explanation of why it is padding and how it hurts article quality' },
-                    suggestion: { type: 'string', description: 'Bilingual rewrite (EN: ... / native language: ...) or "delete"' }
+                    suggestion: { type: 'string', description: 'Rewrite in the same language as the article, or "delete" if the sentence should be removed entirely' }
                   }, required: ['quote', 'category', 'severity', 'tests_failed', 'reason', 'suggestion']
                 }
               }
@@ -4311,7 +4514,7 @@ function buildComparisonTable(topicStats, siteStats) {
 }
 
 // ========== RENDER RESULTS ==========
-function renderResults(url, title, discoverChecks, contentChecks, aiResult, spellResult, qualityResult, discoverAuthority, errors, bodyText) {
+function renderResults(url, title, discoverChecks, contentChecks, aiResult, spellResult, qualityResult, discoverAuthority, errors, bodyText, anglesResult) {
   errors = errors || {};
   storeExportData(url, title, discoverChecks, contentChecks, aiResult, spellResult, qualityResult, discoverAuthority, bodyText);
   document.getElementById('results').classList.add('active');
@@ -4370,6 +4573,11 @@ function renderResults(url, title, discoverChecks, contentChecks, aiResult, spel
   else {
     qualityCard.style.display = 'block';
     document.getElementById('qualityBody').innerHTML = `<div class="ai-unavailable">${t('ai_unavailable')}${errors.qualityError ? ' <span class="ai-unavailable-detail">(' + esc(errors.qualityError) + ')</span>' : ''}</div>`;
+  }
+
+  if (anglesResult) {
+    document.getElementById('anglesCard').style.display = 'block';
+    renderAngles(anglesResult);
   }
 
   renderDiscoverInsights(discoverAuthority);
