@@ -844,6 +844,7 @@ const T = {
     err_fetch: "Could not fetch the page (HTTP {status}). Check the URL.",
     err_fetch_hint: "Could not fetch the page ({status}). Try pasting the HTML directly instead.",
     ai_unavailable: "AI analysis unavailable. Check your API key in Settings or try again.",
+    ai_no_key: "AI features require the CORS proxy to be configured with an OpenAI key, or a local API key in Settings.",
     err_openai: "OpenAI API error ({status}): {msg}",
     err_no_tool: "No tool response from GPT-4o.",
     prog_fetch: "Fetching the page...",
@@ -1015,6 +1016,7 @@ const T = {
     err_fetch: "Impossible de récupérer la page (HTTP {status}). Vérifiez l'URL.",
     err_fetch_hint: "Impossible de récupérer la page ({status}). Essayez de coller le HTML directement.",
     ai_unavailable: "Analyse IA indisponible. Vérifiez votre clé API dans les Paramètres ou réessayez.",
+    ai_no_key: "L'IA nécessite que le proxy CORS soit configuré avec une clé OpenAI, ou une clé API locale dans les Paramètres.",
     err_openai: "Erreur OpenAI API ({status}) : {msg}",
     err_no_tool: "Pas de réponse outil de GPT-4o.",
     prog_fetch: "Récupération de la page...",
@@ -1180,6 +1182,7 @@ const T = {
     err_fetch: "Não foi possível acessar a página (HTTP {status}). Verifique a URL.",
     err_fetch_hint: "Não foi possível acessar a página ({status}). Tente colar o HTML diretamente.",
     ai_unavailable: "Análise IA indisponível. Verifique sua chave API nas Configurações ou tente novamente.",
+    ai_no_key: "IA requer que o proxy CORS tenha uma chave OpenAI configurada, ou uma chave API local nas Configurações.",
     err_openai: "Erro na API OpenAI ({status}): {msg}",
     err_no_tool: "Sem resposta de ferramenta do GPT-4o.",
     prog_fetch: "Buscando a página...",
@@ -1346,6 +1349,7 @@ const T = {
     err_fetch: "No se pudo acceder a la página (HTTP {status}). Verifica la URL.",
     err_fetch_hint: "No se pudo acceder a la página ({status}). Intenta pegar el HTML directamente.",
     ai_unavailable: "Análisis IA no disponible. Verifica tu clave API en Ajustes o inténtalo de nuevo.",
+    ai_no_key: "IA requiere que el proxy CORS tenga una clave OpenAI configurada, o una clave API local en Ajustes.",
     err_openai: "Error de la API OpenAI ({status}): {msg}",
     err_no_tool: "Sin respuesta de herramienta de GPT-4o.",
     prog_fetch: "Obteniendo la página...",
@@ -1511,6 +1515,7 @@ const T = {
     err_fetch: "Impossibile recuperare la pagina (HTTP {status}). Controlla l'URL.",
     err_fetch_hint: "Impossibile recuperare la pagina ({status}). Prova a incollare il codice HTML direttamente.",
     ai_unavailable: "Analisi IA non disponibile. Controlla la chiave API nelle Impostazioni o riprova.",
+    ai_no_key: "L'IA richiede che il proxy CORS sia configurato con una chiave OpenAI, o una chiave API locale nelle Impostazioni.",
     err_openai: "Errore API OpenAI ({status}): {msg}",
     err_no_tool: "Nessuna risposta tool da GPT-4o.",
     prog_fetch: "Recupero della pagina...",
@@ -1676,6 +1681,7 @@ const T = {
     err_fetch: "Не удалось загрузить страницу (HTTP {status}). Проверьте URL.",
     err_fetch_hint: "Не удалось загрузить страницу ({status}). Попробуйте вставить HTML напрямую.",
     ai_unavailable: "ИИ-анализ недоступен. Проверьте API-ключ в Настройках или попробуйте ещё раз.",
+    ai_no_key: "ИИ-функции требуют ключ OpenAI в CORS-прокси или локальный API-ключ в Настройках.",
     err_openai: "Ошибка API OpenAI ({status}): {msg}",
     err_no_tool: "Нет ответа от инструмента GPT-4o.",
     prog_fetch: "Загрузка страницы...",
@@ -1841,6 +1847,7 @@ const T = {
     err_fetch: "Не вдалося завантажити сторінку (HTTP {status}). Перевірте URL.",
     err_fetch_hint: "Не вдалося завантажити сторінку ({status}). Спробуйте вставити HTML напряму.",
     ai_unavailable: "ІІ-аналіз недоступний. Перевірте API-ключ у Налаштуваннях або спробуйте знову.",
+    ai_no_key: "ІІ-функції потребують ключ OpenAI у CORS-проксі або локальний API-ключ у Налаштуваннях.",
     err_openai: "Помилка API OpenAI ({status}): {msg}",
     err_no_tool: "Немає відповіді від інструмента GPT-4o.",
     prog_fetch: "Завантаження сторінки...",
@@ -2006,6 +2013,7 @@ const T = {
     err_fetch: "Nie udało się pobrać strony (HTTP {status}). Sprawdź URL.",
     err_fetch_hint: "Nie udało się pobrać strony ({status}). Spróbuj wkleić HTML bezpośrednio.",
     ai_unavailable: "Analiza AI niedostępna. Sprawdź klucz API w Ustawieniach lub spróbuj ponownie.",
+    ai_no_key: "AI wymaga klucza OpenAI w proxy CORS lub lokalnego klucza API w Ustawieniach.",
     err_openai: "Błąd API OpenAI ({status}): {msg}",
     err_no_tool: "Brak odpowiedzi narzędzia GPT-4o.",
     prog_fetch: "Pobieranie strony...",
@@ -2171,6 +2179,7 @@ const T = {
     err_fetch: "Nepodařilo se načíst stránku (HTTP {status}). Zkontrolujte URL.",
     err_fetch_hint: "Nepodařilo se načíst stránku ({status}). Zkuste vložit HTML přímo.",
     ai_unavailable: "AI analýza není k dispozici. Zkontrolujte API klíč v Nastavení nebo zkuste znovu.",
+    ai_no_key: "AI vyžaduje klíč OpenAI v CORS proxy nebo lokální API klíč v Nastavení.",
     err_openai: "Chyba API OpenAI ({status}): {msg}",
     err_no_tool: "Žádná odpověď nástroje GPT-4o.",
     prog_fetch: "Načítání stránky...",
@@ -2400,22 +2409,29 @@ function buildCalibrationBlock(feedback, currentDomain) {
 async function callOpenAI(body) {
   const proxy = localStorage.getItem('media_dashboard_cors_proxy')
     || 'https://script.google.com/macros/s/AKfycbydan3oxJpVWmT1VDWw3xKUWFqy7tW4Bkb2-guLhufwQItALaZpXTu2SlH2xKaQ_i77yg/exec';
+  let proxyError = '';
   // Try GAS proxy first (key stored server-side)
   try {
     const resp = await fetchWithTimeout(proxy, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'text/plain' },
       body: typeof body === 'string' ? body : JSON.stringify(body),
       redirect: 'follow'
     }, 60000);
     if (resp.ok) {
       const j = await resp.json();
       if (!j.error) return j;
+      proxyError = 'Proxy returned error: ' + (typeof j.error === 'string' ? j.error : JSON.stringify(j.error));
+    } else {
+      proxyError = 'Proxy HTTP ' + resp.status;
     }
-  } catch(e) { /* fall through to direct call */ }
+  } catch(e) {
+    proxyError = 'Proxy: ' + (e.name === 'AbortError' ? 'timeout (60s)' : e.message);
+  }
+  console.warn('GAS proxy failed:', proxyError);
   // Fallback: direct OpenAI call with local API key
   const apiKey = localStorage.getItem('media_dashboard_openai_key');
-  if (!apiKey) throw new Error('AI features require the CORS proxy to be configured with an OpenAI key, or a local API key in Settings.');
+  if (!apiKey) throw new Error(t('ai_no_key') + (proxyError ? ' (' + proxyError + ')' : ''));
   const resp = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + apiKey },
