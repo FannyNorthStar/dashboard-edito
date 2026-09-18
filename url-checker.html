@@ -399,6 +399,12 @@ body {
   text-transform: uppercase; letter-spacing: 0.5px;
 }
 .ai-body { padding: 20px; }
+.ai-unavailable {
+  padding: 16px 20px; font-size: 13px; color: var(--text-muted);
+  background: var(--surface-2); border-radius: var(--radius-sm);
+  border-left: 3px solid var(--amber);
+}
+.ai-unavailable-detail { font-size: 11px; opacity: 0.7; word-break: break-word; }
 .ai-subsection { margin-bottom: 20px; }
 .ai-subsection:last-child { margin-bottom: 0; }
 .ai-subsection h4 {
@@ -836,6 +842,8 @@ const T = {
     err_empty_html: "Paste HTML code to analyze.",
     err_url: "URL must start with http:// or https://",
     err_fetch: "Could not fetch the page (HTTP {status}). Check the URL.",
+    err_fetch_hint: "Could not fetch the page ({status}). Try pasting the HTML directly instead.",
+    ai_unavailable: "AI analysis unavailable. Check your API key in Settings or try again.",
     err_openai: "OpenAI API error ({status}): {msg}",
     err_no_tool: "No tool response from GPT-4o.",
     prog_fetch: "Fetching the page...",
@@ -1005,6 +1013,8 @@ const T = {
     err_empty: "Entrez une URL à analyser.",
     err_url: "L'URL doit commencer par http:// ou https://",
     err_fetch: "Impossible de récupérer la page (HTTP {status}). Vérifiez l'URL.",
+    err_fetch_hint: "Impossible de récupérer la page ({status}). Essayez de coller le HTML directement.",
+    ai_unavailable: "Analyse IA indisponible. Vérifiez votre clé API dans les Paramètres ou réessayez.",
     err_openai: "Erreur OpenAI API ({status}) : {msg}",
     err_no_tool: "Pas de réponse outil de GPT-4o.",
     prog_fetch: "Récupération de la page...",
@@ -1168,6 +1178,8 @@ const T = {
     err_empty: "Insira uma URL para analisar.",
     err_url: "A URL deve começar com http:// ou https://",
     err_fetch: "Não foi possível acessar a página (HTTP {status}). Verifique a URL.",
+    err_fetch_hint: "Não foi possível acessar a página ({status}). Tente colar o HTML diretamente.",
+    ai_unavailable: "Análise IA indisponível. Verifique sua chave API nas Configurações ou tente novamente.",
     err_openai: "Erro na API OpenAI ({status}): {msg}",
     err_no_tool: "Sem resposta de ferramenta do GPT-4o.",
     prog_fetch: "Buscando a página...",
@@ -1332,6 +1344,8 @@ const T = {
     err_empty_html: "Pega el código HTML para analizar.",
     err_url: "La URL debe empezar con http:// o https://",
     err_fetch: "No se pudo acceder a la página (HTTP {status}). Verifica la URL.",
+    err_fetch_hint: "No se pudo acceder a la página ({status}). Intenta pegar el HTML directamente.",
+    ai_unavailable: "Análisis IA no disponible. Verifica tu clave API en Ajustes o inténtalo de nuevo.",
     err_openai: "Error de la API OpenAI ({status}): {msg}",
     err_no_tool: "Sin respuesta de herramienta de GPT-4o.",
     prog_fetch: "Obteniendo la página...",
@@ -1495,6 +1509,8 @@ const T = {
     err_empty_html: "Incolla il codice HTML da analizzare.",
     err_url: "L'URL deve iniziare con http:// o https://",
     err_fetch: "Impossibile recuperare la pagina (HTTP {status}). Controlla l'URL.",
+    err_fetch_hint: "Impossibile recuperare la pagina ({status}). Prova a incollare il codice HTML direttamente.",
+    ai_unavailable: "Analisi IA non disponibile. Controlla la chiave API nelle Impostazioni o riprova.",
     err_openai: "Errore API OpenAI ({status}): {msg}",
     err_no_tool: "Nessuna risposta tool da GPT-4o.",
     prog_fetch: "Recupero della pagina...",
@@ -1658,6 +1674,8 @@ const T = {
     err_empty_html: "Вставьте HTML-код для анализа.",
     err_url: "URL должен начинаться с http:// или https://",
     err_fetch: "Не удалось загрузить страницу (HTTP {status}). Проверьте URL.",
+    err_fetch_hint: "Не удалось загрузить страницу ({status}). Попробуйте вставить HTML напрямую.",
+    ai_unavailable: "ИИ-анализ недоступен. Проверьте API-ключ в Настройках или попробуйте ещё раз.",
     err_openai: "Ошибка API OpenAI ({status}): {msg}",
     err_no_tool: "Нет ответа от инструмента GPT-4o.",
     prog_fetch: "Загрузка страницы...",
@@ -1821,6 +1839,8 @@ const T = {
     err_empty_html: "Вставте HTML-код для аналізу.",
     err_url: "URL повинен починатися з http:// або https://",
     err_fetch: "Не вдалося завантажити сторінку (HTTP {status}). Перевірте URL.",
+    err_fetch_hint: "Не вдалося завантажити сторінку ({status}). Спробуйте вставити HTML напряму.",
+    ai_unavailable: "ІІ-аналіз недоступний. Перевірте API-ключ у Налаштуваннях або спробуйте знову.",
     err_openai: "Помилка API OpenAI ({status}): {msg}",
     err_no_tool: "Немає відповіді від інструмента GPT-4o.",
     prog_fetch: "Завантаження сторінки...",
@@ -1984,6 +2004,8 @@ const T = {
     err_empty_html: "Wklej kod HTML do analizy.",
     err_url: "URL musi zaczynać się od http:// lub https://",
     err_fetch: "Nie udało się pobrać strony (HTTP {status}). Sprawdź URL.",
+    err_fetch_hint: "Nie udało się pobrać strony ({status}). Spróbuj wkleić HTML bezpośrednio.",
+    ai_unavailable: "Analiza AI niedostępna. Sprawdź klucz API w Ustawieniach lub spróbuj ponownie.",
     err_openai: "Błąd API OpenAI ({status}): {msg}",
     err_no_tool: "Brak odpowiedzi narzędzia GPT-4o.",
     prog_fetch: "Pobieranie strony...",
@@ -2147,6 +2169,8 @@ const T = {
     err_empty_html: "Vložte HTML kód k analýze.",
     err_url: "URL musí začínat http:// nebo https://",
     err_fetch: "Nepodařilo se načíst stránku (HTTP {status}). Zkontrolujte URL.",
+    err_fetch_hint: "Nepodařilo se načíst stránku ({status}). Zkuste vložit HTML přímo.",
+    ai_unavailable: "AI analýza není k dispozici. Zkontrolujte API klíč v Nastavení nebo zkuste znovu.",
     err_openai: "Chyba API OpenAI ({status}): {msg}",
     err_no_tool: "Žádná odpověď nástroje GPT-4o.",
     prog_fetch: "Načítání stránky...",
@@ -2528,24 +2552,45 @@ async function startAnalysis(mode) {
     let spellResult = null;
     let qualityResult = null;
     let discoverAuthority = null;
+    let aiError = null, spellError = null, qualityError = null;
+
+    // Each AI feature runs independently so one failure doesn't kill the rest
     try {
       setProgress(62, t('prog_ai'));
       aiResult = await runAIAnalysis(url, title, bodyText);
-      setProgress(74, t('prog_spell'));
-      spellResult = await runSpellcheck(bodyText, doc);
-      setProgress(82, t('prog_quality'));
-      qualityResult = await runQualityCheck(title, bodyText, url);
-      if (mode === 'url') {
-        setProgress(92, t('prog_discover_auth'));
-        discoverAuthority = await runDiscoverAuthority(url, title);
-      }
-      setProgress(98, t('prog_done'));
-    } catch(aiErr) {
-      console.warn('AI analysis unavailable:', aiErr.message);
+    } catch(e) {
+      aiError = e.message;
+      console.warn('AI analysis failed:', e.message);
     }
 
+    try {
+      setProgress(74, t('prog_spell'));
+      spellResult = await runSpellcheck(bodyText, doc);
+    } catch(e) {
+      spellError = e.message;
+      console.warn('Spellcheck failed:', e.message);
+    }
+
+    try {
+      setProgress(82, t('prog_quality'));
+      qualityResult = await runQualityCheck(title, bodyText, url);
+    } catch(e) {
+      qualityError = e.message;
+      console.warn('Quality check failed:', e.message);
+    }
+
+    if (mode === 'url') {
+      try {
+        setProgress(92, t('prog_discover_auth'));
+        discoverAuthority = await runDiscoverAuthority(url, title);
+      } catch(e) {
+        console.warn('Discover authority failed:', e.message);
+      }
+    }
+    setProgress(98, t('prog_done'));
+
     setProgress(100, t('prog_done'));
-    renderResults(url, title, discoverChecks, contentChecks, aiResult, spellResult, qualityResult, discoverAuthority);
+    renderResults(url, title, discoverChecks, contentChecks, aiResult, spellResult, qualityResult, discoverAuthority, { aiError, spellError, qualityError });
   } catch (err) {
     showError('Error: ' + err.message);
     document.getElementById('progressBar').classList.remove('active');
@@ -2572,18 +2617,26 @@ async function fetchWithTimeout(url, opts = {}, timeoutMs = 15000) {
 async function fetchViaProxy(targetUrl) {
   const errors = [];
 
-  // 1. Try custom Google Apps Script proxy first (most reliable)
+  // 1. Try custom Google Apps Script proxy first (most reliable) — with retry
   const DEFAULT_PROXY = 'https://script.google.com/macros/s/AKfycbydan3oxJpVWmT1VDWw3xKUWFqy7tW4Bkb2-guLhufwQItALaZpXTu2SlH2xKaQ_i77yg/exec';
   const customProxy = localStorage.getItem('media_dashboard_cors_proxy') || DEFAULT_PROXY;
   if (customProxy) {
-    try {
-      const sep = customProxy.includes('?') ? '&' : '?';
-      const proxyUrl = customProxy + sep + 'url=' + encodeURIComponent(targetUrl);
-      const resp = await fetchWithTimeout(proxyUrl, { redirect:'follow' }, 20000);
-      if (resp.ok) return await resp.text();
-      errors.push(`custom: HTTP ${resp.status}`);
-    } catch(e) {
-      errors.push(`custom: ${e.name === 'AbortError' ? 'timeout' : e.message}`);
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        const sep = customProxy.includes('?') ? '&' : '?';
+        const proxyUrl = customProxy + sep + 'url=' + encodeURIComponent(targetUrl);
+        const resp = await fetchWithTimeout(proxyUrl, { redirect:'follow' }, 30000);
+        if (resp.ok) return await resp.text();
+        errors.push(`custom: HTTP ${resp.status}`);
+        break; // non-timeout HTTP error, no retry
+      } catch(e) {
+        const msg = e.name === 'AbortError' ? 'timeout' : e.message;
+        if (attempt === 0 && e.name === 'AbortError') {
+          errors.push('custom: timeout (retrying)');
+          continue; // retry once on timeout
+        }
+        errors.push(`custom: ${msg}`);
+      }
     }
   }
 
@@ -2610,7 +2663,7 @@ async function fetchViaProxy(targetUrl) {
       errors.push(`${proxy.name}: ${e.name === 'AbortError' ? 'timeout' : e.message}`);
     }
   }
-  throw new Error(t('err_fetch', { status: errors.join(' / ') }));
+  throw new Error(t('err_fetch_hint', { status: errors.join(' / ') }));
 }
 
 async function fetchPage(url) {
@@ -3342,7 +3395,8 @@ function renderDiscoverInsights(d) {
 }
 
 // ========== RENDER RESULTS ==========
-function renderResults(url, title, discoverChecks, contentChecks, aiResult, spellResult, qualityResult, discoverAuthority) {
+function renderResults(url, title, discoverChecks, contentChecks, aiResult, spellResult, qualityResult, discoverAuthority, errors) {
+  errors = errors || {};
   storeExportData(url, title, discoverChecks, contentChecks, aiResult, spellResult, qualityResult, discoverAuthority);
   document.getElementById('results').classList.add('active');
   document.getElementById('exportBar').classList.add('active');
@@ -3383,15 +3437,24 @@ function renderResults(url, title, discoverChecks, contentChecks, aiResult, spel
 
   const aiSection = document.getElementById('aiSection');
   if (aiResult) { aiSection.style.display = 'block'; renderAI(aiResult); }
-  else aiSection.style.display = 'none';
+  else {
+    aiSection.style.display = 'block';
+    document.getElementById('aiBody').innerHTML = `<div class="ai-unavailable">${t('ai_unavailable')}${errors.aiError ? ' <span class="ai-unavailable-detail">(' + esc(errors.aiError) + ')</span>' : ''}</div>`;
+  }
 
   const spellBody = document.getElementById('spellBody');
   if (spellResult) { spellBody.style.display = 'block'; renderSpellcheck(spellResult); }
-  else spellBody.style.display = 'none';
+  else {
+    spellBody.style.display = 'block';
+    spellBody.innerHTML = `<div class="ai-unavailable">${t('ai_unavailable')}${errors.spellError ? ' <span class="ai-unavailable-detail">(' + esc(errors.spellError) + ')</span>' : ''}</div>`;
+  }
 
   const qualityCard = document.getElementById('qualityCard');
   if (qualityResult) { qualityCard.style.display = 'block'; renderQuality(qualityResult); }
-  else qualityCard.style.display = 'none';
+  else {
+    qualityCard.style.display = 'block';
+    document.getElementById('qualityBody').innerHTML = `<div class="ai-unavailable">${t('ai_unavailable')}${errors.qualityError ? ' <span class="ai-unavailable-detail">(' + esc(errors.qualityError) + ')</span>' : ''}</div>`;
+  }
 
   renderDiscoverInsights(discoverAuthority);
 }
