@@ -27,6 +27,9 @@
   --red-bg: rgba(239,68,68,0.08);
   --amber: #F59E0B;
   --amber-bg: rgba(245,158,11,0.08);
+  --blue: #3B82F6;
+  --blue-bg: rgba(59,130,246,0.08);
+  --purple: #A855F7;
   --radius: 10px;
   --radius-sm: 6px;
   --shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.03);
@@ -108,6 +111,42 @@ body {
   margin: 0 auto;
   padding: 32px 24px 60px;
 }
+
+/* MODE TABS */
+.mode-tabs {
+  display: flex; gap: 0; margin-bottom: 20px;
+  border-bottom: 2px solid var(--border);
+}
+.mode-tab {
+  padding: 10px 18px; font-size: 13px; font-weight: 600;
+  color: var(--text-muted); background: none; border: none;
+  cursor: pointer; position: relative; letter-spacing: 0.3px;
+  transition: color 0.2s;
+}
+.mode-tab:hover { color: var(--text); }
+.mode-tab.active { color: var(--accent); }
+.mode-tab.active::after {
+  content: ''; position: absolute; bottom: -2px; left: 0; right: 0;
+  height: 2px; background: var(--accent); border-radius: 1px 1px 0 0;
+}
+.mode-panel { display: none; }
+.mode-panel.active { display: block; }
+
+/* SITE SELECTOR (keyword mode) */
+.site-select-row {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 14px;
+}
+.site-select-row label {
+  font-size: 12px; font-weight: 600; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap;
+}
+.site-select {
+  flex: 1; padding: 8px 12px; background: var(--surface-2);
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  font-size: 13px; color: var(--text); outline: none;
+  transition: border-color 0.2s;
+}
+.site-select:focus { border-color: var(--accent); }
 
 /* DIVIDER */
 .input-divider {
@@ -370,6 +409,7 @@ body {
 .tl-dot.green { background: var(--green); box-shadow: 0 0 6px rgba(16,185,129,0.4); }
 .tl-dot.amber { background: var(--amber); box-shadow: 0 0 6px rgba(245,158,11,0.4); }
 .tl-dot.red { background: var(--red); box-shadow: 0 0 6px rgba(239,68,68,0.4); }
+.tl-dot.blue { background: var(--blue); box-shadow: 0 0 6px rgba(59,130,246,0.4); }
 .kpi-label {
   font-size: 11px; color: var(--text-muted);
   margin-top: 6px; text-transform: uppercase;
@@ -586,7 +626,7 @@ body {
   body { background: #fff !important; }
   .topbar, .input-section, .error-box, .progress-bar, .footer,
   .modal-overlay, .export-btn-wrap, .export-bar,
-  .fluff-feedback-btn, #reviewerSelect,
+  .fluff-feedback-btn, #reviewerSelect, .mode-tabs,
   [data-export-hide] { display: none !important; }
   .results { padding: 0 !important; }
   .results.active { display: block !important; }
@@ -597,6 +637,9 @@ body {
 }
 
 @media (max-width: 600px) {
+  .mode-tabs { gap: 0; overflow-x: auto; }
+  .mode-tab { padding: 8px 12px; font-size: 12px; white-space: nowrap; }
+  .site-select-row { flex-direction: column; align-items: stretch; gap: 6px; }
   .input-row { flex-direction: column; }
   .check-label { min-width: auto; }
   .check-row { flex-wrap: wrap; }
@@ -636,21 +679,41 @@ body {
 <div class="container">
 
   <div class="input-section">
-    <h3 class="input-label" data-t="label_live">Live Article Checker</h3>
-    <div class="input-row">
-      <input type="text" id="urlInput" data-t-placeholder="input_placeholder" placeholder="https://www.example.com/my-article" autocomplete="url">
+    <div class="mode-tabs">
+      <button class="mode-tab active" onclick="switchMode('url')" data-mode="url" data-t="tab_url">Check URL</button>
+      <button class="mode-tab" onclick="switchMode('html')" data-mode="html" data-t="tab_draft">Check Draft</button>
+      <button class="mode-tab" onclick="switchMode('keyword')" data-mode="keyword" data-t="tab_keyword">Keyword Checker</button>
     </div>
-    <button class="btn" id="analyzeBtnUrl" onclick="startAnalysis('url')" style="width:100%">
-      <span id="btnTextUrl" data-t="btn_check_url">Check URL</span>
-      <div class="spinner" id="btnSpinnerUrl" style="display:none"></div>
-    </button>
-    <div class="input-divider" data-t="input_or">OR</div>
-    <h3 class="input-label" data-t="label_draft">Draft Checker</h3>
-    <textarea class="html-textarea" id="htmlInput" data-t-placeholder="html_placeholder" placeholder="Paste your HTML source code here..."></textarea>
-    <button class="btn" id="analyzeBtnHtml" onclick="startAnalysis('html')" style="width:100%">
-      <span id="btnTextHtml" data-t="btn_check_html">Check HTML</span>
-      <div class="spinner" id="btnSpinnerHtml" style="display:none"></div>
-    </button>
+
+    <div class="mode-panel active" id="panelUrl">
+      <div class="input-row">
+        <input type="text" id="urlInput" data-t-placeholder="input_placeholder" placeholder="https://www.example.com/my-article" autocomplete="url">
+      </div>
+      <button class="btn" id="analyzeBtnUrl" onclick="startAnalysis('url')" style="width:100%">
+        <span id="btnTextUrl" data-t="btn_check_url">Check URL</span>
+        <div class="spinner" id="btnSpinnerUrl" style="display:none"></div>
+      </button>
+    </div>
+
+    <div class="mode-panel" id="panelHtml">
+      <textarea class="html-textarea" id="htmlInput" data-t-placeholder="html_placeholder" placeholder="Paste your HTML source code here..."></textarea>
+      <button class="btn" id="analyzeBtnHtml" onclick="startAnalysis('html')" style="width:100%">
+        <span id="btnTextHtml" data-t="btn_check_html">Check HTML</span>
+        <div class="spinner" id="btnSpinnerHtml" style="display:none"></div>
+      </button>
+    </div>
+
+    <div class="mode-panel" id="panelKeyword">
+      <div class="site-select-row">
+        <label data-t="kw_site_label">Site</label>
+        <select class="site-select" id="kwSiteSelect"></select>
+      </div>
+      <textarea class="html-textarea" id="kwInput" data-t-placeholder="kw_placeholder" placeholder="Describe your article idea, keywords, or topic... e.g. 'Liverpool transfer Dutch midfielder' or 'I want to write about the best wonderkids in Eredivisie'" style="min-height:120px;font-family:inherit"></textarea>
+      <button class="btn" id="analyzeBtnKw" onclick="startAnalysis('keyword')" style="width:100%">
+        <span id="btnTextKw" data-t="btn_check_kw">Check Keywords</span>
+        <div class="spinner" id="btnSpinnerKw" style="display:none"></div>
+      </button>
+    </div>
   </div>
 
   <div class="error-box" id="errorBox"></div>
@@ -715,6 +778,8 @@ body {
       <div class="ai-body" id="aiBody"></div>
     </div>
   </div>
+
+  <div class="results" id="kwResults" style="display:none"></div>
 
 </div>
 
@@ -969,6 +1034,34 @@ const T = {
     pdf_sec_quality: "Content Quality",
     pdf_sec_ai: "AI Analysis",
     pdf_btn_download: "Download PDF",
+    // Keyword Checker
+    tab_url: "Check URL",
+    tab_draft: "Check Draft",
+    tab_keyword: "Keyword Checker",
+    kw_site_label: "Site",
+    kw_all_sites: "All sites",
+    kw_placeholder: "Describe your article idea, keywords, or topic... e.g. 'Liverpool transfer Dutch midfielder' or 'best wonderkids in Eredivisie'",
+    btn_check_kw: "Check Keywords",
+    err_empty_kw: "Describe your article idea or enter keywords to check.",
+    kw_no_sheet: "Configure the Discover CSV sheet URL in Settings first.",
+    prog_kw_parse: "Extracting topics from your input...",
+    prog_kw_fetch: "Fetching Discover data for {site}...",
+    prog_kw_match: "Matching topics against Discover data...",
+    prog_kw_angles: "Generating article ideas and angles...",
+    kw_results_title: "Keyword Analysis",
+    kw_entity: "Topic",
+    kw_matching_urls: "{count} matching article(s)",
+    kw_potential_high: "High potential",
+    kw_potential_medium: "Medium potential",
+    kw_potential_low: "Low potential",
+    kw_potential_new: "New territory",
+    kw_angles_title: "Article ideas & angles",
+    kw_interconnect: "Interconnect articles",
+    kw_evergreen: "Evergreen angles",
+    kw_mag: "Magazine angles",
+    kw_no_data: "No Discover data found for this site.",
+    kw_no_match: "No matching articles found in Discover data.",
+    kw_summary: "Checked {topics} topic(s) across {articles} Discover articles on {site}.",
   },
   fr: {
     input_title: "Analyser un article",
@@ -1135,6 +1228,33 @@ const T = {
     pdf_sec_quality: "Qualite du contenu",
     pdf_sec_ai: "Analyse IA",
     pdf_btn_download: "Telecharger le PDF",
+    tab_url: "Verifier URL",
+    tab_draft: "Verifier brouillon",
+    tab_keyword: "Analyseur de mots-cles",
+    kw_site_label: "Site",
+    kw_all_sites: "Tous les sites",
+    kw_placeholder: "Decrivez votre idee d'article, mots-cles ou sujet... ex. 'transfert Liverpool milieu neerlandais'",
+    btn_check_kw: "Analyser les mots-cles",
+    err_empty_kw: "Decrivez votre idee d'article ou entrez des mots-cles.",
+    kw_no_sheet: "Configurez l'URL du CSV Discover dans les parametres.",
+    prog_kw_parse: "Extraction des sujets...",
+    prog_kw_fetch: "Chargement des donnees Discover pour {site}...",
+    prog_kw_match: "Recherche de correspondances Discover...",
+    prog_kw_angles: "Generation d'idees d'articles...",
+    kw_results_title: "Analyse de mots-cles",
+    kw_entity: "Sujet",
+    kw_matching_urls: "{count} article(s) correspondant(s)",
+    kw_potential_high: "Fort potentiel",
+    kw_potential_medium: "Potentiel moyen",
+    kw_potential_low: "Faible potentiel",
+    kw_potential_new: "Nouveau territoire",
+    kw_angles_title: "Idees d'articles et angles",
+    kw_interconnect: "Articles interconnectes",
+    kw_evergreen: "Angles evergreen",
+    kw_mag: "Angles magazine",
+    kw_no_data: "Aucune donnee Discover trouvee pour ce site.",
+    kw_no_match: "Aucun article correspondant dans les donnees Discover.",
+    kw_summary: "{topics} sujet(s) verifies parmi {articles} articles Discover sur {site}.",
   },
   "pt-br": {
     input_title: "Analisar um artigo",
@@ -1301,6 +1421,33 @@ const T = {
     pdf_sec_quality: "Qualidade do conteudo",
     pdf_sec_ai: "Analise IA",
     pdf_btn_download: "Baixar PDF",
+    tab_url: "Verificar URL",
+    tab_draft: "Verificar rascunho",
+    tab_keyword: "Verificador de palavras-chave",
+    kw_site_label: "Site",
+    kw_all_sites: "Todos os sites",
+    kw_placeholder: "Descreva sua ideia de artigo, palavras-chave ou tema... ex. 'transferencia Liverpool meio-campista holandes'",
+    btn_check_kw: "Verificar palavras-chave",
+    err_empty_kw: "Descreva sua ideia de artigo ou insira palavras-chave.",
+    kw_no_sheet: "Configure a URL da planilha Discover nas configuracoes.",
+    prog_kw_parse: "Extraindo topicos...",
+    prog_kw_fetch: "Carregando dados Discover para {site}...",
+    prog_kw_match: "Buscando correspondencias Discover...",
+    prog_kw_angles: "Gerando ideias de artigos...",
+    kw_results_title: "Analise de palavras-chave",
+    kw_entity: "Topico",
+    kw_matching_urls: "{count} artigo(s) correspondente(s)",
+    kw_potential_high: "Alto potencial",
+    kw_potential_medium: "Potencial medio",
+    kw_potential_low: "Baixo potencial",
+    kw_potential_new: "Territorio novo",
+    kw_angles_title: "Ideias de artigos e angulos",
+    kw_interconnect: "Artigos interconectados",
+    kw_evergreen: "Angulos evergreen",
+    kw_mag: "Angulos revista",
+    kw_no_data: "Nenhum dado Discover encontrado para este site.",
+    kw_no_match: "Nenhum artigo correspondente nos dados Discover.",
+    kw_summary: "{topics} topico(s) verificado(s) em {articles} artigos Discover em {site}.",
   },
   es: {
     input_title: "Analizar un artículo",
@@ -1467,6 +1614,33 @@ const T = {
     pdf_sec_quality: "Calidad del contenido",
     pdf_sec_ai: "Analisis IA",
     pdf_btn_download: "Descargar PDF",
+    tab_url: "Verificar URL",
+    tab_draft: "Verificar borrador",
+    tab_keyword: "Verificador de palabras clave",
+    kw_site_label: "Sitio",
+    kw_all_sites: "Todos los sitios",
+    kw_placeholder: "Describe tu idea de articulo, palabras clave o tema... ej. 'fichaje Liverpool centrocampista holandes'",
+    btn_check_kw: "Verificar palabras clave",
+    err_empty_kw: "Describe tu idea de articulo o introduce palabras clave.",
+    kw_no_sheet: "Configura la URL del CSV Discover en Ajustes.",
+    prog_kw_parse: "Extrayendo temas...",
+    prog_kw_fetch: "Cargando datos Discover para {site}...",
+    prog_kw_match: "Buscando coincidencias Discover...",
+    prog_kw_angles: "Generando ideas de articulos...",
+    kw_results_title: "Analisis de palabras clave",
+    kw_entity: "Tema",
+    kw_matching_urls: "{count} articulo(s) coincidente(s)",
+    kw_potential_high: "Alto potencial",
+    kw_potential_medium: "Potencial medio",
+    kw_potential_low: "Bajo potencial",
+    kw_potential_new: "Territorio nuevo",
+    kw_angles_title: "Ideas de articulos y angulos",
+    kw_interconnect: "Articulos interconectados",
+    kw_evergreen: "Angulos evergreen",
+    kw_mag: "Angulos revista",
+    kw_no_data: "No se encontraron datos Discover para este sitio.",
+    kw_no_match: "No se encontraron articulos coincidentes en los datos Discover.",
+    kw_summary: "{topics} tema(s) verificado(s) en {articles} articulos Discover en {site}.",
   },
   it: {
     input_title: "Analizza un articolo",
@@ -1633,6 +1807,33 @@ const T = {
     pdf_sec_quality: "Qualita del contenuto",
     pdf_sec_ai: "Analisi IA",
     pdf_btn_download: "Scarica PDF",
+    tab_url: "Verifica URL",
+    tab_draft: "Verifica bozza",
+    tab_keyword: "Analizzatore parole chiave",
+    kw_site_label: "Sito",
+    kw_all_sites: "Tutti i siti",
+    kw_placeholder: "Descrivi la tua idea di articolo, parole chiave o argomento... es. 'trasferimento Liverpool centrocampista olandese'",
+    btn_check_kw: "Verifica parole chiave",
+    err_empty_kw: "Descrivi la tua idea di articolo o inserisci parole chiave.",
+    kw_no_sheet: "Configura l'URL del CSV Discover nelle Impostazioni.",
+    prog_kw_parse: "Estrazione argomenti...",
+    prog_kw_fetch: "Caricamento dati Discover per {site}...",
+    prog_kw_match: "Ricerca corrispondenze Discover...",
+    prog_kw_angles: "Generazione idee articoli...",
+    kw_results_title: "Analisi parole chiave",
+    kw_entity: "Argomento",
+    kw_matching_urls: "{count} articolo/i corrispondente/i",
+    kw_potential_high: "Alto potenziale",
+    kw_potential_medium: "Potenziale medio",
+    kw_potential_low: "Basso potenziale",
+    kw_potential_new: "Territorio nuovo",
+    kw_angles_title: "Idee articoli e angolazioni",
+    kw_interconnect: "Articoli interconnessi",
+    kw_evergreen: "Angolazioni evergreen",
+    kw_mag: "Angolazioni magazine",
+    kw_no_data: "Nessun dato Discover trovato per questo sito.",
+    kw_no_match: "Nessun articolo corrispondente nei dati Discover.",
+    kw_summary: "{topics} argomento/i verificato/i su {articles} articoli Discover su {site}.",
   },
   ru: {
     input_title: "Анализ статьи",
@@ -1799,6 +2000,33 @@ const T = {
     pdf_sec_quality: "Качество контента",
     pdf_sec_ai: "ИИ анализ",
     pdf_btn_download: "Скачать PDF",
+    tab_url: "Проверить URL",
+    tab_draft: "Проверить черновик",
+    tab_keyword: "Проверка ключевых слов",
+    kw_site_label: "Сайт",
+    kw_all_sites: "Все сайты",
+    kw_placeholder: "Опишите идею статьи, ключевые слова или тему... напр. 'трансфер Ливерпуль голландский полузащитник'",
+    btn_check_kw: "Проверить ключевые слова",
+    err_empty_kw: "Опишите идею статьи или введите ключевые слова.",
+    kw_no_sheet: "Настройте URL CSV Discover в настройках.",
+    prog_kw_parse: "Извлечение тем...",
+    prog_kw_fetch: "Загрузка данных Discover для {site}...",
+    prog_kw_match: "Поиск совпадений в Discover...",
+    prog_kw_angles: "Генерация идей для статей...",
+    kw_results_title: "Анализ ключевых слов",
+    kw_entity: "Тема",
+    kw_matching_urls: "{count} совпадающих статей",
+    kw_potential_high: "Высокий потенциал",
+    kw_potential_medium: "Средний потенциал",
+    kw_potential_low: "Низкий потенциал",
+    kw_potential_new: "Новая территория",
+    kw_angles_title: "Идеи статей и ракурсы",
+    kw_interconnect: "Связанные статьи",
+    kw_evergreen: "Вечнозелёные ракурсы",
+    kw_mag: "Журнальные ракурсы",
+    kw_no_data: "Данные Discover не найдены для этого сайта.",
+    kw_no_match: "Совпадающих статей в данных Discover не найдено.",
+    kw_summary: "Проверено {topics} тем(ы) среди {articles} статей Discover на {site}.",
   },
   uk: {
     input_title: "Аналіз статті",
@@ -1965,6 +2193,33 @@ const T = {
     pdf_sec_quality: "Якість контенту",
     pdf_sec_ai: "ШІ аналіз",
     pdf_btn_download: "Завантажити PDF",
+    tab_url: "Перевірити URL",
+    tab_draft: "Перевірити чернетку",
+    tab_keyword: "Перевірка ключових слів",
+    kw_site_label: "Сайт",
+    kw_all_sites: "Усі сайти",
+    kw_placeholder: "Опишіть ідею статті, ключові слова або тему... напр. 'трансфер Ліверпуль голландський півзахисник'",
+    btn_check_kw: "Перевірити ключові слова",
+    err_empty_kw: "Опишіть ідею статті або введіть ключові слова.",
+    kw_no_sheet: "Налаштуйте URL CSV Discover у налаштуваннях.",
+    prog_kw_parse: "Вилучення тем...",
+    prog_kw_fetch: "Завантаження даних Discover для {site}...",
+    prog_kw_match: "Пошук відповідностей у Discover...",
+    prog_kw_angles: "Генерація ідей для статей...",
+    kw_results_title: "Аналіз ключових слів",
+    kw_entity: "Тема",
+    kw_matching_urls: "{count} відповідних статей",
+    kw_potential_high: "Високий потенціал",
+    kw_potential_medium: "Середній потенціал",
+    kw_potential_low: "Низький потенціал",
+    kw_potential_new: "Нова територія",
+    kw_angles_title: "Ідеї статей та ракурси",
+    kw_interconnect: "Пов'язані статті",
+    kw_evergreen: "Вічнозелені ракурси",
+    kw_mag: "Журнальні ракурси",
+    kw_no_data: "Даних Discover не знайдено для цього сайту.",
+    kw_no_match: "Відповідних статей у даних Discover не знайдено.",
+    kw_summary: "Перевірено {topics} тем серед {articles} статей Discover на {site}.",
   },
   pl: {
     input_title: "Analiza artykułu",
@@ -2131,6 +2386,33 @@ const T = {
     pdf_sec_quality: "Jakość treści",
     pdf_sec_ai: "Analiza AI",
     pdf_btn_download: "Pobierz PDF",
+    tab_url: "Sprawdz URL",
+    tab_draft: "Sprawdz szkic",
+    tab_keyword: "Sprawdzanie slow kluczowych",
+    kw_site_label: "Strona",
+    kw_all_sites: "Wszystkie strony",
+    kw_placeholder: "Opisz pomysl na artykul, slowa kluczowe lub temat... np. 'transfer Liverpool holenderski pomocnik'",
+    btn_check_kw: "Sprawdz slowa kluczowe",
+    err_empty_kw: "Opisz pomysl na artykul lub wpisz slowa kluczowe.",
+    kw_no_sheet: "Skonfiguruj URL CSV Discover w ustawieniach.",
+    prog_kw_parse: "Wyodrebnianie tematow...",
+    prog_kw_fetch: "Ladowanie danych Discover dla {site}...",
+    prog_kw_match: "Szukanie dopasowań w Discover...",
+    prog_kw_angles: "Generowanie pomyslow na artykuly...",
+    kw_results_title: "Analiza slow kluczowych",
+    kw_entity: "Temat",
+    kw_matching_urls: "{count} pasujacych artykulow",
+    kw_potential_high: "Wysoki potencjal",
+    kw_potential_medium: "Sredni potencjal",
+    kw_potential_low: "Niski potencjal",
+    kw_potential_new: "Nowe terytorium",
+    kw_angles_title: "Pomysly na artykuly i ujecia",
+    kw_interconnect: "Artykuly powiazane",
+    kw_evergreen: "Ujecia evergreen",
+    kw_mag: "Ujecia magazynowe",
+    kw_no_data: "Nie znaleziono danych Discover dla tej strony.",
+    kw_no_match: "Nie znaleziono pasujacych artykulow w danych Discover.",
+    kw_summary: "Sprawdzono {topics} temat(ow) wsrod {articles} artykulow Discover na {site}.",
   },
   cs: {
     input_title: "Analýza článku",
@@ -2297,6 +2579,33 @@ const T = {
     pdf_sec_quality: "Kvalita obsahu",
     pdf_sec_ai: "AI analyza",
     pdf_btn_download: "Stahnout PDF",
+    tab_url: "Zkontrolovat URL",
+    tab_draft: "Zkontrolovat koncept",
+    tab_keyword: "Kontrola klicovych slov",
+    kw_site_label: "Web",
+    kw_all_sites: "Vsechny weby",
+    kw_placeholder: "Popiste napad na clanek, klicova slova nebo tema... napr. 'prestup Liverpool holandsky zaloznik'",
+    btn_check_kw: "Zkontrolovat klicova slova",
+    err_empty_kw: "Popiste napad na clanek nebo zadejte klicova slova.",
+    kw_no_sheet: "Nastavte URL CSV Discover v nastaveni.",
+    prog_kw_parse: "Extrahovani temat...",
+    prog_kw_fetch: "Nacitani dat Discover pro {site}...",
+    prog_kw_match: "Hledani shod v Discover...",
+    prog_kw_angles: "Generovani napadu na clanky...",
+    kw_results_title: "Analyza klicovych slov",
+    kw_entity: "Tema",
+    kw_matching_urls: "{count} odpovidajicich clanku",
+    kw_potential_high: "Vysoky potencial",
+    kw_potential_medium: "Stredni potencial",
+    kw_potential_low: "Nizky potencial",
+    kw_potential_new: "Nove uzemi",
+    kw_angles_title: "Napady na clanky a uhly pohledu",
+    kw_interconnect: "Propojene clanky",
+    kw_evergreen: "Evergreen uhly",
+    kw_mag: "Magazinove uhly",
+    kw_no_data: "Pro tento web nebyla nalezena zadna data Discover.",
+    kw_no_match: "V datech Discover nebyly nalezeny zadne odpovidajici clanky.",
+    kw_summary: "Zkontrolovano {topics} temat mezi {articles} clanky Discover na {site}.",
   }
 };
 
@@ -2319,6 +2628,9 @@ function applyTranslations() {
   document.querySelectorAll('[data-t-placeholder]').forEach(el => {
     el.placeholder = t(el.dataset.tPlaceholder);
   });
+  // Refresh site selector label for "All sites"
+  const allOpt = document.querySelector('#kwSiteSelect option[value="_all"]');
+  if (allOpt) allOpt.textContent = t('kw_all_sites');
 }
 
 // ========== CONFIG ==========
@@ -2460,6 +2772,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('settingsModal').addEventListener('click', e => {
     if (e.target === e.currentTarget) closeSettings();
   });
+  populateSiteSelect();
 });
 
 document.getElementById('langSelect').addEventListener('change', e => {
@@ -2491,6 +2804,44 @@ function saveSettings() {
   closeSettings();
 }
 
+// ========== MODE TABS ==========
+const SITE_OPTIONS = [
+  { value: '_all', label: 'All sites' },
+  { value: 'TOPMERCATO', label: 'TopMercato' },
+  { value: 'SPORTSMOLE', label: 'SportsMole' },
+  { value: 'TRIVELA', label: 'Trivela' },
+  { value: 'UMDOISESPORTES', label: 'UmDoisEsportes' },
+  { value: 'AFRIKFOOTFR', label: 'Afrik-Foot (FR)' },
+  { value: 'AFRIKFOOTZA', label: 'Afrik-Foot (ZA)' },
+  { value: 'AFRIKFOOTNG', label: 'Afrik-Foot (NG)' },
+  { value: 'FOOTBALLWHISPERS', label: 'Football Whispers' },
+  { value: 'FOOTBALLGROUNDGUIDE', label: 'Football Ground Guide' },
+  { value: 'MRFIXITSTIPS', label: 'Mr Fixits Tips' },
+  { value: 'SOLOBASKET', label: 'SoloBasket' },
+  { value: 'FOTBALPORTAL', label: 'Fotbal Portal' },
+  { value: 'VRINGE', label: 'VR Fringe' }
+];
+
+function populateSiteSelect() {
+  const sel = document.getElementById('kwSiteSelect');
+  sel.innerHTML = '';
+  for (const s of SITE_OPTIONS) {
+    const opt = document.createElement('option');
+    opt.value = s.value;
+    opt.textContent = s.value === '_all' ? t('kw_all_sites') : s.label;
+    sel.appendChild(opt);
+  }
+}
+
+function switchMode(mode) {
+  document.querySelectorAll('.mode-tab').forEach(tab => {
+    tab.classList.toggle('active', tab.dataset.mode === mode);
+  });
+  document.getElementById('panelUrl').classList.toggle('active', mode === 'url');
+  document.getElementById('panelHtml').classList.toggle('active', mode === 'html');
+  document.getElementById('panelKeyword').classList.toggle('active', mode === 'keyword');
+}
+
 // ========== UI HELPERS ==========
 function toggleCard(header) { header.classList.toggle('collapsed'); }
 
@@ -2510,14 +2861,21 @@ function clearError() { document.getElementById('errorBox').classList.remove('ac
 function setLoading(on) {
   document.getElementById('analyzeBtnUrl').disabled = on;
   document.getElementById('analyzeBtnHtml').disabled = on;
+  document.getElementById('analyzeBtnKw').disabled = on;
   document.getElementById('btnTextUrl').textContent = on ? t('btn_analyzing') : t('btn_check_url');
   document.getElementById('btnTextHtml').textContent = on ? t('btn_analyzing') : t('btn_check_html');
+  document.getElementById('btnTextKw').textContent = on ? t('btn_analyzing') : t('btn_check_kw');
   const activeSpinner = document.getElementById('btnSpinner_active');
   if (activeSpinner) activeSpinner.style.display = on ? 'block' : 'none';
 }
 
 // ========== MAIN FLOW ==========
 async function startAnalysis(mode) {
+  // Keyword mode has its own flow
+  if (mode === 'keyword') {
+    return startKeywordAnalysis();
+  }
+
   let url = document.getElementById('urlInput').value.trim();
   let html = document.getElementById('htmlInput').value.trim();
 
@@ -2539,6 +2897,7 @@ async function startAnalysis(mode) {
   clearError();
   setLoading(true);
   document.getElementById('results').classList.remove('active');
+  document.getElementById('kwResults').style.display = 'none';
   document.getElementById('progressBar').classList.remove('active');
   document.getElementById('spellBody').style.display = 'none';
   document.getElementById('qualityCard').style.display = 'none';
@@ -2614,6 +2973,286 @@ async function startAnalysis(mode) {
     setLoading(false);
     restoreSpinner();
   }
+}
+
+// ========== KEYWORD CHECKER ==========
+async function startKeywordAnalysis() {
+  const kwText = document.getElementById('kwInput').value.trim();
+  if (!kwText) { showError(t('err_empty_kw')); return; }
+
+  const sheetUrl = localStorage.getItem('media_dashboard_discover_sheet') || '';
+  if (!sheetUrl) { showError(t('kw_no_sheet')); return; }
+
+  const selectedSite = document.getElementById('kwSiteSelect').value;
+
+  // Show spinner
+  const spinnerEl = document.getElementById('btnSpinnerKw');
+  spinnerEl.id = 'btnSpinner_active';
+  const restoreSpinner = () => { spinnerEl.id = 'btnSpinnerKw'; };
+
+  clearError();
+  setLoading(true);
+  document.getElementById('results').classList.remove('active');
+  document.getElementById('kwResults').style.display = 'none';
+  document.getElementById('progressBar').classList.remove('active');
+
+  try {
+    // Step 1: GPT extracts entities/topics from free text
+    setProgress(10, t('prog_kw_parse'));
+    const parsed = await parseKeywordInput(kwText);
+
+    if (!parsed.entities || parsed.entities.length === 0) {
+      throw new Error('Could not extract topics from your input. Try being more specific.');
+    }
+
+    // Step 2: Determine which tabs to check
+    const tabsToCheck = selectedSite === '_all'
+      ? [...new Set(Object.values(DOMAIN_TAB_MAP))]
+      : [selectedSite];
+
+    const sheetId = extractSheetId(sheetUrl);
+    const allTabData = {};
+
+    // Step 3: Fetch CSV data for each tab
+    let fetchIdx = 0;
+    for (const tab of tabsToCheck) {
+      fetchIdx++;
+      setProgress(10 + Math.round(30 * fetchIdx / tabsToCheck.length),
+        t('prog_kw_fetch', { site: tab }));
+      try {
+        const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(tab)}`;
+        const csvText = await fetchViaProxy(csvUrl);
+        const rows = parseDiscoverCSV(csvText);
+        if (rows.length > 0) allTabData[tab] = rows;
+      } catch(e) {
+        console.warn(`Failed to fetch Discover data for ${tab}:`, e.message);
+      }
+    }
+
+    if (Object.keys(allTabData).length === 0) {
+      throw new Error(t('kw_no_data'));
+    }
+
+    // Step 4: For each entity, match against Discover data
+    setProgress(50, t('prog_kw_match'));
+    const entityResults = [];
+
+    for (const entity of parsed.entities) {
+      const keywords = extractTopicKeywords(entity.name);
+      if (keywords.length === 0) continue;
+
+      const entityData = { name: entity.name, sites: [] };
+
+      for (const [tab, rows] of Object.entries(allTabData)) {
+        // Pre-filter: rows where URL slug contains at least 1 keyword
+        const candidates = rows.filter(r => {
+          const slug = r.url.toLowerCase();
+          return keywords.some(kw => slug.includes(kw));
+        });
+
+        if (candidates.length === 0 && rows.length > 0) {
+          // No keyword matches but site has data
+          const siteStats = computeSiteStats(rows);
+          entityData.sites.push({ tab, matchingRows: [], candidates: 0, siteStats, totalArticles: rows.length });
+          continue;
+        }
+
+        // Use GPT to identify true topic matches (same as discover authority)
+        const subset = candidates.slice(0, 150);
+        const compactList = subset.map((r, i) => {
+          const path = r.url.replace(/https?:\/\/[^/]+/, '');
+          return `[${i}] ${path} | ${r.clicks} | ${r.impressions}`;
+        }).join('\n');
+
+        let matchingRows = [];
+        try {
+          const data = await callOpenAI({
+            model: 'gpt-4o',
+            messages: [
+              { role: 'system', content: `You are a Discover performance analyst. The user wants to write about a topic. You have a numbered list of Discover URLs (pre-filtered by keyword).
+
+Identify which URLs are truly about the SAME TOPIC (same team, player, event, or subject). Return the indices of matching URLs. Be inclusive: include closely related articles.
+
+URL list format: [index] path | clicks | impressions` },
+              { role: 'user', content: `Topic: "${entity.name}"\n\nCandidate URLs (${subset.length} from ${rows.length} total on ${tab}):\n${compactList || '(no keyword matches)'}` }
+            ],
+            tools: [{
+              type: 'function',
+              function: {
+                name: 'discover_matches',
+                description: 'Return the indices of matching URLs',
+                parameters: {
+                  type: 'object',
+                  properties: {
+                    matching_indices: { type: 'array', items: { type: 'integer' }, description: 'Zero-based indices of matching URLs. Empty if none.' }
+                  },
+                  required: ['matching_indices']
+                }
+              }
+            }],
+            tool_choice: { type: 'function', function: { name: 'discover_matches' } },
+            temperature: 0.1
+          });
+
+          const tc = data.choices?.[0]?.message?.tool_calls?.[0];
+          if (tc) {
+            const gpt = JSON.parse(tc.function.arguments);
+            matchingRows = (gpt.matching_indices || [])
+              .filter(i => i >= 0 && i < subset.length)
+              .map(i => subset[i]);
+          }
+        } catch(e) {
+          console.warn(`GPT matching failed for ${entity.name} on ${tab}:`, e.message);
+        }
+
+        const siteStats = computeSiteStats(rows);
+        entityData.sites.push({ tab, matchingRows, candidates: candidates.length, siteStats, totalArticles: rows.length });
+      }
+
+      entityResults.push(entityData);
+    }
+
+    // Step 5: Generate article ideas and angles
+    setProgress(80, t('prog_kw_angles'));
+    let angleIdeas = null;
+    try {
+      angleIdeas = await generateArticleAngles(kwText, parsed.entities, entityResults);
+    } catch(e) {
+      console.warn('Angle generation failed:', e.message);
+    }
+
+    setProgress(100, t('prog_done'));
+    renderKeywordResults(kwText, selectedSite, entityResults, angleIdeas);
+
+  } catch(err) {
+    showError('Error: ' + err.message);
+    document.getElementById('progressBar').classList.remove('active');
+  } finally {
+    setLoading(false);
+    restoreSpinner();
+  }
+}
+
+function computeSiteStats(rows) {
+  return {
+    avg_impressions: rows.reduce((a, r) => a + r.impressions, 0) / rows.length,
+    avg_clicks: rows.reduce((a, r) => a + r.clicks, 0) / rows.length,
+    avg_ctr: rows.reduce((a, r) => a + r.ctr, 0) / rows.length,
+    median_impressions: computeMedian(rows.map(r => r.impressions)),
+    median_clicks: computeMedian(rows.map(r => r.clicks)),
+    median_ctr: computeMedian(rows.map(r => r.ctr))
+  };
+}
+
+async function parseKeywordInput(text) {
+  const data = await callOpenAI({
+    model: 'gpt-4o',
+    messages: [
+      { role: 'system', content: `You extract article topics/entities from a user's free-text input. The user might type keywords, a sentence describing an article idea, or a question about what to write. Extract the distinct topics, entities, or angles they want to explore.
+
+For example:
+- "Liverpool transfer Dutch midfielder" → entities: ["Liverpool Dutch midfielder transfer"]
+- "I want to write about the best wonderkids in Eredivisie" → entities: ["Eredivisie wonderkids"]
+- "Liverpool vs Arsenal, who has better midfield" → entities: ["Liverpool midfield", "Arsenal midfield"]
+- "Should I write about Mbappe or Haaland for our next feature?" → entities: ["Mbappe", "Haaland"]
+
+Keep entity names concise (2-5 words). Extract 1-5 entities max.` },
+      { role: 'user', content: text }
+    ],
+    tools: [{
+      type: 'function',
+      function: {
+        name: 'extract_entities',
+        description: 'Extract article topics from the input',
+        parameters: {
+          type: 'object',
+          properties: {
+            entities: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  name: { type: 'string', description: 'Topic name (2-5 words)' }
+                },
+                required: ['name']
+              },
+              description: 'Extracted topics/entities'
+            },
+            user_intent: { type: 'string', description: 'Brief summary of what the user wants to write about' }
+          },
+          required: ['entities', 'user_intent']
+        }
+      }
+    }],
+    tool_choice: { type: 'function', function: { name: 'extract_entities' } },
+    temperature: 0.2
+  });
+
+  const tc = data.choices?.[0]?.message?.tool_calls?.[0];
+  if (!tc) throw new Error('Could not parse your input.');
+  return JSON.parse(tc.function.arguments);
+}
+
+async function generateArticleAngles(originalInput, entities, entityResults) {
+  // Build context about what Discover data shows
+  let discoverContext = '';
+  for (const er of entityResults) {
+    const totalMatches = er.sites.reduce((a, s) => a + s.matchingRows.length, 0);
+    const topUrls = er.sites
+      .flatMap(s => s.matchingRows.slice(0, 3).map(r => r.url))
+      .slice(0, 5);
+    discoverContext += `\nTopic "${er.name}": ${totalMatches} matching articles on Discover.`;
+    if (topUrls.length > 0) discoverContext += ` Top URLs: ${topUrls.join(', ')}`;
+  }
+
+  const data = await callOpenAI({
+    model: 'gpt-4o',
+    messages: [
+      { role: 'system', content: `You are a sports editorial strategist. The user wants article ideas based on topics they're exploring. You have Discover data context showing what's already performing.
+
+Generate 3 categories of article ideas:
+1. INTERCONNECT articles: spin-off/related articles that link to the main topic (e.g. if writing about "Liverpool transfer Dutch midfielder", interconnect could be "Top 5 Dutch players to watch in 2025", "Liverpool's transfer history with Dutch talent", "Best young midfielders in Eredivisie")
+2. EVERGREEN angles: timeless angles on this topic that can rank long-term
+3. MAGAZINE angles: deeper investigative or feature-style angles
+
+Each idea should be a specific, publishable article title. Give 3-5 ideas per category. Be creative and specific based on the actual topic.` },
+      { role: 'user', content: `User input: "${originalInput}"\n\nExtracted topics: ${entities.map(e => e.name).join(', ')}\n\nDiscover data context:${discoverContext || ' (no matching data found)'}` }
+    ],
+    tools: [{
+      type: 'function',
+      function: {
+        name: 'article_angles',
+        description: 'Generate article ideas in 3 categories',
+        parameters: {
+          type: 'object',
+          properties: {
+            interconnect: {
+              type: 'array',
+              items: { type: 'string' },
+              description: 'Interconnect/spin-off article ideas (3-5 titles)'
+            },
+            evergreen: {
+              type: 'array',
+              items: { type: 'string' },
+              description: 'Evergreen angle article ideas (3-5 titles)'
+            },
+            magazine: {
+              type: 'array',
+              items: { type: 'string' },
+              description: 'Magazine/feature angle article ideas (3-5 titles)'
+            }
+          },
+          required: ['interconnect', 'evergreen', 'magazine']
+        }
+      }
+    }],
+    tool_choice: { type: 'function', function: { name: 'article_angles' } },
+    temperature: 0.7
+  });
+
+  const tc = data.choices?.[0]?.message?.tool_calls?.[0];
+  if (!tc) return null;
+  return JSON.parse(tc.function.arguments);
 }
 
 // ========== FETCH PAGE ==========
@@ -3408,6 +4047,174 @@ function renderDiscoverInsights(d) {
   }
 
   body.innerHTML = html;
+}
+
+// ========== KEYWORD RESULTS RENDERER ==========
+function renderKeywordResults(inputText, selectedSite, entityResults, angleIdeas) {
+  // Hide the normal results cards, show keyword-specific results
+  document.getElementById('results').classList.remove('active');
+
+  const container = document.getElementById('kwResults');
+  container.style.display = 'block';
+  container.innerHTML = '';
+
+  const siteName = selectedSite === '_all' ? t('kw_all_sites') : selectedSite;
+
+  // Header
+  container.innerHTML = `<div class="result-header">
+    <div>
+      <div class="result-title">${esc(t('kw_results_title'))}</div>
+      <div class="result-url" style="font-style:italic">${esc(inputText.substring(0, 200))}</div>
+    </div>
+  </div>`;
+
+  // Per-entity cards
+  for (const entity of entityResults) {
+    const totalMatches = entity.sites.reduce((a, s) => a + s.matchingRows.length, 0);
+    const totalArticles = entity.sites.reduce((a, s) => a + s.totalArticles, 0);
+
+    // Determine potential level
+    let potentialLabel, potentialColor;
+    if (totalMatches >= 10) {
+      potentialLabel = t('kw_potential_high');
+      potentialColor = 'green';
+    } else if (totalMatches >= 3) {
+      potentialLabel = t('kw_potential_medium');
+      potentialColor = 'amber';
+    } else if (totalMatches >= 1) {
+      potentialLabel = t('kw_potential_low');
+      potentialColor = 'red';
+    } else {
+      potentialLabel = t('kw_potential_new');
+      potentialColor = 'blue';
+    }
+
+    let cardHtml = `<div class="card">
+      <div class="card-header" onclick="toggleCard(this)">
+        <h3><span class="tl-dot ${potentialColor}"></span> ${esc(entity.name)} <span class="count">${t('kw_matching_urls', { count: totalMatches })}</span></h3>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="card-body">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+          <span style="font-size:12px;padding:3px 10px;border-radius:12px;font-weight:600;background:var(--${potentialColor === 'blue' ? 'accent-glow' : potentialColor + '-bg'},var(--surface-2));color:var(--${potentialColor === 'blue' ? 'accent' : potentialColor},var(--text))">${potentialLabel}</span>
+          <span style="color:var(--text-muted);font-size:12px;margin-left:auto">${t('kw_summary', { topics: entityResults.length, articles: totalArticles.toLocaleString(), site: siteName })}</span>
+        </div>`;
+
+    // Per-site stats tables
+    for (const site of entity.sites) {
+      if (site.matchingRows.length === 0 && entity.sites.length > 1) continue; // Skip empty sites in multi-site view
+
+      const ss = site.siteStats;
+      const matchCount = site.matchingRows.length;
+
+      if (matchCount > 0) {
+        const topicStats = {
+          avg_impressions: site.matchingRows.reduce((a, r) => a + r.impressions, 0) / matchCount,
+          avg_clicks: site.matchingRows.reduce((a, r) => a + r.clicks, 0) / matchCount,
+          avg_ctr: site.matchingRows.reduce((a, r) => a + r.ctr, 0) / matchCount
+        };
+
+        if (entity.sites.length > 1 || selectedSite === '_all') {
+          cardHtml += `<div style="font-weight:600;font-size:13px;margin:12px 0 6px">${site.tab}</div>`;
+        }
+
+        cardHtml += buildComparisonTable(topicStats, ss);
+
+        // Show top matching URLs
+        const topRows = site.matchingRows.slice(0, 5);
+        cardHtml += `<div style="margin-top:10px;font-size:12px;color:var(--text-muted)">Top matching URLs:</div>`;
+        cardHtml += `<div style="margin-top:4px">`;
+        for (const r of topRows) {
+          const path = r.url.replace(/https?:\/\/[^/]+/, '');
+          cardHtml += `<div style="font-size:12px;padding:4px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;gap:8px">
+            <a href="${esc(r.url)}" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(path)}</a>
+            <span style="white-space:nowrap;color:var(--text-muted)">${r.clicks.toLocaleString()} clicks · ${r.impressions.toLocaleString()} imp</span>
+          </div>`;
+        }
+        cardHtml += `</div>`;
+      } else if (entity.sites.length === 1) {
+        cardHtml += `<p style="color:var(--text-muted);font-size:13px;margin:8px 0">${t('kw_no_match')}</p>`;
+      }
+    }
+
+    cardHtml += `</div></div>`;
+    container.innerHTML += cardHtml;
+  }
+
+  // Article angles card
+  if (angleIdeas) {
+    let anglesHtml = `<div class="card">
+      <div class="card-header" onclick="toggleCard(this)">
+        <h3>💡 ${esc(t('kw_angles_title'))}</h3>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="card-body">`;
+
+    if (angleIdeas.interconnect && angleIdeas.interconnect.length > 0) {
+      anglesHtml += `<div style="font-weight:600;font-size:13px;margin-bottom:8px;color:var(--accent)">🔗 ${t('kw_interconnect')}</div>`;
+      anglesHtml += `<ul style="margin:0 0 16px 20px;padding:0;font-size:13px;line-height:1.8">`;
+      for (const idea of angleIdeas.interconnect) {
+        anglesHtml += `<li>${esc(idea)}</li>`;
+      }
+      anglesHtml += `</ul>`;
+    }
+
+    if (angleIdeas.evergreen && angleIdeas.evergreen.length > 0) {
+      anglesHtml += `<div style="font-weight:600;font-size:13px;margin-bottom:8px;color:var(--green,#22c55e)">🌿 ${t('kw_evergreen')}</div>`;
+      anglesHtml += `<ul style="margin:0 0 16px 20px;padding:0;font-size:13px;line-height:1.8">`;
+      for (const idea of angleIdeas.evergreen) {
+        anglesHtml += `<li>${esc(idea)}</li>`;
+      }
+      anglesHtml += `</ul>`;
+    }
+
+    if (angleIdeas.magazine && angleIdeas.magazine.length > 0) {
+      anglesHtml += `<div style="font-weight:600;font-size:13px;margin-bottom:8px;color:var(--purple,#a855f7)">📰 ${t('kw_mag')}</div>`;
+      anglesHtml += `<ul style="margin:0 0 0 20px;padding:0;font-size:13px;line-height:1.8">`;
+      for (const idea of angleIdeas.magazine) {
+        anglesHtml += `<li>${esc(idea)}</li>`;
+      }
+      anglesHtml += `</ul>`;
+    }
+
+    anglesHtml += `</div></div>`;
+    container.innerHTML += anglesHtml;
+  }
+}
+
+function buildComparisonTable(topicStats, siteStats) {
+  const metrics = [
+    { label: 'Impressions', topic: topicStats.avg_impressions, avg: siteStats.avg_impressions, median: siteStats.median_impressions, fmt: v => Math.round(v).toLocaleString() },
+    { label: 'Clicks', topic: topicStats.avg_clicks, avg: siteStats.avg_clicks, median: siteStats.median_clicks, fmt: v => Math.round(v).toLocaleString() },
+    { label: 'CTR', topic: topicStats.avg_ctr, avg: siteStats.avg_ctr, median: siteStats.median_ctr, fmt: v => v.toFixed(1) + '%' }
+  ];
+
+  let html = `<table style="width:100%;font-size:13px;border-collapse:collapse">
+    <thead><tr style="border-bottom:2px solid var(--border)">
+      <th style="padding:6px 8px;text-align:left;font-weight:600"></th>
+      <th style="padding:6px 8px;text-align:right;font-weight:600">${t('kw_entity')}</th>
+      <th style="padding:6px 8px;text-align:right;font-weight:600">Site avg</th>
+      <th style="padding:6px 8px;text-align:right;font-weight:600">Site median</th>
+      <th style="padding:6px 8px;text-align:right;font-weight:600">vs avg</th>
+      <th style="padding:6px 8px;text-align:right;font-weight:600">vs median</th>
+    </tr></thead><tbody>`;
+
+  for (const m of metrics) {
+    const vsAvg = m.avg > 0 ? ((m.topic - m.avg) / m.avg * 100) : 0;
+    const vsMed = m.median > 0 ? ((m.topic - m.median) / m.median * 100) : 0;
+    const ac = vsAvg >= 0 ? 'var(--green,#22c55e)' : 'var(--red,#ef4444)';
+    const mc = vsMed >= 0 ? 'var(--green,#22c55e)' : 'var(--red,#ef4444)';
+    html += `<tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:6px 8px;font-weight:600">${m.label}</td>
+      <td style="padding:6px 8px;text-align:right;font-weight:600">${m.fmt(m.topic)}</td>
+      <td style="padding:6px 8px;text-align:right">${m.fmt(m.avg)}</td>
+      <td style="padding:6px 8px;text-align:right">${m.fmt(m.median)}</td>
+      <td style="padding:6px 8px;text-align:right;color:${ac}">${vsAvg>=0?'▲':'▼'} ${vsAvg>=0?'+':''}${vsAvg.toFixed(0)}%</td>
+      <td style="padding:6px 8px;text-align:right;color:${mc}">${vsMed>=0?'▲':'▼'} ${vsMed>=0?'+':''}${vsMed.toFixed(0)}%</td>
+    </tr>`;
+  }
+  html += `</tbody></table>`;
+  return html;
 }
 
 // ========== RENDER RESULTS ==========
