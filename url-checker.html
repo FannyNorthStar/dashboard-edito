@@ -529,6 +529,67 @@ body {
   margin-top: 40px;
 }
 
+/* EXPORT BUTTONS */
+.export-btn-wrap {
+  position: relative; display: inline-flex; margin-left: auto;
+}
+.export-btn {
+  background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 3px 10px;
+  font-size: 11px; font-weight: 600; font-family: inherit;
+  color: var(--text-muted); cursor: pointer;
+  display: inline-flex; align-items: center; gap: 4px;
+  transition: border-color 0.15s;
+}
+.export-btn:hover { border-color: var(--accent); color: var(--accent); }
+.export-dropdown {
+  display: none; position: absolute; top: 100%; right: 0; margin-top: 4px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); box-shadow: var(--shadow-md);
+  z-index: 50; min-width: 120px; overflow: hidden;
+}
+.export-dropdown.open { display: block; }
+.export-dropdown button {
+  display: block; width: 100%; text-align: left;
+  padding: 8px 14px; font-size: 12px; font-family: inherit;
+  background: none; border: none; color: var(--text); cursor: pointer;
+}
+.export-dropdown button:hover { background: var(--surface-2); }
+
+/* GLOBAL EXPORT BAR */
+.export-bar {
+  display: none; justify-content: flex-end; gap: 8px;
+  margin-bottom: 12px; padding: 0 4px;
+}
+.export-bar.active { display: flex; }
+.export-bar .export-btn { padding: 5px 14px; font-size: 12px; }
+
+/* PDF MODAL */
+.pdf-modal .pdf-sections { margin: 12px 0 16px; }
+.pdf-modal .pdf-section-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 0; font-size: 13px;
+}
+.pdf-modal .pdf-section-row input[type="checkbox"] {
+  width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer;
+}
+.pdf-modal .pdf-section-row label { cursor: pointer; flex: 1; }
+
+/* PRINT STYLES FOR PDF */
+@media print {
+  body { background: #fff !important; }
+  .topbar, .input-section, .error-box, .progress-bar, .footer,
+  .modal-overlay, .export-btn-wrap, .export-bar,
+  .fluff-feedback-btn, #reviewerSelect,
+  [data-export-hide] { display: none !important; }
+  .results { padding: 0 !important; }
+  .results.active { display: block !important; }
+  .card, .ai-section { break-inside: avoid; box-shadow: none !important; border: 1px solid #ddd !important; }
+  .card-header.collapsed + .card-body { display: block !important; }
+  .card-header .chevron { display: none !important; }
+  [data-pdf-hide] { display: none !important; }
+}
+
 @media (max-width: 600px) {
   .input-row { flex-direction: column; }
   .check-label { min-width: auto; }
@@ -600,10 +661,16 @@ body {
         <div class="result-url" id="resultUrl"></div>
       </div>
     </div>
+    <div class="export-bar" id="exportBar">
+      <button class="export-btn" onclick="exportAll('csv')" title="Export all as CSV">📥 <span data-t="export_all">Export all</span> (CSV)</button>
+      <button class="export-btn" onclick="exportAll('json')" title="Export all as JSON">📥 <span data-t="export_all">Export all</span> (JSON)</button>
+      <button class="export-btn" onclick="openPdfModal()" title="Download PDF" style="background:var(--accent-glow);color:var(--accent);border-color:var(--accent)">📄 <span data-t="export_pdf">PDF One-Pager</span></button>
+    </div>
     <div class="kpi-row" id="kpiRow"></div>
     <div class="card" id="discoverCard">
       <div class="card-header" onclick="toggleCard(this)">
         <h3>🔍 <span data-t="discover_title">Discover Eligibility</span> <span class="count" id="discoverCount"></span></h3>
+        <div class="export-btn-wrap"><button class="export-btn" onclick="event.stopPropagation();toggleExportMenu(this)">↓ <span data-t="export_btn">Export</span></button><div class="export-dropdown"><button onclick="exportSection('discover','csv')">CSV</button><button onclick="exportSection('discover','json')">JSON</button></div></div>
         <span class="chevron">▼</span>
       </div>
       <div class="card-body" id="discoverBody"></div>
@@ -611,6 +678,7 @@ body {
     <div class="card" id="discoverInsightsCard" style="display:none">
       <div class="card-header" onclick="toggleCard(this)">
         <h3>🤖 <span data-t="discover_insights_title">AI Discover Insights</span></h3>
+        <div class="export-btn-wrap"><button class="export-btn" onclick="event.stopPropagation();toggleExportMenu(this)">↓ <span data-t="export_btn">Export</span></button><div class="export-dropdown"><button onclick="exportSection('discoverInsights','csv')">CSV</button><button onclick="exportSection('discoverInsights','json')">JSON</button></div></div>
         <span class="chevron">▼</span>
       </div>
       <div class="card-body" id="discoverInsightsBody"></div>
@@ -618,6 +686,7 @@ body {
     <div class="card" id="contentCard">
       <div class="card-header" onclick="toggleCard(this)">
         <h3>🔧 <span data-t="content_title">Article Structure</span></h3>
+        <div class="export-btn-wrap"><button class="export-btn" onclick="event.stopPropagation();toggleExportMenu(this)">↓ <span data-t="export_btn">Export</span></button><div class="export-dropdown"><button onclick="exportSection('content','csv')">CSV</button><button onclick="exportSection('content','json')">JSON</button></div></div>
         <span class="chevron">▼</span>
       </div>
       <div class="card-body" id="contentBody"></div>
@@ -626,6 +695,7 @@ body {
     <div class="card" id="qualityCard" style="display:none">
       <div class="card-header" onclick="toggleCard(this)">
         <h3>📝 <span data-t="quality_title">Content Quality</span> <span class="count" id="qualityCount"></span></h3>
+        <div class="export-btn-wrap"><button class="export-btn" onclick="event.stopPropagation();toggleExportMenu(this)">↓ <span data-t="export_btn">Export</span></button><div class="export-dropdown"><button onclick="exportSection('quality','csv')">CSV</button><button onclick="exportSection('quality','json')">JSON</button></div></div>
         <span class="chevron">▼</span>
       </div>
       <div class="card-body" id="qualityBody"></div>
@@ -634,6 +704,7 @@ body {
       <div class="ai-header">
         <h3>🤖 <span data-t="ai_title">AI Analysis</span></h3>
         <span class="ai-badge">GPT-4o</span>
+        <div class="export-btn-wrap" style="margin-left:auto"><button class="export-btn" onclick="event.stopPropagation();toggleExportMenu(this)">↓ <span data-t="export_btn">Export</span></button><div class="export-dropdown"><button onclick="exportSection('ai','csv')">CSV</button><button onclick="exportSection('ai','json')">JSON</button></div></div>
       </div>
       <div class="ai-body" id="aiBody"></div>
     </div>
@@ -643,6 +714,26 @@ body {
 
 <div class="footer">
   Media Dashboard · URL Checker
+</div>
+
+<!-- PDF EXPORT MODAL -->
+<div class="modal-overlay" id="pdfModal">
+  <div class="modal pdf-modal">
+    <h3 data-t="pdf_modal_title">Download PDF One-Pager</h3>
+    <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px" data-t="pdf_modal_desc">Select the sections to include:</p>
+    <div class="pdf-sections">
+      <div class="pdf-section-row"><input type="checkbox" id="pdfKpi" checked><label for="pdfKpi" data-t="pdf_sec_kpi">KPI Summary</label></div>
+      <div class="pdf-section-row"><input type="checkbox" id="pdfDiscover" checked><label for="pdfDiscover" data-t="pdf_sec_discover">Discover Eligibility</label></div>
+      <div class="pdf-section-row"><input type="checkbox" id="pdfDiscoverInsights" checked><label for="pdfDiscoverInsights" data-t="pdf_sec_discover_insights">AI Discover Insights</label></div>
+      <div class="pdf-section-row"><input type="checkbox" id="pdfContent" checked><label for="pdfContent" data-t="pdf_sec_content">Article Structure & Spellcheck</label></div>
+      <div class="pdf-section-row"><input type="checkbox" id="pdfQuality" checked><label for="pdfQuality" data-t="pdf_sec_quality">Content Quality</label></div>
+      <div class="pdf-section-row"><input type="checkbox" id="pdfAi" checked><label for="pdfAi" data-t="pdf_sec_ai">AI Analysis</label></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closePdfModal()" data-t="btn_cancel">Cancel</button>
+      <button class="btn" onclick="generatePdf()" data-t="pdf_btn_download">Download PDF</button>
+    </div>
+  </div>
 </div>
 
 <!-- SETTINGS MODAL -->
@@ -856,6 +947,19 @@ const T = {
     authority_90d: "Last 90 days",
     authority_para_on: "{count} article(s) about {topic} were on Discover in the last 90 days (out of {total} total on the site).",
     authority_para_off: "No articles about {topic} were found on Discover in the last 90 days. The site has {total} article(s) on Discover overall.",
+    // Export
+    export_btn: "Export",
+    export_all: "Export all",
+    export_pdf: "PDF One-Pager",
+    pdf_modal_title: "Download PDF One-Pager",
+    pdf_modal_desc: "Select the sections to include:",
+    pdf_sec_kpi: "KPI Summary",
+    pdf_sec_discover: "Discover Eligibility",
+    pdf_sec_discover_insights: "AI Discover Insights",
+    pdf_sec_content: "Article Structure & Spellcheck",
+    pdf_sec_quality: "Content Quality",
+    pdf_sec_ai: "AI Analysis",
+    pdf_btn_download: "Download PDF",
   },
   fr: {
     input_title: "Analyser un article",
@@ -1007,6 +1111,18 @@ const T = {
     authority_90d: "90 derniers jours",
     authority_para_on: "{count} article(s) sur {topic} étaient sur Discover au cours des 90 derniers jours (sur {total} au total sur le site).",
     authority_para_off: "Aucun article sur {topic} n'a été trouvé sur Discover au cours des 90 derniers jours. Le site a {total} article(s) sur Discover au total.",
+    export_btn: "Exporter",
+    export_all: "Tout exporter",
+    export_pdf: "PDF une page",
+    pdf_modal_title: "Telecharger le PDF",
+    pdf_modal_desc: "Selectionnez les sections a inclure :",
+    pdf_sec_kpi: "Resume KPI",
+    pdf_sec_discover: "Eligibilite Discover",
+    pdf_sec_discover_insights: "Insights IA Discover",
+    pdf_sec_content: "Structure & orthographe",
+    pdf_sec_quality: "Qualite du contenu",
+    pdf_sec_ai: "Analyse IA",
+    pdf_btn_download: "Telecharger le PDF",
   },
   "pt-br": {
     input_title: "Analisar um artigo",
@@ -1158,6 +1274,18 @@ const T = {
     authority_90d: "Últimos 90 dias",
     authority_para_on: "{count} artigo(s) sobre {topic} estiveram no Discover nos últimos 90 dias (de {total} no total do site).",
     authority_para_off: "Nenhum artigo sobre {topic} foi encontrado no Discover nos últimos 90 dias. O site tem {total} artigo(s) no Discover no total.",
+    export_btn: "Exportar",
+    export_all: "Exportar tudo",
+    export_pdf: "PDF resumo",
+    pdf_modal_title: "Baixar PDF",
+    pdf_modal_desc: "Selecione as secoes a incluir:",
+    pdf_sec_kpi: "Resumo KPI",
+    pdf_sec_discover: "Eligibilidade Discover",
+    pdf_sec_discover_insights: "Insights IA Discover",
+    pdf_sec_content: "Estrutura & ortografia",
+    pdf_sec_quality: "Qualidade do conteudo",
+    pdf_sec_ai: "Analise IA",
+    pdf_btn_download: "Baixar PDF",
   },
   es: {
     input_title: "Analizar un artículo",
@@ -1309,6 +1437,18 @@ const T = {
     authority_90d: "Últimos 90 días",
     authority_para_on: "{count} artículo(s) sobre {topic} estuvieron en Discover en los últimos 90 días (de {total} en total en el sitio).",
     authority_para_off: "No se encontraron artículos sobre {topic} en Discover en los últimos 90 días. El sitio tiene {total} artículo(s) en Discover en total.",
+    export_btn: "Exportar",
+    export_all: "Exportar todo",
+    export_pdf: "PDF resumen",
+    pdf_modal_title: "Descargar PDF",
+    pdf_modal_desc: "Seleccione las secciones a incluir:",
+    pdf_sec_kpi: "Resumen KPI",
+    pdf_sec_discover: "Eligibilidad Discover",
+    pdf_sec_discover_insights: "Insights IA Discover",
+    pdf_sec_content: "Estructura & ortografia",
+    pdf_sec_quality: "Calidad del contenido",
+    pdf_sec_ai: "Analisis IA",
+    pdf_btn_download: "Descargar PDF",
   },
   it: {
     input_title: "Analizza un articolo",
@@ -1460,6 +1600,18 @@ const T = {
     authority_90d: "Ultimi 90 giorni",
     authority_para_on: "{count} articolo/i su {topic} erano su Discover negli ultimi 90 giorni (su {total} totali nel sito).",
     authority_para_off: "Nessun articolo su {topic} trovato su Discover negli ultimi 90 giorni. Il sito ha {total} articolo/i su Discover in totale.",
+    export_btn: "Esporta",
+    export_all: "Esporta tutto",
+    export_pdf: "PDF riepilogo",
+    pdf_modal_title: "Scarica PDF",
+    pdf_modal_desc: "Seleziona le sezioni da includere:",
+    pdf_sec_kpi: "Riepilogo KPI",
+    pdf_sec_discover: "Idoneita Discover",
+    pdf_sec_discover_insights: "Insights IA Discover",
+    pdf_sec_content: "Struttura & ortografia",
+    pdf_sec_quality: "Qualita del contenuto",
+    pdf_sec_ai: "Analisi IA",
+    pdf_btn_download: "Scarica PDF",
   },
   ru: {
     input_title: "Анализ статьи",
@@ -1611,6 +1763,18 @@ const T = {
     authority_90d: "Последние 90 дней",
     authority_para_on: "{count} статей о {topic} были в Discover за последние 90 дней (из {total} всего на сайте).",
     authority_para_off: "Статей о {topic} в Discover за последние 90 дней не найдено. На сайте {total} статей в Discover всего.",
+    export_btn: "Экспорт",
+    export_all: "Экспортировать все",
+    export_pdf: "PDF сводка",
+    pdf_modal_title: "Скачать PDF",
+    pdf_modal_desc: "Выберите разделы для включения:",
+    pdf_sec_kpi: "Сводка KPI",
+    pdf_sec_discover: "Пригодность Discover",
+    pdf_sec_discover_insights: "ИИ Discover аналитика",
+    pdf_sec_content: "Структура и орфография",
+    pdf_sec_quality: "Качество контента",
+    pdf_sec_ai: "ИИ анализ",
+    pdf_btn_download: "Скачать PDF",
   },
   uk: {
     input_title: "Аналіз статті",
@@ -1762,6 +1926,18 @@ const T = {
     authority_90d: "Останні 90 днів",
     authority_para_on: "{count} статей про {topic} були у Discover за останні 90 днів (з {total} усього на сайті).",
     authority_para_off: "Статей про {topic} у Discover за останні 90 днів не знайдено. На сайті {total} статей у Discover загалом.",
+    export_btn: "Експорт",
+    export_all: "Експортувати все",
+    export_pdf: "PDF зведення",
+    pdf_modal_title: "Завантажити PDF",
+    pdf_modal_desc: "Оберіть розділи для включення:",
+    pdf_sec_kpi: "Зведення KPI",
+    pdf_sec_discover: "Придатність Discover",
+    pdf_sec_discover_insights: "ШІ Discover аналітика",
+    pdf_sec_content: "Структура і орфографія",
+    pdf_sec_quality: "Якість контенту",
+    pdf_sec_ai: "ШІ аналіз",
+    pdf_btn_download: "Завантажити PDF",
   },
   pl: {
     input_title: "Analiza artykułu",
@@ -1913,6 +2089,18 @@ const T = {
     authority_90d: "Ostatnie 90 dni",
     authority_para_on: "{count} artykułów o {topic} było w Discover w ciągu ostatnich 90 dni (z {total} ogółem na stronie).",
     authority_para_off: "Nie znaleziono artykułów o {topic} w Discover w ciągu ostatnich 90 dni. Strona ma {total} artykułów w Discover ogółem.",
+    export_btn: "Eksportuj",
+    export_all: "Eksportuj wszystko",
+    export_pdf: "PDF podsumowanie",
+    pdf_modal_title: "Pobierz PDF",
+    pdf_modal_desc: "Wybierz sekcje do uwzględnienia:",
+    pdf_sec_kpi: "Podsumowanie KPI",
+    pdf_sec_discover: "Kwalifikowalność Discover",
+    pdf_sec_discover_insights: "AI Discover analiza",
+    pdf_sec_content: "Struktura i pisownia",
+    pdf_sec_quality: "Jakość treści",
+    pdf_sec_ai: "Analiza AI",
+    pdf_btn_download: "Pobierz PDF",
   },
   cs: {
     input_title: "Analýza článku",
@@ -2064,6 +2252,18 @@ const T = {
     authority_90d: "Posledních 90 dní",
     authority_para_on: "{count} článků o {topic} bylo na Discover za posledních 90 dní (z {total} celkem na webu).",
     authority_para_off: "Žádné články o {topic} nebyly nalezeny na Discover za posledních 90 dní. Web má {total} článků na Discover celkem.",
+    export_btn: "Export",
+    export_all: "Exportovat vse",
+    export_pdf: "PDF souhrn",
+    pdf_modal_title: "Stahnout PDF",
+    pdf_modal_desc: "Vyberte sekce k zahrnutí:",
+    pdf_sec_kpi: "Souhrn KPI",
+    pdf_sec_discover: "Zpusobilost Discover",
+    pdf_sec_discover_insights: "AI Discover analyza",
+    pdf_sec_content: "Struktura a pravopis",
+    pdf_sec_quality: "Kvalita obsahu",
+    pdf_sec_ai: "AI analyza",
+    pdf_btn_download: "Stahnout PDF",
   }
 };
 
@@ -3143,7 +3343,9 @@ function renderDiscoverInsights(d) {
 
 // ========== RENDER RESULTS ==========
 function renderResults(url, title, discoverChecks, contentChecks, aiResult, spellResult, qualityResult, discoverAuthority) {
+  storeExportData(url, title, discoverChecks, contentChecks, aiResult, spellResult, qualityResult, discoverAuthority);
   document.getElementById('results').classList.add('active');
+  document.getElementById('exportBar').classList.add('active');
   document.getElementById('resultTitle').textContent = title;
   document.getElementById('resultUrl').textContent = url;
 
@@ -3160,17 +3362,17 @@ function renderResults(url, title, discoverChecks, contentChecks, aiResult, spel
     { label: t('kpi_h2'), value: h2Count, color: h2Count>0?'green':'amber' },
   ];
   if (aiResult) {
-    kpis.push({ label: t('kpi_discover_ai'), value: aiResult.discover?.score||'?', color: (aiResult.discover?.score||0)>=70?'green':(aiResult.discover?.score||0)>=40?'amber':'red' });
+    kpis.push({ label: t('kpi_discover_ai'), value: (aiResult.discover?.score||'?') + '/100', color: (aiResult.discover?.score||0)>=70?'green':(aiResult.discover?.score||0)>=40?'amber':'red' });
     if (aiResult.search?.score_lisibilite_mot_cle != null)
-      kpis.push({ label: t('kpi_seo'), value: aiResult.search.score_lisibilite_mot_cle, color: aiResult.search.score_lisibilite_mot_cle>=60?'green':aiResult.search.score_lisibilite_mot_cle>=30?'amber':'red' });
+      kpis.push({ label: t('kpi_seo'), value: aiResult.search.score_lisibilite_mot_cle + '/100', color: aiResult.search.score_lisibilite_mot_cle>=60?'green':aiResult.search.score_lisibilite_mot_cle>=30?'amber':'red' });
   }
   if (spellResult) {
     const errCount = spellResult.errors?.length || 0;
-    kpis.push({ label: t('kpi_spell'), value: errCount, color: errCount===0?'green':errCount<=3?'amber':'red' });
+    kpis.push({ label: t('kpi_spell'), value: errCount === 0 ? 'OK' : errCount + ' issue(s)', color: errCount===0?'green':errCount<=3?'amber':'red' });
   }
   if (qualityResult) {
     const qIssues = (qualityResult.title_alignment?.status !== 'aligned' ? 1 : 0) + (qualityResult.fluff?.length || 0);
-    kpis.push({ label: t('kpi_quality'), value: qIssues === 0 ? 'OK' : qIssues, color: qIssues===0?'green':qIssues<=2?'amber':'red' });
+    kpis.push({ label: t('kpi_quality'), value: qIssues === 0 ? 'OK' : qIssues + ' issue(s)', color: qIssues===0?'green':qIssues<=2?'amber':'red' });
   }
   document.getElementById('kpiRow').innerHTML = kpis.map(k => `<div class="kpi-card"><div class="kpi-value ${k.color}"><span class="tl-dot ${k.color}"></span>${k.value}</div><div class="kpi-label">${k.label}</div></div>`).join('');
 
@@ -3416,6 +3618,243 @@ function exportFluffFeedback() {
     a.click();
     URL.revokeObjectURL(a.href);
   } catch(e) { alert('Export error: ' + e.message); }
+}
+
+// ========== GLOBAL EXPORT DATA STORE ==========
+window._exportData = null;
+
+function storeExportData(url, title, discoverChecks, contentChecks, aiResult, spellResult, qualityResult, discoverAuthority) {
+  window._exportData = { url, title, discoverChecks, contentChecks, aiResult, spellResult, qualityResult, discoverAuthority, timestamp: new Date().toISOString() };
+}
+
+// ========== EXPORT HELPERS ==========
+function csvQ(s) { return '"' + String(s||'').replace(/"/g, '""') + '"'; }
+
+function downloadFile(content, filename, mime) {
+  const blob = new Blob([content], { type: mime });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function toggleExportMenu(btn) {
+  const dd = btn.parentElement.querySelector('.export-dropdown');
+  // Close all other dropdowns first
+  document.querySelectorAll('.export-dropdown.open').forEach(d => { if (d !== dd) d.classList.remove('open'); });
+  dd.classList.toggle('open');
+}
+// Close export dropdowns on click outside
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.export-btn-wrap')) {
+    document.querySelectorAll('.export-dropdown.open').forEach(d => d.classList.remove('open'));
+  }
+});
+
+// ========== SECTION DATA EXTRACTORS ==========
+function getDiscoverData() {
+  const d = window._exportData;
+  if (!d || !d.discoverChecks) return null;
+  return d.discoverChecks.map(c => ({ check: c.label, status: c.status, detail: c.detail }));
+}
+
+function getDiscoverInsightsData() {
+  const d = window._exportData;
+  if (!d || !d.discoverAuthority) return null;
+  const a = d.discoverAuthority;
+  const obj = { topic: a.topic, matching_count: a.matching_count, authority: a.matching_count > 0 ? 'On Discover' : 'Not on Discover', site: a.site, total_articles: a.total_articles };
+  if (a.matching_count > 0) {
+    obj.avg_impressions = Math.round(a.avg_impressions);
+    obj.avg_clicks = Math.round(a.avg_clicks);
+    obj.avg_ctr = Number(a.avg_ctr.toFixed(1));
+    if (a.site_stats) {
+      obj.site_avg_impressions = Math.round(a.site_stats.avg_impressions);
+      obj.site_avg_clicks = Math.round(a.site_stats.avg_clicks);
+      obj.site_avg_ctr = Number(a.site_stats.avg_ctr.toFixed(1));
+      obj.site_median_impressions = Math.round(a.site_stats.median_impressions);
+      obj.site_median_clicks = Math.round(a.site_stats.median_clicks);
+      obj.site_median_ctr = Number(a.site_stats.median_ctr.toFixed(1));
+    }
+  }
+  return obj;
+}
+
+function getContentData() {
+  const d = window._exportData;
+  if (!d) return null;
+  const rows = (d.contentChecks || []).map(c => ({ check: c.label, status: c.status, detail: c.detail, value: c.value }));
+  if (d.spellResult) {
+    rows.push({ check: 'Spellcheck', status: (d.spellResult.errors||[]).length === 0 ? 'ok' : 'fail', detail: `${(d.spellResult.errors||[]).length} error(s)`, value: (d.spellResult.errors||[]).length });
+    (d.spellResult.errors || []).forEach(e => {
+      rows.push({ check: 'Spell error', status: 'fail', detail: `${e.original} -> ${e.correction}`, value: e.type });
+    });
+  }
+  return rows;
+}
+
+function getQualityData() {
+  const d = window._exportData;
+  if (!d || !d.qualityResult) return null;
+  const q = d.qualityResult;
+  const rows = [];
+  if (q.title_alignment) rows.push({ check: 'Title alignment', status: q.title_alignment.status, comment: q.title_alignment.comment || '' });
+  if (q.title_balance) rows.push({ check: 'Title balance', status: q.title_balance.status, comment: q.title_balance.comment || '', suggestion: q.title_balance.suggestion || '' });
+  (q.fluff || []).forEach(f => {
+    rows.push({ check: 'Fluff', quote: f.quote, reason: f.reason, suggestion: f.suggestion, tests_failed: f.tests_failed || '' });
+  });
+  return rows;
+}
+
+function getAiData() {
+  const d = window._exportData;
+  if (!d || !d.aiResult) return null;
+  return d.aiResult;
+}
+
+// ========== EXPORT PER SECTION ==========
+function exportSection(section, format) {
+  // Close dropdown
+  document.querySelectorAll('.export-dropdown.open').forEach(d => d.classList.remove('open'));
+  const d = window._exportData;
+  if (!d) return;
+  const slug = (d.url || 'analysis').replace(/[^a-z0-9]/gi, '_').slice(0, 40);
+  const ts = new Date().toISOString().slice(0, 10);
+
+  if (format === 'json') {
+    let data;
+    if (section === 'discover') data = { url: d.url, title: d.title, section: 'discover_eligibility', checks: getDiscoverData() };
+    else if (section === 'discoverInsights') data = { url: d.url, title: d.title, section: 'discover_insights', data: getDiscoverInsightsData() };
+    else if (section === 'content') data = { url: d.url, title: d.title, section: 'content_structure', checks: getContentData() };
+    else if (section === 'quality') data = { url: d.url, title: d.title, section: 'content_quality', checks: getQualityData() };
+    else if (section === 'ai') data = { url: d.url, title: d.title, section: 'ai_analysis', data: getAiData() };
+    downloadFile(JSON.stringify(data, null, 2), `${section}_${slug}_${ts}.json`, 'application/json');
+    return;
+  }
+
+  // CSV
+  let header, rows;
+  if (section === 'discover') {
+    const checks = getDiscoverData() || [];
+    header = 'Check,Status,Detail';
+    rows = checks.map(c => [csvQ(c.check), csvQ(c.status), csvQ(c.detail)].join(','));
+  } else if (section === 'discoverInsights') {
+    const di = getDiscoverInsightsData();
+    if (!di) return;
+    header = Object.keys(di).join(',');
+    rows = [Object.values(di).map(v => csvQ(v)).join(',')];
+  } else if (section === 'content') {
+    const checks = getContentData() || [];
+    header = 'Check,Status,Detail,Value';
+    rows = checks.map(c => [csvQ(c.check), csvQ(c.status), csvQ(c.detail), csvQ(c.value)].join(','));
+  } else if (section === 'quality') {
+    const checks = getQualityData() || [];
+    header = 'Check,Status,Comment,Quote,Reason,Suggestion,Tests Failed';
+    rows = checks.map(c => [csvQ(c.check), csvQ(c.status), csvQ(c.comment), csvQ(c.quote), csvQ(c.reason), csvQ(c.suggestion), csvQ(c.tests_failed)].join(','));
+  } else if (section === 'ai') {
+    const ai = getAiData();
+    if (!ai) return;
+    // Flatten AI data
+    header = 'Category,Field,Value';
+    rows = [];
+    const s = ai.search || {};
+    rows.push([csvQ('Search'), csvQ('Rankable'), csvQ(s.positionnable_seo ? 'Yes' : 'No')].join(','));
+    if (s.mot_cle_principal) rows.push([csvQ('Search'), csvQ('Keyword'), csvQ(s.mot_cle_principal)].join(','));
+    if (s.cluster_thematique) rows.push([csvQ('Search'), csvQ('Cluster'), csvQ(s.cluster_thematique)].join(','));
+    if (s.score_lisibilite_mot_cle != null) rows.push([csvQ('Search'), csvQ('Readability'), csvQ(s.score_lisibilite_mot_cle)].join(','));
+    if (s.justification) rows.push([csvQ('Search'), csvQ('Justification'), csvQ(s.justification)].join(','));
+    const dd = ai.discover || {};
+    if (dd.score != null) rows.push([csvQ('Discover'), csvQ('Score'), csvQ(dd.score)].join(','));
+    (dd.points_forts || []).forEach(p => rows.push([csvQ('Discover'), csvQ('Strength'), csvQ(p)].join(',')));
+    (dd.points_faibles || []).forEach(p => rows.push([csvQ('Discover'), csvQ('Weakness'), csvQ(p)].join(',')));
+    (dd.titre_suggestions || []).forEach(p => rows.push([csvQ('Discover'), csvQ('Title suggestion'), csvQ(p)].join(',')));
+    if (dd.justification) rows.push([csvQ('Discover'), csvQ('Justification'), csvQ(dd.justification)].join(','));
+    (ai.entites_principales || []).forEach(e => rows.push([csvQ('Entities'), csvQ('Entity'), csvQ(e)].join(',')));
+    const l = ai.lecture_editoriale || {};
+    if (l.titre_coherent) rows.push([csvQ('Editorial'), csvQ('Title coherent'), csvQ(l.titre_coherent.statut + ': ' + (l.titre_coherent.commentaire||''))].join(','));
+    if (l.sourcing_present) rows.push([csvQ('Editorial'), csvQ('Sourcing'), csvQ(l.sourcing_present.statut + ': ' + (l.sourcing_present.commentaire||''))].join(','));
+  }
+  downloadFile('﻿' + header + '\n' + rows.join('\n'), `${section}_${slug}_${ts}.csv`, 'text/csv;charset=utf-8');
+}
+
+// ========== EXPORT ALL ==========
+function exportAll(format) {
+  const d = window._exportData;
+  if (!d) return;
+  const slug = (d.url || 'analysis').replace(/[^a-z0-9]/gi, '_').slice(0, 40);
+  const ts = new Date().toISOString().slice(0, 10);
+
+  if (format === 'json') {
+    const data = {
+      url: d.url, title: d.title, timestamp: d.timestamp,
+      discover_eligibility: getDiscoverData(),
+      discover_insights: getDiscoverInsightsData(),
+      content_structure: getContentData(),
+      content_quality: getQualityData(),
+      ai_analysis: getAiData()
+    };
+    downloadFile(JSON.stringify(data, null, 2), `full_analysis_${slug}_${ts}.json`, 'application/json');
+    return;
+  }
+
+  // CSV: combine all sections with a Section column
+  let allRows = ['Section,Check,Status,Detail,Value'];
+  (getDiscoverData() || []).forEach(c => allRows.push([csvQ('Discover'), csvQ(c.check), csvQ(c.status), csvQ(c.detail), ''].join(',')));
+  const di = getDiscoverInsightsData();
+  if (di) {
+    Object.entries(di).forEach(([k, v]) => allRows.push([csvQ('Discover Insights'), csvQ(k), '', csvQ(v), ''].join(',')));
+  }
+  (getContentData() || []).forEach(c => allRows.push([csvQ('Content'), csvQ(c.check), csvQ(c.status), csvQ(c.detail), csvQ(c.value)].join(',')));
+  (getQualityData() || []).forEach(c => allRows.push([csvQ('Quality'), csvQ(c.check), csvQ(c.status), csvQ(c.comment || c.quote || ''), csvQ(c.suggestion || c.reason || '')].join(',')));
+  const ai = getAiData();
+  if (ai) {
+    const s = ai.search || {};
+    allRows.push([csvQ('AI'), csvQ('Rankable'), csvQ(s.positionnable_seo ? 'Yes' : 'No'), '', ''].join(','));
+    if (s.mot_cle_principal) allRows.push([csvQ('AI'), csvQ('Keyword'), '', csvQ(s.mot_cle_principal), ''].join(','));
+    const dd = ai.discover || {};
+    if (dd.score != null) allRows.push([csvQ('AI'), csvQ('Discover Score'), '', csvQ(dd.score + '/100'), ''].join(','));
+  }
+  downloadFile('﻿' + allRows.join('\n'), `full_analysis_${slug}_${ts}.csv`, 'text/csv;charset=utf-8');
+}
+
+// ========== PDF MODAL ==========
+function openPdfModal() {
+  document.getElementById('pdfModal').classList.add('active');
+}
+function closePdfModal() {
+  document.getElementById('pdfModal').classList.remove('active');
+}
+
+function generatePdf() {
+  closePdfModal();
+  // Hide/show sections based on checkboxes
+  const map = {
+    pdfKpi: 'kpiRow',
+    pdfDiscover: 'discoverCard',
+    pdfDiscoverInsights: 'discoverInsightsCard',
+    pdfContent: 'contentCard',
+    pdfQuality: 'qualityCard',
+    pdfAi: 'aiSection'
+  };
+  // Mark unchecked sections for print hide
+  for (const [cbId, elId] of Object.entries(map)) {
+    const el = document.getElementById(elId);
+    if (!el) continue;
+    if (!document.getElementById(cbId).checked) {
+      el.setAttribute('data-pdf-hide', '1');
+    } else {
+      el.removeAttribute('data-pdf-hide');
+    }
+  }
+  // Trigger print
+  window.print();
+  // Clean up after print
+  setTimeout(() => {
+    for (const elId of Object.values(map)) {
+      const el = document.getElementById(elId);
+      if (el) el.removeAttribute('data-pdf-hide');
+    }
+  }, 1000);
 }
 
 function esc(str) { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
