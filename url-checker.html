@@ -2993,6 +2993,9 @@ const CORS_PROXIES = [
 ];
 const OPENAI_MODEL = 'gpt-4o';
 const DEFAULT_GAS_PROXY = 'https://script.google.com/macros/s/AKfycbydan3oxJpVWmT1VDWw3xKUWFqy7tW4Bkb2-guLhufwQItALaZpXTu2SlH2xKaQ_i77yg/exec';
+const DEFAULT_DISCOVER_SHEET = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSzDGCChRg2qmqFMxm9Y55B3VF_shHhTzrjMIg5e--9jG3lcGkUWfEX4pXajCRgCuRAq6RKOYIsRBDm/pubhtml';
+const DEFAULT_DISCOVER_SHEET_30D = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTU8KEN1IQpVyz9hZg0TtnO7wCP4OWtsNkB6wqyVVSdMgZhy6O_jy9fecwzzoP8fmkN640tq5l912sq/pubhtml';
+const DEFAULT_DISCOVER_SHEET_10D = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSnayllIjjOD3u0l7dv_LjD56DZnVuamM7_y6QMbnsTlOACyeXZZ5MP_eTC_uqu-8CHk_4zv6C-z2na/pubhtml';
 const DEFAULT_SEARCH_SHEET = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS_xBBpbRcqRO8du0wSfLvPXms6LBBFyaqJX0KNwAARqV-iulmwz8PHqldYfbG9vffCday53ZrrsbNb/pubhtml';
 
 // ========== FLUFF FEEDBACK LEARNING ==========
@@ -3172,19 +3175,7 @@ function saveSettings() {
 // ========== MODE TABS ==========
 const SITE_OPTIONS = [
   { value: '_all', label: 'All sites' },
-  { value: 'TOPMERCATO', label: 'TopMercato' },
-  { value: 'SPORTSMOLE', label: 'SportsMole' },
-  { value: 'TRIVELA', label: 'Trivela' },
-  { value: 'UMDOISESPORTES', label: 'UmDoisEsportes' },
-  { value: 'AFRIKFOOTFR', label: 'Afrik-Foot (FR)' },
-  { value: 'AFRIKFOOTZA', label: 'Afrik-Foot (ZA)' },
-  { value: 'AFRIKFOOTNG', label: 'Afrik-Foot (NG)' },
-  { value: 'FOOTBALLWHISPERS', label: 'Football Whispers' },
-  { value: 'FOOTBALLGROUNDGUIDE', label: 'Football Ground Guide' },
-  { value: 'MRFIXITSTIPS', label: 'Mr Fixits Tips' },
-  { value: 'SOLOBASKET', label: 'SoloBasket' },
-  { value: 'FOTBALPORTAL', label: 'Fotbal Portal' },
-  { value: 'VRINGE', label: 'Vringe' }
+  ...[...new Set(Object.values(DOMAIN_TAB_MAP))].sort().map(tab => ({ value: tab, label: TAB_LABELS[tab] || tab }))
 ];
 
 function populateSiteSelect() {
@@ -3344,7 +3335,7 @@ async function startKeywordAnalysis() {
   const kwText = document.getElementById('kwInput').value.trim();
   if (!kwText) { showError(t('err_empty_kw')); return; }
 
-  const sheetUrl = localStorage.getItem('media_dashboard_discover_sheet') || '';
+  const sheetUrl = localStorage.getItem('media_dashboard_discover_sheet') || DEFAULT_DISCOVER_SHEET;
   if (!sheetUrl) { showError(t('kw_no_sheet')); return; }
 
   const selectedSite = document.getElementById('kwSiteSelect').value;
@@ -4336,30 +4327,39 @@ function computeMedian(arr) {
 }
 const DOMAIN_TAB_MAP = {
   'topmercato.com': 'TOPMERCATO',
-  'www.topmercato.com': 'TOPMERCATO',
   'sportsmole.co.uk': 'SPORTSMOLE',
-  'www.sportsmole.co.uk': 'SPORTSMOLE',
   'trivela.com.br': 'TRIVELA',
-  'www.trivela.com.br': 'TRIVELA',
   'umdoisesportes.com.br': 'UMDOISESPORTES',
-  'www.umdoisesportes.com.br': 'UMDOISESPORTES',
   'afrik-foot.com': 'AFRIKFOOTFR',
-  'www.afrik-foot.com': 'AFRIKFOOTFR',
   'afrikfoot.com': 'AFRIKFOOTFR',
   'za.afrik-foot.com': 'AFRIKFOOTZA',
   'ng.afrik-foot.com': 'AFRIKFOOTNG',
   'footballwhispers.com': 'FOOTBALLWHISPERS',
-  'www.footballwhispers.com': 'FOOTBALLWHISPERS',
   'footballgroundguide.com': 'FOOTBALLGROUNDGUIDE',
-  'www.footballgroundguide.com': 'FOOTBALLGROUNDGUIDE',
   'mrfixitstips.co.uk': 'MRFIXITSTIPS',
-  'www.mrfixitstips.co.uk': 'MRFIXITSTIPS',
   'solobasket.com': 'SOLOBASKET',
-  'www.solobasket.com': 'SOLOBASKET',
   'fotbalportal.cz': 'FOTBALPORTAL',
-  'www.fotbalportal.cz': 'FOTBALPORTAL',
   'vrfringe.com': 'VRINGE',
-  'www.vrfringe.com': 'VRINGE',
+  'alairelibrechile.cl': 'ALAIRELIBRE',
+  'calciodangolo.com': 'CALCIODANGOLO',
+  'soccernet.ng': 'SOCCERNET',
+  'basketusa.com': 'BASKETUSA',
+  'basketeurope.com': 'BASKETEUROPE',
+  'lubsport.com': 'LUBSPORT',
+  'lakersbrasil.com': 'LAKERSBRASIL',
+};
+// Display labels for tab codes (used by SITE_OPTIONS and keyword checker)
+const TAB_LABELS = {
+  'TOPMERCATO': 'TopMercato', 'SPORTSMOLE': 'SportsMole', 'TRIVELA': 'Trivela',
+  'UMDOISESPORTES': 'UmDoisEsportes', 'AFRIKFOOTFR': 'Afrik-Foot (FR)',
+  'AFRIKFOOTZA': 'Afrik-Foot (ZA)', 'AFRIKFOOTNG': 'Afrik-Foot (NG)',
+  'FOOTBALLWHISPERS': 'Football Whispers', 'FOOTBALLGROUNDGUIDE': 'Football Ground Guide',
+  'MRFIXITSTIPS': 'Mr Fixits Tips', 'SOLOBASKET': 'SoloBasket',
+  'FOTBALPORTAL': 'Fotbal Portal', 'VRINGE': 'Vringe',
+  'ALAIRELIBRE': 'Al Aire Libre', 'CALCIODANGOLO': 'CalcioDAngolo',
+  'SOCCERNET': 'Soccernet', 'BASKETUSA': 'Basket USA',
+  'BASKETEUROPE': 'Basket Europe', 'LUBSPORT': 'LubSport',
+  'LAKERSBRASIL': 'Lakers Brasil',
 };
 
 function extractSheetId(url) {
@@ -4407,7 +4407,7 @@ function extractTopicKeywords(title) {
 }
 
 async function runDiscoverAuthority(url, title) {
-  const sheetUrl = localStorage.getItem('media_dashboard_discover_sheet') || '';
+  const sheetUrl = localStorage.getItem('media_dashboard_discover_sheet') || DEFAULT_DISCOVER_SHEET;
   if (!sheetUrl) return null;
 
   let hostname;
@@ -4426,7 +4426,7 @@ async function runDiscoverAuthority(url, title) {
   if (allRows.length === 0) return null;
 
   // Fetch 30-day data if configured
-  const sheetUrl30 = localStorage.getItem('media_dashboard_discover_sheet_30d') || '';
+  const sheetUrl30 = localStorage.getItem('media_dashboard_discover_sheet_30d') || DEFAULT_DISCOVER_SHEET_30D;
   let rows30 = [];
   if (sheetUrl30) {
     try {
@@ -4437,7 +4437,7 @@ async function runDiscoverAuthority(url, title) {
   }
 
   // Fetch 10-day data if configured
-  const sheetUrl10 = localStorage.getItem('media_dashboard_discover_sheet_10d') || '';
+  const sheetUrl10 = localStorage.getItem('media_dashboard_discover_sheet_10d') || DEFAULT_DISCOVER_SHEET_10D;
   let rows10 = [];
   if (sheetUrl10) {
     try {
@@ -4447,15 +4447,7 @@ async function runDiscoverAuthority(url, title) {
     } catch(e) { console.warn('Discover 10d fetch failed:', e.message); }
   }
 
-  // Compute site-wide stats for comparison
-  const siteStats = {
-    avg_impressions: allRows.reduce((a, r) => a + r.impressions, 0) / allRows.length,
-    avg_clicks: allRows.reduce((a, r) => a + r.clicks, 0) / allRows.length,
-    avg_ctr: allRows.reduce((a, r) => a + r.ctr, 0) / allRows.length,
-    median_impressions: computeMedian(allRows.map(r => r.impressions)),
-    median_clicks: computeMedian(allRows.map(r => r.clicks)),
-    median_ctr: computeMedian(allRows.map(r => r.ctr))
-  };
+  const siteStats = computeSiteStats(allRows);
 
   const keywords = extractTopicKeywords(title);
   if (keywords.length === 0) return null;
@@ -4517,10 +4509,11 @@ URL list format: [index] path | clicks | impressions` },
     const count = matchingRows.length;
 
     // All stats computed in JS from actual CSV data
+    const matchingUrls90 = new Set(matchingRows.map(r => r.url));
+
     // 30-day matching: reuse the same GPT topic keywords against 30d data
     let match30 = { count: 0, avg_clicks: 0, avg_impressions: 0, avg_ctr: 0, total: rows30.length };
     if (rows30.length > 0) {
-      const matchingUrls90 = new Set(matchingRows.map(r => r.url));
       const candidates30 = rows30.filter(r => {
         const slug = r.url.toLowerCase();
         return keywords.some(kw => slug.includes(kw));
@@ -4538,7 +4531,6 @@ URL list format: [index] path | clicks | impressions` },
     // 10-day matching: same pattern as 30d
     let match10 = { count: 0, avg_clicks: 0, avg_impressions: 0, avg_ctr: 0, total: rows10.length };
     if (rows10.length > 0) {
-      const matchingUrls90 = new Set(matchingRows.map(r => r.url));
       const candidates10 = rows10.filter(r => {
         const slug = r.url.toLowerCase();
         return keywords.some(kw => slug.includes(kw));
@@ -4632,39 +4624,7 @@ function renderDiscoverInsights(d) {
   if (isOn && d.site_stats) {
     const para = t('authority_para_on', { topic: d.topic, count: d.matching_count, total: d.total_articles });
     html += `<p style="color:var(--text);line-height:1.7;margin:0 0 12px 0">${para}</p>`;
-
-    const ss = d.site_stats;
-    const metrics = [
-      { label: 'Impressions', topic: d.avg_impressions, avg: ss.avg_impressions, median: ss.median_impressions, fmt: v => Math.round(v).toLocaleString() },
-      { label: 'Clicks', topic: d.avg_clicks, avg: ss.avg_clicks, median: ss.median_clicks, fmt: v => Math.round(v).toLocaleString() },
-      { label: 'CTR', topic: d.avg_ctr, avg: ss.avg_ctr, median: ss.median_ctr, fmt: v => v.toFixed(1) + '%' }
-    ];
-
-    html += `<table style="width:100%;font-size:13px;border-collapse:collapse">
-      <thead><tr style="border-bottom:2px solid var(--border)">
-        <th style="padding:6px 8px;text-align:left;font-weight:600"></th>
-        <th style="padding:6px 8px;text-align:right;font-weight:600">Topic</th>
-        <th style="padding:6px 8px;text-align:right;font-weight:600">Site avg</th>
-        <th style="padding:6px 8px;text-align:right;font-weight:600">Site median</th>
-        <th style="padding:6px 8px;text-align:right;font-weight:600">vs avg</th>
-        <th style="padding:6px 8px;text-align:right;font-weight:600">vs median</th>
-      </tr></thead><tbody>`;
-
-    for (const m of metrics) {
-      const vsAvg = m.avg > 0 ? ((m.topic - m.avg) / m.avg * 100) : 0;
-      const vsMed = m.median > 0 ? ((m.topic - m.median) / m.median * 100) : 0;
-      const ac = vsAvg >= 0 ? 'var(--green,#22c55e)' : 'var(--red,#ef4444)';
-      const mc = vsMed >= 0 ? 'var(--green,#22c55e)' : 'var(--red,#ef4444)';
-      html += `<tr style="border-bottom:1px solid var(--border)">
-        <td style="padding:6px 8px;font-weight:600">${m.label}</td>
-        <td style="padding:6px 8px;text-align:right;font-weight:600">${m.fmt(m.topic)}</td>
-        <td style="padding:6px 8px;text-align:right">${m.fmt(m.avg)}</td>
-        <td style="padding:6px 8px;text-align:right">${m.fmt(m.median)}</td>
-        <td style="padding:6px 8px;text-align:right;color:${ac}">${vsAvg>=0?'▲':'▼'} ${vsAvg>=0?'+':''}${vsAvg.toFixed(0)}%</td>
-        <td style="padding:6px 8px;text-align:right;color:${mc}">${vsMed>=0?'▲':'▼'} ${vsMed>=0?'+':''}${vsMed.toFixed(0)}%</td>
-      </tr>`;
-    }
-    html += `</tbody></table>`;
+    html += buildComparisonTable(d, d.site_stats, 'Topic');
   } else {
     const para = t('authority_para_off', { topic: d.topic, total: d.total_articles });
     html += `<p style="color:var(--text);line-height:1.7;margin:0">${para}</p>`;
@@ -4693,15 +4653,7 @@ async function runSearchAuthority(url, title) {
   const allRows = parseDiscoverCSV(csvText);
   if (allRows.length === 0) return null;
 
-  // Compute site-wide stats for comparison
-  const siteStats = {
-    avg_impressions: allRows.reduce((a, r) => a + r.impressions, 0) / allRows.length,
-    avg_clicks: allRows.reduce((a, r) => a + r.clicks, 0) / allRows.length,
-    avg_ctr: allRows.reduce((a, r) => a + r.ctr, 0) / allRows.length,
-    median_impressions: computeMedian(allRows.map(r => r.impressions)),
-    median_clicks: computeMedian(allRows.map(r => r.clicks)),
-    median_ctr: computeMedian(allRows.map(r => r.ctr))
-  };
+  const siteStats = computeSiteStats(allRows);
 
   const keywords = extractTopicKeywords(title);
   if (keywords.length === 0) return null;
@@ -4795,39 +4747,7 @@ function renderSearchInsights(d) {
   if (isOn && d.site_stats) {
     const para = t('authority_search_para_on', { topic: d.topic, count: d.matching_count, total: d.total_articles });
     html += `<p style="color:var(--text);line-height:1.7;margin:0 0 12px 0">${para}</p>`;
-
-    const ss = d.site_stats;
-    const metrics = [
-      { label: 'Impressions', topic: d.avg_impressions, avg: ss.avg_impressions, median: ss.median_impressions, fmt: v => Math.round(v).toLocaleString() },
-      { label: 'Clicks', topic: d.avg_clicks, avg: ss.avg_clicks, median: ss.median_clicks, fmt: v => Math.round(v).toLocaleString() },
-      { label: 'CTR', topic: d.avg_ctr, avg: ss.avg_ctr, median: ss.median_ctr, fmt: v => v.toFixed(1) + '%' }
-    ];
-
-    html += `<table style="width:100%;font-size:13px;border-collapse:collapse">
-      <thead><tr style="border-bottom:2px solid var(--border)">
-        <th style="padding:6px 8px;text-align:left;font-weight:600"></th>
-        <th style="padding:6px 8px;text-align:right;font-weight:600">Topic</th>
-        <th style="padding:6px 8px;text-align:right;font-weight:600">Site avg</th>
-        <th style="padding:6px 8px;text-align:right;font-weight:600">Site median</th>
-        <th style="padding:6px 8px;text-align:right;font-weight:600">vs avg</th>
-        <th style="padding:6px 8px;text-align:right;font-weight:600">vs median</th>
-      </tr></thead><tbody>`;
-
-    for (const m of metrics) {
-      const vsAvg = m.avg > 0 ? ((m.topic - m.avg) / m.avg * 100) : 0;
-      const vsMed = m.median > 0 ? ((m.topic - m.median) / m.median * 100) : 0;
-      const ac = vsAvg >= 0 ? 'var(--green,#22c55e)' : 'var(--red,#ef4444)';
-      const mc = vsMed >= 0 ? 'var(--green,#22c55e)' : 'var(--red,#ef4444)';
-      html += `<tr style="border-bottom:1px solid var(--border)">
-        <td style="padding:6px 8px;font-weight:600">${m.label}</td>
-        <td style="padding:6px 8px;text-align:right;font-weight:600">${m.fmt(m.topic)}</td>
-        <td style="padding:6px 8px;text-align:right">${m.fmt(m.avg)}</td>
-        <td style="padding:6px 8px;text-align:right">${m.fmt(m.median)}</td>
-        <td style="padding:6px 8px;text-align:right;color:${ac}">${vsAvg>=0?'▲':'▼'} ${vsAvg>=0?'+':''}${vsAvg.toFixed(0)}%</td>
-        <td style="padding:6px 8px;text-align:right;color:${mc}">${vsMed>=0?'▲':'▼'} ${vsMed>=0?'+':''}${vsMed.toFixed(0)}%</td>
-      </tr>`;
-    }
-    html += `</tbody></table>`;
+    html += buildComparisonTable(d, d.site_stats, 'Topic');
   } else {
     const para = t('authority_search_para_off', { topic: d.topic, total: d.total_articles });
     html += `<p style="color:var(--text);line-height:1.7;margin:0">${para}</p>`;
@@ -4970,7 +4890,8 @@ function renderKeywordResults(inputText, selectedSite, entityResults, angleIdeas
   container.innerHTML = allHtml;
 }
 
-function buildComparisonTable(topicStats, siteStats) {
+function buildComparisonTable(topicStats, siteStats, topicLabel) {
+  const colLabel = topicLabel || t('kw_entity');
   const metrics = [
     { label: 'Impressions', topic: topicStats.avg_impressions, avg: siteStats.avg_impressions, median: siteStats.median_impressions, fmt: v => Math.round(v).toLocaleString() },
     { label: 'Clicks', topic: topicStats.avg_clicks, avg: siteStats.avg_clicks, median: siteStats.median_clicks, fmt: v => Math.round(v).toLocaleString() },
@@ -4980,7 +4901,7 @@ function buildComparisonTable(topicStats, siteStats) {
   let html = `<table style="width:100%;font-size:13px;border-collapse:collapse">
     <thead><tr style="border-bottom:2px solid var(--border)">
       <th style="padding:6px 8px;text-align:left;font-weight:600"></th>
-      <th style="padding:6px 8px;text-align:right;font-weight:600">${t('kw_entity')}</th>
+      <th style="padding:6px 8px;text-align:right;font-weight:600">${colLabel}</th>
       <th style="padding:6px 8px;text-align:right;font-weight:600">Site avg</th>
       <th style="padding:6px 8px;text-align:right;font-weight:600">Site median</th>
       <th style="padding:6px 8px;text-align:right;font-weight:600">vs avg</th>
@@ -5454,11 +5375,11 @@ function getDiscoverData() {
   return d.discoverChecks.map(c => ({ check: c.label, status: c.status, detail: c.detail }));
 }
 
-function getDiscoverInsightsData() {
+function getAuthorityInsightsData(dataKey, onLabel, offLabel) {
   const d = window._exportData;
-  if (!d || !d.discoverAuthority) return null;
-  const a = d.discoverAuthority;
-  const obj = { topic: a.topic, matching_count: a.matching_count, authority: a.matching_count > 0 ? 'On Discover' : 'Not on Discover', site: a.site, total_articles: a.total_articles };
+  if (!d || !d[dataKey]) return null;
+  const a = d[dataKey];
+  const obj = { topic: a.topic, matching_count: a.matching_count, authority: a.matching_count > 0 ? onLabel : offLabel, site: a.site, total_articles: a.total_articles };
   if (a.matching_count > 0) {
     obj.avg_impressions = Math.round(a.avg_impressions);
     obj.avg_clicks = Math.round(a.avg_clicks);
@@ -5474,27 +5395,8 @@ function getDiscoverInsightsData() {
   }
   return obj;
 }
-
-function getSearchInsightsData() {
-  const d = window._exportData;
-  if (!d || !d.searchAuthority) return null;
-  const a = d.searchAuthority;
-  const obj = { topic: a.topic, matching_count: a.matching_count, authority: a.matching_count > 0 ? 'On Search' : 'Not on Search', site: a.site, total_articles: a.total_articles };
-  if (a.matching_count > 0) {
-    obj.avg_impressions = Math.round(a.avg_impressions);
-    obj.avg_clicks = Math.round(a.avg_clicks);
-    obj.avg_ctr = Number(a.avg_ctr.toFixed(1));
-    if (a.site_stats) {
-      obj.site_avg_impressions = Math.round(a.site_stats.avg_impressions);
-      obj.site_avg_clicks = Math.round(a.site_stats.avg_clicks);
-      obj.site_avg_ctr = Number(a.site_stats.avg_ctr.toFixed(1));
-      obj.site_median_impressions = Math.round(a.site_stats.median_impressions);
-      obj.site_median_clicks = Math.round(a.site_stats.median_clicks);
-      obj.site_median_ctr = Number(a.site_stats.median_ctr.toFixed(1));
-    }
-  }
-  return obj;
-}
+function getDiscoverInsightsData() { return getAuthorityInsightsData('discoverAuthority', 'On Discover', 'Not on Discover'); }
+function getSearchInsightsData() { return getAuthorityInsightsData('searchAuthority', 'On Search', 'Not on Search'); }
 
 function getContentData() {
   const d = window._exportData;
