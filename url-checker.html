@@ -796,6 +796,14 @@ body {
       </div>
       <div class="card-body" id="discoverInsightsBody"></div>
     </div>
+    <div class="card" id="searchInsightsCard" style="display:none">
+      <div class="card-header" onclick="toggleCard(this)">
+        <h3>🔍 <span data-t="search_insights_title">AI Search Insights</span></h3>
+        <div class="export-btn-wrap"><button class="export-btn" onclick="event.stopPropagation();toggleExportMenu(this)">↓ <span data-t="export_btn">Export</span></button><div class="export-dropdown"><button onclick="exportSection('searchInsights','csv')">CSV</button><button onclick="exportSection('searchInsights','json')">JSON</button></div></div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="card-body" id="searchInsightsBody"></div>
+    </div>
     <div class="card" id="contentCard">
       <div class="card-header" onclick="toggleCard(this)">
         <h3>🔧 <span data-t="content_title">Article Structure</span></h3>
@@ -848,6 +856,7 @@ body {
       <div class="pdf-section-row"><input type="checkbox" id="pdfKpi" checked><label for="pdfKpi" data-t="pdf_sec_kpi">KPI Summary</label></div>
       <div class="pdf-section-row"><input type="checkbox" id="pdfDiscover" checked><label for="pdfDiscover" data-t="pdf_sec_discover">Discover Eligibility</label></div>
       <div class="pdf-section-row"><input type="checkbox" id="pdfDiscoverInsights" checked><label for="pdfDiscoverInsights" data-t="pdf_sec_discover_insights">AI Discover Insights</label></div>
+      <div class="pdf-section-row"><input type="checkbox" id="pdfSearchInsights" checked><label for="pdfSearchInsights" data-t="pdf_sec_search_insights">AI Search Insights</label></div>
       <div class="pdf-section-row"><input type="checkbox" id="pdfContent" checked><label for="pdfContent" data-t="pdf_sec_content">Article Structure & Spellcheck</label></div>
       <div class="pdf-section-row"><input type="checkbox" id="pdfQuality" checked><label for="pdfQuality" data-t="pdf_sec_quality">Content Quality</label></div>
       <div class="pdf-section-row"><input type="checkbox" id="pdfAi" checked><label for="pdfAi" data-t="pdf_sec_ai">AI Analysis</label></div>
@@ -876,6 +885,9 @@ body {
     <label for="settingsSheetUrl10" style="margin-top:16px" data-t="settings_sheet_10d_label">Discover Last 10 Days (Google Sheets URL)</label>
     <input type="text" id="settingsSheetUrl10" placeholder="https://docs.google.com/spreadsheets/d/...">
     <div class="hint" data-t="settings_sheet_10d_hint">Rolling 10-day Discover data. Same format. Completes the trend timeline.</div>
+    <label for="settingsSearchSheet" style="margin-top:16px" data-t="settings_search_sheet_label">Search Data Last 10 Days (Google Sheets URL)</label>
+    <input type="text" id="settingsSearchSheet" placeholder="https://docs.google.com/spreadsheets/d/...">
+    <div class="hint" data-t="settings_search_sheet_hint">Rolling 10-day Google Search data. Same format (URL, Clicks, Impressions, CTR). Enables Search authority check.</div>
     <label for="settingsProxyUrl" style="margin-top:16px" data-t="settings_proxy_label">CORS Proxy (Google Apps Script URL)</label>
     <input type="text" id="settingsProxyUrl" placeholder="https://script.google.com/macros/s/.../exec">
     <div class="hint" data-t="settings_proxy_hint">Your own proxy for reliable page fetching. <a href="#" onclick="showProxyHelp();return false" data-t="settings_proxy_link">How to set up (30 sec)</a></div>
@@ -1084,6 +1096,8 @@ const T = {
     settings_sheet_30d_hint: "Rolling 30-day Discover data. Same format as above. Enables trend detection.",
     settings_sheet_10d_label: "Discover Last 10 Days (Google Sheets URL)",
     settings_sheet_10d_hint: "Rolling 10-day Discover data. Same format. Completes the trend timeline.",
+    settings_search_sheet_label: "Search Data Last 10 Days (Google Sheets URL)",
+    settings_search_sheet_hint: "Rolling 10-day Google Search data. Same format (URL, Clicks, Impressions, CTR). Enables Search authority check.",
     settings_proxy_label: "CORS Proxy (Google Apps Script URL)",
     settings_proxy_hint: "Your own proxy for reliable page fetching.",
     settings_proxy_link: "How to set up (30 sec)",
@@ -1101,6 +1115,12 @@ const T = {
     trend_articles: "article(s)",
     authority_para_on: "{count} article(s) about {topic} were on Discover in the last 90 days (out of {total} total on the site).",
     authority_para_off: "No articles about {topic} were found on Discover in the last 90 days. The site has {total} article(s) on Discover overall.",
+    search_insights_title: "AI Search Insights",
+    authority_on_search: "On Search",
+    authority_not_on_search: "Not on Search",
+    authority_search_10d: "Last 10 days",
+    authority_search_para_on: "{count} article(s) about {topic} appeared in Google Search in the last 10 days (out of {total} total on the site).",
+    authority_search_para_off: "No articles about {topic} were found in Google Search in the last 10 days. The site has {total} article(s) in Search overall.",
     // Export
     export_btn: "Export",
     export_all: "Export all",
@@ -1110,6 +1130,7 @@ const T = {
     pdf_sec_kpi: "KPI Summary",
     pdf_sec_discover: "Discover Eligibility",
     pdf_sec_discover_insights: "AI Discover Insights",
+    pdf_sec_search_insights: "AI Search Insights",
     pdf_sec_content: "Article Structure & Spellcheck",
     pdf_sec_quality: "Content Quality",
     pdf_sec_ai: "AI Analysis",
@@ -1301,6 +1322,8 @@ const T = {
     settings_sheet_30d_hint: "Donnees Discover glissantes sur 30 jours. Meme format. Active la detection de tendances.",
     settings_sheet_10d_label: "Discover 10 derniers jours (URL Google Sheets)",
     settings_sheet_10d_hint: "Donnees Discover glissantes sur 10 jours. Meme format. Complete la chronologie des tendances.",
+    settings_search_sheet_label: "Donnees Search 10 derniers jours (URL Google Sheets)",
+    settings_search_sheet_hint: "Donnees Google Search glissantes sur 10 jours. Meme format (URL, Clics, Impressions, CTR). Active la verification d'autorite Search.",
     settings_proxy_label: "Proxy CORS (URL Google Apps Script)",
     settings_proxy_hint: "Votre propre proxy pour un chargement fiable.",
     settings_proxy_link: "Comment configurer (30 sec)",
@@ -1318,6 +1341,12 @@ const T = {
     trend_articles: "article(s)",
     authority_para_on: "{count} article(s) sur {topic} étaient sur Discover au cours des 90 derniers jours (sur {total} au total sur le site).",
     authority_para_off: "Aucun article sur {topic} n'a été trouvé sur Discover au cours des 90 derniers jours. Le site a {total} article(s) sur Discover au total.",
+    search_insights_title: "Insights IA Search",
+    authority_on_search: "Sur Search",
+    authority_not_on_search: "Pas sur Search",
+    authority_search_10d: "10 derniers jours",
+    authority_search_para_on: "{count} article(s) sur {topic} sont apparus dans Google Search au cours des 10 derniers jours (sur {total} au total sur le site).",
+    authority_search_para_off: "Aucun article sur {topic} n'a ete trouve dans Google Search au cours des 10 derniers jours. Le site a {total} article(s) dans Search au total.",
     export_btn: "Exporter",
     export_all: "Tout exporter",
     export_pdf: "PDF une page",
@@ -1326,6 +1355,7 @@ const T = {
     pdf_sec_kpi: "Resume KPI",
     pdf_sec_discover: "Eligibilite Discover",
     pdf_sec_discover_insights: "Insights IA Discover",
+    pdf_sec_search_insights: "Insights IA Search",
     pdf_sec_content: "Structure & orthographe",
     pdf_sec_quality: "Qualite du contenu",
     pdf_sec_ai: "Analyse IA",
@@ -1516,6 +1546,8 @@ const T = {
     settings_sheet_30d_hint: "Dados Discover dos últimos 30 dias. Mesmo formato. Ativa detecção de tendências.",
     settings_sheet_10d_label: "Discover Últimos 10 Dias (URL Google Sheets)",
     settings_sheet_10d_hint: "Dados Discover dos últimos 10 dias. Mesmo formato. Completa a linha do tempo de tendências.",
+    settings_search_sheet_label: "Dados Search ultimos 10 dias (URL Google Sheets)",
+    settings_search_sheet_hint: "Dados Google Search dos ultimos 10 dias. Mesmo formato (URL, Cliques, Impressoes, CTR). Ativa verificacao de autoridade Search.",
     settings_proxy_label: "Proxy CORS (URL Google Apps Script)",
     settings_proxy_hint: "Seu proxy próprio para carregamento confiável.",
     settings_proxy_link: "Como configurar (30 seg)",
@@ -1533,6 +1565,12 @@ const T = {
     trend_articles: "artigo(s)",
     authority_para_on: "{count} artigo(s) sobre {topic} estiveram no Discover nos últimos 90 dias (de {total} no total do site).",
     authority_para_off: "Nenhum artigo sobre {topic} foi encontrado no Discover nos últimos 90 dias. O site tem {total} artigo(s) no Discover no total.",
+    search_insights_title: "Insights IA Search",
+    authority_on_search: "No Search",
+    authority_not_on_search: "Fora do Search",
+    authority_search_10d: "Ultimos 10 dias",
+    authority_search_para_on: "{count} artigo(s) sobre {topic} apareceram no Google Search nos ultimos 10 dias (de {total} no total do site).",
+    authority_search_para_off: "Nenhum artigo sobre {topic} foi encontrado no Google Search nos ultimos 10 dias. O site tem {total} artigo(s) no Search no total.",
     export_btn: "Exportar",
     export_all: "Exportar tudo",
     export_pdf: "PDF resumo",
@@ -1541,6 +1579,7 @@ const T = {
     pdf_sec_kpi: "Resumo KPI",
     pdf_sec_discover: "Eligibilidade Discover",
     pdf_sec_discover_insights: "Insights IA Discover",
+    pdf_sec_search_insights: "Insights IA Search",
     pdf_sec_content: "Estrutura & ortografia",
     pdf_sec_quality: "Qualidade do conteudo",
     pdf_sec_ai: "Analise IA",
@@ -1731,6 +1770,8 @@ const T = {
     settings_sheet_30d_hint: "Datos Discover de los últimos 30 días. Mismo formato. Activa la detección de tendencias.",
     settings_sheet_10d_label: "Discover Últimos 10 Días (URL Google Sheets)",
     settings_sheet_10d_hint: "Datos Discover de los últimos 10 días. Mismo formato. Completa la línea temporal de tendencias.",
+    settings_search_sheet_label: "Datos Search ultimos 10 dias (URL Google Sheets)",
+    settings_search_sheet_hint: "Datos Google Search de los ultimos 10 dias. Mismo formato (URL, Clics, Impresiones, CTR). Activa la verificacion de autoridad Search.",
     settings_proxy_label: "Proxy CORS (URL Google Apps Script)",
     settings_proxy_hint: "Tu propio proxy para carga fiable.",
     settings_proxy_link: "Cómo configurar (30 seg)",
@@ -1748,6 +1789,12 @@ const T = {
     trend_articles: "artículo(s)",
     authority_para_on: "{count} artículo(s) sobre {topic} estuvieron en Discover en los últimos 90 días (de {total} en total en el sitio).",
     authority_para_off: "No se encontraron artículos sobre {topic} en Discover en los últimos 90 días. El sitio tiene {total} artículo(s) en Discover en total.",
+    search_insights_title: "Insights IA Search",
+    authority_on_search: "En Search",
+    authority_not_on_search: "No en Search",
+    authority_search_10d: "Ultimos 10 dias",
+    authority_search_para_on: "{count} articulo(s) sobre {topic} aparecieron en Google Search en los ultimos 10 dias (de {total} en total en el sitio).",
+    authority_search_para_off: "No se encontraron articulos sobre {topic} en Google Search en los ultimos 10 dias. El sitio tiene {total} articulo(s) en Search en total.",
     export_btn: "Exportar",
     export_all: "Exportar todo",
     export_pdf: "PDF resumen",
@@ -1756,6 +1803,7 @@ const T = {
     pdf_sec_kpi: "Resumen KPI",
     pdf_sec_discover: "Eligibilidad Discover",
     pdf_sec_discover_insights: "Insights IA Discover",
+    pdf_sec_search_insights: "Insights IA Search",
     pdf_sec_content: "Estructura & ortografia",
     pdf_sec_quality: "Calidad del contenido",
     pdf_sec_ai: "Analisis IA",
@@ -1946,6 +1994,8 @@ const T = {
     settings_sheet_30d_hint: "Dati Discover degli ultimi 30 giorni. Stesso formato. Attiva il rilevamento tendenze.",
     settings_sheet_10d_label: "Discover Ultimi 10 Giorni (URL Google Sheets)",
     settings_sheet_10d_hint: "Dati Discover degli ultimi 10 giorni. Stesso formato. Completa la cronologia delle tendenze.",
+    settings_search_sheet_label: "Dati Search ultimi 10 giorni (URL Google Sheets)",
+    settings_search_sheet_hint: "Dati Google Search degli ultimi 10 giorni. Stesso formato (URL, Clic, Impressioni, CTR). Attiva il controllo autorita Search.",
     settings_proxy_label: "Proxy CORS (URL Google Apps Script)",
     settings_proxy_hint: "Il tuo proxy personale per un caricamento affidabile.",
     settings_proxy_link: "Come configurare (30 sec)",
@@ -1963,6 +2013,12 @@ const T = {
     trend_articles: "articolo/i",
     authority_para_on: "{count} articolo/i su {topic} erano su Discover negli ultimi 90 giorni (su {total} totali nel sito).",
     authority_para_off: "Nessun articolo su {topic} trovato su Discover negli ultimi 90 giorni. Il sito ha {total} articolo/i su Discover in totale.",
+    search_insights_title: "Insights IA Search",
+    authority_on_search: "Su Search",
+    authority_not_on_search: "Non su Search",
+    authority_search_10d: "Ultimi 10 giorni",
+    authority_search_para_on: "{count} articolo/i su {topic} sono apparsi su Google Search negli ultimi 10 giorni (su {total} in totale sul sito).",
+    authority_search_para_off: "Nessun articolo su {topic} trovato su Google Search negli ultimi 10 giorni. Il sito ha {total} articolo/i su Search in totale.",
     export_btn: "Esporta",
     export_all: "Esporta tutto",
     export_pdf: "PDF riepilogo",
@@ -1971,6 +2027,7 @@ const T = {
     pdf_sec_kpi: "Riepilogo KPI",
     pdf_sec_discover: "Idoneita Discover",
     pdf_sec_discover_insights: "Insights IA Discover",
+    pdf_sec_search_insights: "Insights IA Search",
     pdf_sec_content: "Struttura & ortografia",
     pdf_sec_quality: "Qualita del contenuto",
     pdf_sec_ai: "Analisi IA",
@@ -2161,6 +2218,8 @@ const T = {
     settings_sheet_30d_hint: "Данные Discover за последние 30 дней. Тот же формат. Включает обнаружение трендов.",
     settings_sheet_10d_label: "Discover за 10 дней (URL Google Sheets)",
     settings_sheet_10d_hint: "Данные Discover за последние 10 дней. Тот же формат. Дополняет хронологию трендов.",
+    settings_search_sheet_label: "Данные Search за 10 дней (URL Google Sheets)",
+    settings_search_sheet_hint: "Данные Google Search за последние 10 дней. Тот же формат (URL, Клики, Показы, CTR). Включает проверку авторитета Search.",
     settings_proxy_label: "CORS-прокси (URL Google Apps Script)",
     settings_proxy_hint: "Ваш собственный прокси для надёжной загрузки.",
     settings_proxy_link: "Как настроить (30 сек)",
@@ -2178,6 +2237,12 @@ const T = {
     trend_articles: "статей",
     authority_para_on: "{count} статей о {topic} были в Discover за последние 90 дней (из {total} всего на сайте).",
     authority_para_off: "Статей о {topic} в Discover за последние 90 дней не найдено. На сайте {total} статей в Discover всего.",
+    search_insights_title: "ИИ Search аналитика",
+    authority_on_search: "В Search",
+    authority_not_on_search: "Нет в Search",
+    authority_search_10d: "Последние 10 дней",
+    authority_search_para_on: "{count} статей о {topic} появились в Google Search за последние 10 дней (из {total} всего на сайте).",
+    authority_search_para_off: "Статей о {topic} в Google Search за последние 10 дней не найдено. На сайте {total} статей в Search всего.",
     export_btn: "Экспорт",
     export_all: "Экспортировать все",
     export_pdf: "PDF сводка",
@@ -2186,6 +2251,7 @@ const T = {
     pdf_sec_kpi: "Сводка KPI",
     pdf_sec_discover: "Пригодность Discover",
     pdf_sec_discover_insights: "ИИ Discover аналитика",
+    pdf_sec_search_insights: "ИИ Search аналитика",
     pdf_sec_content: "Структура и орфография",
     pdf_sec_quality: "Качество контента",
     pdf_sec_ai: "ИИ анализ",
@@ -2376,6 +2442,8 @@ const T = {
     settings_sheet_30d_hint: "Дані Discover за останні 30 днів. Той самий формат. Вмикає виявлення трендів.",
     settings_sheet_10d_label: "Discover за 10 днів (URL Google Sheets)",
     settings_sheet_10d_hint: "Дані Discover за останні 10 днів. Той самий формат. Доповнює хронологію трендів.",
+    settings_search_sheet_label: "Дані Search за 10 днів (URL Google Sheets)",
+    settings_search_sheet_hint: "Дані Google Search за останні 10 днів. Той самий формат (URL, Кліки, Покази, CTR). Вмикає перевірку авторитету Search.",
     settings_proxy_label: "CORS-проксі (URL Google Apps Script)",
     settings_proxy_hint: "Ваш власний проксі для надійного завантаження.",
     settings_proxy_link: "Як налаштувати (30 сек)",
@@ -2393,6 +2461,12 @@ const T = {
     trend_articles: "статей",
     authority_para_on: "{count} статей про {topic} були у Discover за останні 90 днів (з {total} усього на сайті).",
     authority_para_off: "Статей про {topic} у Discover за останні 90 днів не знайдено. На сайті {total} статей у Discover загалом.",
+    search_insights_title: "ШІ Search аналітика",
+    authority_on_search: "У Search",
+    authority_not_on_search: "Немає в Search",
+    authority_search_10d: "Останні 10 днів",
+    authority_search_para_on: "{count} статей про {topic} з'явилися в Google Search за останні 10 днів (з {total} загалом на сайті).",
+    authority_search_para_off: "Статей про {topic} у Google Search за останні 10 днів не знайдено. На сайті {total} статей у Search загалом.",
     export_btn: "Експорт",
     export_all: "Експортувати все",
     export_pdf: "PDF зведення",
@@ -2401,6 +2475,7 @@ const T = {
     pdf_sec_kpi: "Зведення KPI",
     pdf_sec_discover: "Придатність Discover",
     pdf_sec_discover_insights: "ШІ Discover аналітика",
+    pdf_sec_search_insights: "ШІ Search аналітика",
     pdf_sec_content: "Структура і орфографія",
     pdf_sec_quality: "Якість контенту",
     pdf_sec_ai: "ШІ аналіз",
@@ -2591,6 +2666,8 @@ const T = {
     settings_sheet_30d_hint: "Dane Discover z ostatnich 30 dni. Ten sam format. Włącza wykrywanie trendów.",
     settings_sheet_10d_label: "Discover ostatnie 10 dni (URL Google Sheets)",
     settings_sheet_10d_hint: "Dane Discover z ostatnich 10 dni. Ten sam format. Uzupełnia chronologię trendów.",
+    settings_search_sheet_label: "Dane Search ostatnie 10 dni (URL Google Sheets)",
+    settings_search_sheet_hint: "Dane Google Search z ostatnich 10 dni. Ten sam format (URL, Kliknięcia, Wyświetlenia, CTR). Włącza sprawdzanie autorytetu Search.",
     settings_proxy_label: "Proxy CORS (URL Google Apps Script)",
     settings_proxy_hint: "Własny proxy do niezawodnego ładowania.",
     settings_proxy_link: "Jak skonfigurować (30 sek)",
@@ -2608,6 +2685,12 @@ const T = {
     trend_articles: "artykułów",
     authority_para_on: "{count} artykułów o {topic} było w Discover w ciągu ostatnich 90 dni (z {total} ogółem na stronie).",
     authority_para_off: "Nie znaleziono artykułów o {topic} w Discover w ciągu ostatnich 90 dni. Strona ma {total} artykułów w Discover ogółem.",
+    search_insights_title: "Analiza AI Search",
+    authority_on_search: "W Search",
+    authority_not_on_search: "Brak w Search",
+    authority_search_10d: "Ostatnie 10 dni",
+    authority_search_para_on: "{count} artykuł(ów) o {topic} pojawiło się w Google Search w ciągu ostatnich 10 dni (z {total} ogółem na stronie).",
+    authority_search_para_off: "Nie znaleziono artykułów o {topic} w Google Search w ciągu ostatnich 10 dni. Strona ma {total} artykułów w Search ogółem.",
     export_btn: "Eksportuj",
     export_all: "Eksportuj wszystko",
     export_pdf: "PDF podsumowanie",
@@ -2616,6 +2699,7 @@ const T = {
     pdf_sec_kpi: "Podsumowanie KPI",
     pdf_sec_discover: "Kwalifikowalność Discover",
     pdf_sec_discover_insights: "AI Discover analiza",
+    pdf_sec_search_insights: "Analiza AI Search",
     pdf_sec_content: "Struktura i pisownia",
     pdf_sec_quality: "Jakość treści",
     pdf_sec_ai: "Analiza AI",
@@ -2806,6 +2890,8 @@ const T = {
     settings_sheet_30d_hint: "Data Discover za posledních 30 dní. Stejný formát. Aktivuje detekci trendů.",
     settings_sheet_10d_label: "Discover posledních 10 dní (URL Google Sheets)",
     settings_sheet_10d_hint: "Data Discover za posledních 10 dní. Stejný formát. Doplňuje chronologii trendů.",
+    settings_search_sheet_label: "Data Search poslednich 10 dni (URL Google Sheets)",
+    settings_search_sheet_hint: "Data Google Search za poslednich 10 dni. Stejny format (URL, Kliknuti, Zobrazeni, CTR). Aktivuje kontrolu autority Search.",
     settings_proxy_label: "CORS proxy (URL Google Apps Script)",
     settings_proxy_hint: "Vlastní proxy pro spolehlivé načítání.",
     settings_proxy_link: "Jak nastavit (30 sec)",
@@ -2823,6 +2909,12 @@ const T = {
     trend_articles: "článků",
     authority_para_on: "{count} článků o {topic} bylo na Discover za posledních 90 dní (z {total} celkem na webu).",
     authority_para_off: "Žádné články o {topic} nebyly nalezeny na Discover za posledních 90 dní. Web má {total} článků na Discover celkem.",
+    search_insights_title: "AI Search analyza",
+    authority_on_search: "V Search",
+    authority_not_on_search: "Neni v Search",
+    authority_search_10d: "Poslednich 10 dni",
+    authority_search_para_on: "{count} clanek/clanku o {topic} se objevilo v Google Search za poslednich 10 dni (z {total} celkem na webu).",
+    authority_search_para_off: "Zadne clanky o {topic} nebyly nalezeny v Google Search za poslednich 10 dni. Web ma {total} clanku v Search celkem.",
     export_btn: "Export",
     export_all: "Exportovat vse",
     export_pdf: "PDF souhrn",
@@ -2831,6 +2923,7 @@ const T = {
     pdf_sec_kpi: "Souhrn KPI",
     pdf_sec_discover: "Zpusobilost Discover",
     pdf_sec_discover_insights: "AI Discover analyza",
+    pdf_sec_search_insights: "AI Search analyza",
     pdf_sec_content: "Struktura a pravopis",
     pdf_sec_quality: "Kvalita obsahu",
     pdf_sec_ai: "AI analyza",
@@ -3024,6 +3117,8 @@ document.addEventListener('DOMContentLoaded', () => {
   if (savedSheet30) document.getElementById('settingsSheetUrl30').value = savedSheet30;
   const savedSheet10 = localStorage.getItem('media_dashboard_discover_sheet_10d');
   if (savedSheet10) document.getElementById('settingsSheetUrl10').value = savedSheet10;
+  const savedSearchSheet = localStorage.getItem('media_dashboard_search_sheet');
+  if (savedSearchSheet) document.getElementById('settingsSearchSheet').value = savedSearchSheet;
   const savedProxy = localStorage.getItem('media_dashboard_cors_proxy');
   if (savedProxy) document.getElementById('settingsProxyUrl').value = savedProxy;
   document.getElementById('urlInput').addEventListener('keydown', e => {
@@ -3064,6 +3159,9 @@ function saveSettings() {
   const sheetUrl10 = document.getElementById('settingsSheetUrl10').value.trim();
   if (sheetUrl10) localStorage.setItem('media_dashboard_discover_sheet_10d', sheetUrl10);
   else localStorage.removeItem('media_dashboard_discover_sheet_10d');
+  const searchSheetUrl = document.getElementById('settingsSearchSheet').value.trim();
+  if (searchSheetUrl) localStorage.setItem('media_dashboard_search_sheet', searchSheetUrl);
+  else localStorage.removeItem('media_dashboard_search_sheet');
   const proxyUrl = document.getElementById('settingsProxyUrl').value.trim();
   if (proxyUrl) localStorage.setItem('media_dashboard_cors_proxy', proxyUrl);
   else localStorage.removeItem('media_dashboard_cors_proxy');
@@ -3168,6 +3266,7 @@ async function startAnalysis(mode) {
   document.getElementById('spellBody').style.display = 'none';
   document.getElementById('qualityCard').style.display = 'none';
   document.getElementById('discoverInsightsCard').style.display = 'none';
+  document.getElementById('searchInsightsCard').style.display = 'none';
   document.getElementById('anglesCard').style.display = 'none';
 
   try {
@@ -3195,6 +3294,7 @@ async function startAnalysis(mode) {
     let qualityResult = null;
     let anglesResult = null;
     let discoverAuthority = null;
+    let searchAuthority = null;
     let aiError = null, spellError = null, qualityError = null;
 
     // Run AI calls in parallel — they are independent
@@ -3204,16 +3304,20 @@ async function startAnalysis(mode) {
       runSpellcheck(bodyText, doc).catch(e => { spellError = e.message; console.warn('Spellcheck failed:', e.message); return null; }),
       runQualityCheck(title, bodyText, url).catch(e => { qualityError = e.message; console.warn('Quality check failed:', e.message); return null; }),
     ];
-    // Discover authority runs in parallel too (URL mode only)
+    // Discover + Search authority run in parallel too (URL mode only)
     if (mode === 'url') {
       aiPromises.push(runDiscoverAuthority(url, title).catch(e => { console.warn('Discover authority failed:', e.message); return null; }));
+      aiPromises.push(runSearchAuthority(url, title).catch(e => { console.warn('Search authority failed:', e.message); return null; }));
     }
 
-    const [aiRes, spellRes, qualityRes, discoverAuth] = await Promise.all(aiPromises);
+    const [aiRes, spellRes, qualityRes, discoverAuth, searchAuth] = await Promise.all(aiPromises);
     aiResult = aiRes;
     spellResult = spellRes;
     qualityResult = qualityRes;
-    if (mode === 'url') discoverAuthority = discoverAuth || null;
+    if (mode === 'url') {
+      discoverAuthority = discoverAuth || null;
+      searchAuthority = searchAuth || null;
+    }
 
     setProgress(88, t('prog_angles'));
     // Angles runs after AI so it can use aiResult for richer context
@@ -3224,7 +3328,7 @@ async function startAnalysis(mode) {
     }
 
     setProgress(100, t('prog_done'));
-    renderResults(url, title, discoverChecks, contentChecks, aiResult, spellResult, qualityResult, discoverAuthority, { aiError, spellError, qualityError }, bodyText, anglesResult);
+    renderResults(url, title, discoverChecks, contentChecks, aiResult, spellResult, qualityResult, discoverAuthority, { aiError, spellError, qualityError }, bodyText, anglesResult, searchAuthority);
   } catch (err) {
     showError('Error: ' + err.message);
     document.getElementById('progressBar').classList.remove('active');
@@ -4052,6 +4156,8 @@ IMPORTANT — DO NOT FLAG THESE (they are NOT errors in sports writing):
 6. UPPERCASE ACCENTS: In French and Romance languages, missing accents on uppercase letters is standard ("L'Equipe" = "L'Équipe", "SERIE A" = "SÉRIE A").
 7. GENDER AGREEMENT ON PAST PARTICIPLES: In French/Italian/Spanish/Portuguese, past participle agreement (é/ée, amené/amenée, etc.) depends on the grammatical subject, which may be earlier in the sentence. If the visible context does not clearly show the subject's gender, do NOT flag it. "était amené" and "était amenée" can both be correct depending on context. Only flag when the subject is clearly visible AND the agreement is clearly wrong.
 
+8. REGIONAL/GEOGRAPHIC ADJECTIVES: In French and other Romance languages, adjectives derived from regions, cities or areas are LOWERCASE and agree in gender. "club nordiste" (northern club), "formation artésienne" (from Artois / Lens area), "équipe marseillaise", "club nantais", "effectif parisien", "section stéphanoise" — these are correct as-is. Do NOT capitalize them and do NOT change their gender when they agree with the noun they describe. "artésienne" (feminine) is correct when modifying a feminine noun like "formation". Similarly, "lyonnais/lyonnaise", "lillois/lilloise", "bordelais/bordelaise", "toulousain/toulousaine" etc.
+
 GENERAL RULE: When in doubt, do NOT flag it. A false positive (flagging something correct) is worse than a false negative (missing a real error). Only flag things you are very confident are genuine mistakes.
 
 Respond ONLY via the spellcheck_report tool.`;
@@ -4566,6 +4672,169 @@ function renderDiscoverInsights(d) {
   body.innerHTML = html;
 }
 
+// ========== SEARCH AUTHORITY ==========
+async function runSearchAuthority(url, title) {
+  const sheetUrl = localStorage.getItem('media_dashboard_search_sheet') || '';
+  if (!sheetUrl) return null;
+
+  let hostname;
+  try { hostname = new URL(url).hostname; } catch(e) { return null; }
+  const tab = DOMAIN_TAB_MAP[hostname] || DOMAIN_TAB_MAP[hostname.replace('www.', '')];
+  if (!tab) return null;
+
+  const csvUrl = buildCsvUrl(sheetUrl, tab);
+
+  let csvText;
+  try {
+    csvText = await fetchViaProxy(csvUrl);
+  } catch(e) { return null; }
+
+  const allRows = parseDiscoverCSV(csvText);
+  if (allRows.length === 0) return null;
+
+  // Compute site-wide stats for comparison
+  const siteStats = {
+    avg_impressions: allRows.reduce((a, r) => a + r.impressions, 0) / allRows.length,
+    avg_clicks: allRows.reduce((a, r) => a + r.clicks, 0) / allRows.length,
+    avg_ctr: allRows.reduce((a, r) => a + r.ctr, 0) / allRows.length,
+    median_impressions: computeMedian(allRows.map(r => r.impressions)),
+    median_clicks: computeMedian(allRows.map(r => r.clicks)),
+    median_ctr: computeMedian(allRows.map(r => r.ctr))
+  };
+
+  const keywords = extractTopicKeywords(title);
+  if (keywords.length === 0) return null;
+
+  // Pre-filter: keep rows where URL slug contains at least 1 keyword
+  const candidates = allRows.filter(r => {
+    const slug = r.url.toLowerCase();
+    return keywords.some(kw => slug.includes(kw));
+  });
+
+  // Prepare compact data for AI: send indexed slug + stats for candidates (max 150)
+  const subset = candidates.slice(0, 150);
+  const compactList = subset.map((r, i) => {
+    const path = r.url.replace(/https?:\/\/[^/]+/, '');
+    return `[${i}] ${path} | ${r.clicks} | ${r.impressions}`;
+  }).join('\n');
+
+  const totalArticles = allRows.length;
+
+  let data;
+  try {
+    data = await callOpenAI({
+      model: OPENAI_MODEL,
+      messages: [
+        { role: 'system', content: `You are a Google Search performance analyst. The user is checking an article. You have a numbered list of Search URLs from the same site (pre-filtered by keyword).
+
+Identify which URLs are truly about the SAME TOPIC as the article (same team, player, event, or subject — not just vaguely related). Return the topic name and the indices of matching URLs. Do NOT compute any stats — just identify matches.
+
+URL list format: [index] path | clicks | impressions` },
+        { role: 'user', content: `Article title: "${title}"\n\nCandidate URLs (${subset.length} pre-filtered from ${totalArticles} total):\n${compactList || '(no keyword matches found)'}` }
+      ],
+      tools: [{
+        type: 'function',
+        function: {
+          name: 'search_matches',
+          description: 'Return the topic and indices of matching URLs',
+          parameters: {
+            type: 'object',
+            properties: {
+              topic: { type: 'string', description: 'The article topic in 2-5 words' },
+              matching_indices: { type: 'array', items: { type: 'integer' }, description: 'Zero-based indices from the candidate list that are truly about the same topic. Empty array if none match.' }
+            },
+            required: ['topic', 'matching_indices']
+          }
+        }
+      }],
+      tool_choice: { type: 'function', function: { name: 'search_matches' } },
+      temperature: 0.1
+    });
+  } catch(e) { return null; }
+  const tc = data.choices?.[0]?.message?.tool_calls?.[0];
+  if (!tc) return null;
+  try {
+    const gpt = JSON.parse(tc.function.arguments);
+    const matchingRows = (gpt.matching_indices || [])
+      .filter(i => i >= 0 && i < subset.length)
+      .map(i => subset[i]);
+    const count = matchingRows.length;
+
+    const result = {
+      topic: gpt.topic,
+      matching_count: count,
+      avg_clicks: count > 0 ? matchingRows.reduce((a, r) => a + r.clicks, 0) / count : 0,
+      avg_impressions: count > 0 ? matchingRows.reduce((a, r) => a + r.impressions, 0) / count : 0,
+      avg_ctr: count > 0 ? matchingRows.reduce((a, r) => a + r.ctr, 0) / count : 0,
+      total_articles: totalArticles,
+      site: tab,
+      site_stats: siteStats,
+      authority_level: count > 0 ? 'on_search' : 'not_on_search'
+    };
+    return result;
+  } catch(e) { return null; }
+}
+
+function renderSearchInsights(d) {
+  const card = document.getElementById('searchInsightsCard');
+  const body = document.getElementById('searchInsightsBody');
+  if (!d) { card.style.display = 'none'; return; }
+  card.style.display = 'block';
+
+  const isOn = d.matching_count > 0;
+  const levelColor = isOn ? 'green' : 'red';
+  const levelLabel = isOn ? t('authority_on_search') : t('authority_not_on_search');
+
+  let html = `<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+    <span class="tl-dot ${levelColor}"></span>
+    <strong>${levelLabel}</strong>
+    <span style="color:var(--text-muted);font-size:12px;margin-left:auto">${d.site} · ${t('authority_search_10d')}</span>
+  </div>`;
+
+  if (isOn && d.site_stats) {
+    const para = t('authority_search_para_on', { topic: d.topic, count: d.matching_count, total: d.total_articles });
+    html += `<p style="color:var(--text);line-height:1.7;margin:0 0 12px 0">${para}</p>`;
+
+    const ss = d.site_stats;
+    const metrics = [
+      { label: 'Impressions', topic: d.avg_impressions, avg: ss.avg_impressions, median: ss.median_impressions, fmt: v => Math.round(v).toLocaleString() },
+      { label: 'Clicks', topic: d.avg_clicks, avg: ss.avg_clicks, median: ss.median_clicks, fmt: v => Math.round(v).toLocaleString() },
+      { label: 'CTR', topic: d.avg_ctr, avg: ss.avg_ctr, median: ss.median_ctr, fmt: v => v.toFixed(1) + '%' }
+    ];
+
+    html += `<table style="width:100%;font-size:13px;border-collapse:collapse">
+      <thead><tr style="border-bottom:2px solid var(--border)">
+        <th style="padding:6px 8px;text-align:left;font-weight:600"></th>
+        <th style="padding:6px 8px;text-align:right;font-weight:600">Topic</th>
+        <th style="padding:6px 8px;text-align:right;font-weight:600">Site avg</th>
+        <th style="padding:6px 8px;text-align:right;font-weight:600">Site median</th>
+        <th style="padding:6px 8px;text-align:right;font-weight:600">vs avg</th>
+        <th style="padding:6px 8px;text-align:right;font-weight:600">vs median</th>
+      </tr></thead><tbody>`;
+
+    for (const m of metrics) {
+      const vsAvg = m.avg > 0 ? ((m.topic - m.avg) / m.avg * 100) : 0;
+      const vsMed = m.median > 0 ? ((m.topic - m.median) / m.median * 100) : 0;
+      const ac = vsAvg >= 0 ? 'var(--green,#22c55e)' : 'var(--red,#ef4444)';
+      const mc = vsMed >= 0 ? 'var(--green,#22c55e)' : 'var(--red,#ef4444)';
+      html += `<tr style="border-bottom:1px solid var(--border)">
+        <td style="padding:6px 8px;font-weight:600">${m.label}</td>
+        <td style="padding:6px 8px;text-align:right;font-weight:600">${m.fmt(m.topic)}</td>
+        <td style="padding:6px 8px;text-align:right">${m.fmt(m.avg)}</td>
+        <td style="padding:6px 8px;text-align:right">${m.fmt(m.median)}</td>
+        <td style="padding:6px 8px;text-align:right;color:${ac}">${vsAvg>=0?'▲':'▼'} ${vsAvg>=0?'+':''}${vsAvg.toFixed(0)}%</td>
+        <td style="padding:6px 8px;text-align:right;color:${mc}">${vsMed>=0?'▲':'▼'} ${vsMed>=0?'+':''}${vsMed.toFixed(0)}%</td>
+      </tr>`;
+    }
+    html += `</tbody></table>`;
+  } else {
+    const para = t('authority_search_para_off', { topic: d.topic, total: d.total_articles });
+    html += `<p style="color:var(--text);line-height:1.7;margin:0">${para}</p>`;
+  }
+
+  body.innerHTML = html;
+}
+
 // ========== KEYWORD RESULTS RENDERER ==========
 function renderKeywordResults(inputText, selectedSite, entityResults, angleIdeas) {
   // Hide the normal results cards, show keyword-specific results
@@ -4736,9 +5005,9 @@ function buildComparisonTable(topicStats, siteStats) {
 }
 
 // ========== RENDER RESULTS ==========
-function renderResults(url, title, discoverChecks, contentChecks, aiResult, spellResult, qualityResult, discoverAuthority, errors, bodyText, anglesResult) {
+function renderResults(url, title, discoverChecks, contentChecks, aiResult, spellResult, qualityResult, discoverAuthority, errors, bodyText, anglesResult, searchAuthority) {
   errors = errors || {};
-  storeExportData(url, title, discoverChecks, contentChecks, aiResult, spellResult, qualityResult, discoverAuthority, bodyText, anglesResult);
+  storeExportData(url, title, discoverChecks, contentChecks, aiResult, spellResult, qualityResult, discoverAuthority, bodyText, anglesResult, searchAuthority);
   document.getElementById('results').classList.add('active');
   document.getElementById('exportBar').classList.add('active');
   document.getElementById('resultTitle').textContent = title;
@@ -4803,6 +5072,7 @@ function renderResults(url, title, discoverChecks, contentChecks, aiResult, spel
   }
 
   renderDiscoverInsights(discoverAuthority);
+  renderSearchInsights(searchAuthority);
 }
 
 function renderSpellcheck(spell) {
@@ -5147,8 +5417,8 @@ function exportFluffFeedback() {
 // ========== GLOBAL EXPORT DATA STORE ==========
 window._exportData = null;
 
-function storeExportData(url, title, discoverChecks, contentChecks, aiResult, spellResult, qualityResult, discoverAuthority, bodyText, anglesResult) {
-  window._exportData = { url, title, discoverChecks, contentChecks, aiResult, spellResult, qualityResult, discoverAuthority, bodyText, anglesResult, timestamp: new Date().toISOString() };
+function storeExportData(url, title, discoverChecks, contentChecks, aiResult, spellResult, qualityResult, discoverAuthority, bodyText, anglesResult, searchAuthority) {
+  window._exportData = { url, title, discoverChecks, contentChecks, aiResult, spellResult, qualityResult, discoverAuthority, bodyText, anglesResult, searchAuthority, timestamp: new Date().toISOString() };
 }
 
 // ========== EXPORT HELPERS ==========
@@ -5188,6 +5458,27 @@ function getDiscoverInsightsData() {
   if (!d || !d.discoverAuthority) return null;
   const a = d.discoverAuthority;
   const obj = { topic: a.topic, matching_count: a.matching_count, authority: a.matching_count > 0 ? 'On Discover' : 'Not on Discover', site: a.site, total_articles: a.total_articles };
+  if (a.matching_count > 0) {
+    obj.avg_impressions = Math.round(a.avg_impressions);
+    obj.avg_clicks = Math.round(a.avg_clicks);
+    obj.avg_ctr = Number(a.avg_ctr.toFixed(1));
+    if (a.site_stats) {
+      obj.site_avg_impressions = Math.round(a.site_stats.avg_impressions);
+      obj.site_avg_clicks = Math.round(a.site_stats.avg_clicks);
+      obj.site_avg_ctr = Number(a.site_stats.avg_ctr.toFixed(1));
+      obj.site_median_impressions = Math.round(a.site_stats.median_impressions);
+      obj.site_median_clicks = Math.round(a.site_stats.median_clicks);
+      obj.site_median_ctr = Number(a.site_stats.median_ctr.toFixed(1));
+    }
+  }
+  return obj;
+}
+
+function getSearchInsightsData() {
+  const d = window._exportData;
+  if (!d || !d.searchAuthority) return null;
+  const a = d.searchAuthority;
+  const obj = { topic: a.topic, matching_count: a.matching_count, authority: a.matching_count > 0 ? 'On Search' : 'Not on Search', site: a.site, total_articles: a.total_articles };
   if (a.matching_count > 0) {
     obj.avg_impressions = Math.round(a.avg_impressions);
     obj.avg_clicks = Math.round(a.avg_clicks);
@@ -5249,6 +5540,7 @@ function exportSection(section, format) {
     let data;
     if (section === 'discover') data = { url: d.url, title: d.title, section: 'discover_eligibility', checks: getDiscoverData() };
     else if (section === 'discoverInsights') data = { url: d.url, title: d.title, section: 'discover_insights', data: getDiscoverInsightsData() };
+    else if (section === 'searchInsights') data = { url: d.url, title: d.title, section: 'search_insights', data: getSearchInsightsData() };
     else if (section === 'content') data = { url: d.url, title: d.title, section: 'content_structure', checks: getContentData() };
     else if (section === 'quality') data = { url: d.url, title: d.title, section: 'content_quality', checks: getQualityData() };
     else if (section === 'ai') data = { url: d.url, title: d.title, section: 'ai_analysis', data: getAiData() };
@@ -5267,6 +5559,11 @@ function exportSection(section, format) {
     if (!di) return;
     header = Object.keys(di).join(',');
     rows = [Object.values(di).map(v => csvQ(v)).join(',')];
+  } else if (section === 'searchInsights') {
+    const si = getSearchInsightsData();
+    if (!si) return;
+    header = Object.keys(si).join(',');
+    rows = [Object.values(si).map(v => csvQ(v)).join(',')];
   } else if (section === 'content') {
     const checks = getContentData() || [];
     header = 'Check,Status,Detail,Value';
@@ -5313,6 +5610,7 @@ function exportAll(format) {
       url: d.url, title: d.title, timestamp: d.timestamp,
       discover_eligibility: getDiscoverData(),
       discover_insights: getDiscoverInsightsData(),
+      search_insights: getSearchInsightsData(),
       content_structure: getContentData(),
       content_quality: getQualityData(),
       ai_analysis: getAiData()
@@ -5327,6 +5625,10 @@ function exportAll(format) {
   const di = getDiscoverInsightsData();
   if (di) {
     Object.entries(di).forEach(([k, v]) => allRows.push([csvQ('Discover Insights'), csvQ(k), '', csvQ(v), ''].join(',')));
+  }
+  const si = getSearchInsightsData();
+  if (si) {
+    Object.entries(si).forEach(([k, v]) => allRows.push([csvQ('Search Insights'), csvQ(k), '', csvQ(v), ''].join(',')));
   }
   (getContentData() || []).forEach(c => allRows.push([csvQ('Content'), csvQ(c.check), csvQ(c.status), csvQ(c.detail), csvQ(c.value)].join(',')));
   (getQualityData() || []).forEach(c => allRows.push([csvQ('Quality'), csvQ(c.check), csvQ(c.status), csvQ(c.comment || c.quote || ''), csvQ(c.suggestion || c.reason || '')].join(',')));
@@ -5356,6 +5658,7 @@ function generatePdf() {
     pdfKpi: 'kpiRow',
     pdfDiscover: 'discoverCard',
     pdfDiscoverInsights: 'discoverInsightsCard',
+    pdfSearchInsights: 'searchInsightsCard',
     pdfContent: 'contentCard',
     pdfQuality: 'qualityCard',
     pdfAi: 'aiSection',
