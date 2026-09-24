@@ -872,6 +872,9 @@ body {
     <label for="settingsSheetUrl30" style="margin-top:16px" data-t="settings_sheet_30d_label">Discover Last 30 Days (Google Sheets URL)</label>
     <input type="text" id="settingsSheetUrl30" placeholder="https://docs.google.com/spreadsheets/d/...">
     <div class="hint" data-t="settings_sheet_30d_hint">Rolling 30-day Discover data. Same format as above. Enables trend detection.</div>
+    <label for="settingsSheetUrl10" style="margin-top:16px" data-t="settings_sheet_10d_label">Discover Last 10 Days (Google Sheets URL)</label>
+    <input type="text" id="settingsSheetUrl10" placeholder="https://docs.google.com/spreadsheets/d/...">
+    <div class="hint" data-t="settings_sheet_10d_hint">Rolling 10-day Discover data. Same format. Completes the trend timeline.</div>
     <label for="settingsProxyUrl" style="margin-top:16px" data-t="settings_proxy_label">CORS Proxy (Google Apps Script URL)</label>
     <input type="text" id="settingsProxyUrl" placeholder="https://script.google.com/macros/s/.../exec">
     <div class="hint" data-t="settings_proxy_hint">Your own proxy for reliable page fetching. <a href="#" onclick="showProxyHelp();return false" data-t="settings_proxy_link">How to set up (30 sec)</a></div>
@@ -1077,6 +1080,8 @@ const T = {
     settings_sheet_hint: "Google Sheets with one tab per site. Columns: URL, Clicks, Impressions, CTR.",
     settings_sheet_30d_label: "Discover Last 30 Days (Google Sheets URL)",
     settings_sheet_30d_hint: "Rolling 30-day Discover data. Same format as above. Enables trend detection.",
+    settings_sheet_10d_label: "Discover Last 10 Days (Google Sheets URL)",
+    settings_sheet_10d_hint: "Rolling 10-day Discover data. Same format. Completes the trend timeline.",
     settings_proxy_label: "CORS Proxy (Google Apps Script URL)",
     settings_proxy_hint: "Your own proxy for reliable page fetching.",
     settings_proxy_link: "How to set up (30 sec)",
@@ -1086,6 +1091,7 @@ const T = {
     authority_nodata: "No data",
     authority_90d: "Last 90 days",
     authority_30d: "Last 30 days",
+    authority_10d: "Last 10 days",
     trend_consistent: "Consistent on Discover",
     trend_fading: "Fading from Discover",
     trend_trending: "Trending on Discover",
@@ -1289,6 +1295,8 @@ const T = {
     settings_sheet_hint: "Google Sheets avec un onglet par site. Colonnes : URL, Clics, Impressions, CTR.",
     settings_sheet_30d_label: "Discover 30 derniers jours (URL Google Sheets)",
     settings_sheet_30d_hint: "Donnees Discover glissantes sur 30 jours. Meme format. Active la detection de tendances.",
+    settings_sheet_10d_label: "Discover 10 derniers jours (URL Google Sheets)",
+    settings_sheet_10d_hint: "Donnees Discover glissantes sur 10 jours. Meme format. Complete la chronologie des tendances.",
     settings_proxy_label: "Proxy CORS (URL Google Apps Script)",
     settings_proxy_hint: "Votre propre proxy pour un chargement fiable.",
     settings_proxy_link: "Comment configurer (30 sec)",
@@ -1298,6 +1306,7 @@ const T = {
     authority_nodata: "Pas de données",
     authority_90d: "90 derniers jours",
     authority_30d: "30 derniers jours",
+    authority_10d: "10 derniers jours",
     trend_consistent: "Constant sur Discover",
     trend_fading: "En baisse sur Discover",
     trend_trending: "En hausse sur Discover",
@@ -1499,6 +1508,8 @@ const T = {
     settings_sheet_hint: "Google Sheets com uma aba por site. Colunas: URL, Cliques, Impressões, CTR.",
     settings_sheet_30d_label: "Discover Últimos 30 Dias (URL Google Sheets)",
     settings_sheet_30d_hint: "Dados Discover dos últimos 30 dias. Mesmo formato. Ativa detecção de tendências.",
+    settings_sheet_10d_label: "Discover Últimos 10 Dias (URL Google Sheets)",
+    settings_sheet_10d_hint: "Dados Discover dos últimos 10 dias. Mesmo formato. Completa a linha do tempo de tendências.",
     settings_proxy_label: "Proxy CORS (URL Google Apps Script)",
     settings_proxy_hint: "Seu proxy próprio para carregamento confiável.",
     settings_proxy_link: "Como configurar (30 seg)",
@@ -1508,6 +1519,7 @@ const T = {
     authority_nodata: "Sem dados",
     authority_90d: "Últimos 90 dias",
     authority_30d: "Últimos 30 dias",
+    authority_10d: "Últimos 10 dias",
     trend_consistent: "Constante no Discover",
     trend_fading: "Saindo do Discover",
     trend_trending: "Em alta no Discover",
@@ -1709,6 +1721,8 @@ const T = {
     settings_sheet_hint: "Google Sheets con una pestaña por sitio. Columnas: URL, Clics, Impresiones, CTR.",
     settings_sheet_30d_label: "Discover Últimos 30 Días (URL Google Sheets)",
     settings_sheet_30d_hint: "Datos Discover de los últimos 30 días. Mismo formato. Activa la detección de tendencias.",
+    settings_sheet_10d_label: "Discover Últimos 10 Días (URL Google Sheets)",
+    settings_sheet_10d_hint: "Datos Discover de los últimos 10 días. Mismo formato. Completa la línea temporal de tendencias.",
     settings_proxy_label: "Proxy CORS (URL Google Apps Script)",
     settings_proxy_hint: "Tu propio proxy para carga fiable.",
     settings_proxy_link: "Cómo configurar (30 seg)",
@@ -1718,6 +1732,7 @@ const T = {
     authority_nodata: "Sin datos",
     authority_90d: "Últimos 90 días",
     authority_30d: "Últimos 30 días",
+    authority_10d: "Últimos 10 días",
     trend_consistent: "Constante en Discover",
     trend_fading: "Desapareciendo de Discover",
     trend_trending: "En tendencia en Discover",
@@ -1919,6 +1934,8 @@ const T = {
     settings_sheet_hint: "Google Sheets con una scheda per sito. Colonne: URL, Clic, Impressioni, CTR.",
     settings_sheet_30d_label: "Discover Ultimi 30 Giorni (URL Google Sheets)",
     settings_sheet_30d_hint: "Dati Discover degli ultimi 30 giorni. Stesso formato. Attiva il rilevamento tendenze.",
+    settings_sheet_10d_label: "Discover Ultimi 10 Giorni (URL Google Sheets)",
+    settings_sheet_10d_hint: "Dati Discover degli ultimi 10 giorni. Stesso formato. Completa la cronologia delle tendenze.",
     settings_proxy_label: "Proxy CORS (URL Google Apps Script)",
     settings_proxy_hint: "Il tuo proxy personale per un caricamento affidabile.",
     settings_proxy_link: "Come configurare (30 sec)",
@@ -1928,6 +1945,7 @@ const T = {
     authority_nodata: "Nessun dato",
     authority_90d: "Ultimi 90 giorni",
     authority_30d: "Ultimi 30 giorni",
+    authority_10d: "Ultimi 10 giorni",
     trend_consistent: "Costante su Discover",
     trend_fading: "In calo su Discover",
     trend_trending: "In tendenza su Discover",
@@ -2129,6 +2147,8 @@ const T = {
     settings_sheet_hint: "Google Sheets с одной вкладкой на сайт. Столбцы: URL, Клики, Показы, CTR.",
     settings_sheet_30d_label: "Discover за 30 дней (URL Google Sheets)",
     settings_sheet_30d_hint: "Данные Discover за последние 30 дней. Тот же формат. Включает обнаружение трендов.",
+    settings_sheet_10d_label: "Discover за 10 дней (URL Google Sheets)",
+    settings_sheet_10d_hint: "Данные Discover за последние 10 дней. Тот же формат. Дополняет хронологию трендов.",
     settings_proxy_label: "CORS-прокси (URL Google Apps Script)",
     settings_proxy_hint: "Ваш собственный прокси для надёжной загрузки.",
     settings_proxy_link: "Как настроить (30 сек)",
@@ -2138,6 +2158,7 @@ const T = {
     authority_nodata: "Нет данных",
     authority_90d: "Последние 90 дней",
     authority_30d: "Последние 30 дней",
+    authority_10d: "Последние 10 дней",
     trend_consistent: "Стабильно в Discover",
     trend_fading: "Уходит из Discover",
     trend_trending: "В тренде в Discover",
@@ -2339,6 +2360,8 @@ const T = {
     settings_sheet_hint: "Google Sheets з однією вкладкою на сайт. Стовпці: URL, Кліки, Покази, CTR.",
     settings_sheet_30d_label: "Discover за 30 днів (URL Google Sheets)",
     settings_sheet_30d_hint: "Дані Discover за останні 30 днів. Той самий формат. Вмикає виявлення трендів.",
+    settings_sheet_10d_label: "Discover за 10 днів (URL Google Sheets)",
+    settings_sheet_10d_hint: "Дані Discover за останні 10 днів. Той самий формат. Доповнює хронологію трендів.",
     settings_proxy_label: "CORS-проксі (URL Google Apps Script)",
     settings_proxy_hint: "Ваш власний проксі для надійного завантаження.",
     settings_proxy_link: "Як налаштувати (30 сек)",
@@ -2348,6 +2371,7 @@ const T = {
     authority_nodata: "Немає даних",
     authority_90d: "Останні 90 днів",
     authority_30d: "Останні 30 днів",
+    authority_10d: "Останні 10 днів",
     trend_consistent: "Стабільно в Discover",
     trend_fading: "Зникає з Discover",
     trend_trending: "В тренді в Discover",
@@ -2549,6 +2573,8 @@ const T = {
     settings_sheet_hint: "Google Sheets z jedną zakładką na stronę. Kolumny: URL, Kliknięcia, Wyświetlenia, CTR.",
     settings_sheet_30d_label: "Discover ostatnie 30 dni (URL Google Sheets)",
     settings_sheet_30d_hint: "Dane Discover z ostatnich 30 dni. Ten sam format. Włącza wykrywanie trendów.",
+    settings_sheet_10d_label: "Discover ostatnie 10 dni (URL Google Sheets)",
+    settings_sheet_10d_hint: "Dane Discover z ostatnich 10 dni. Ten sam format. Uzupełnia chronologię trendów.",
     settings_proxy_label: "Proxy CORS (URL Google Apps Script)",
     settings_proxy_hint: "Własny proxy do niezawodnego ładowania.",
     settings_proxy_link: "Jak skonfigurować (30 sek)",
@@ -2558,6 +2584,7 @@ const T = {
     authority_nodata: "Brak danych",
     authority_90d: "Ostatnie 90 dni",
     authority_30d: "Ostatnie 30 dni",
+    authority_10d: "Ostatnie 10 dni",
     trend_consistent: "Stale w Discover",
     trend_fading: "Znika z Discover",
     trend_trending: "W trendach w Discover",
@@ -2759,6 +2786,8 @@ const T = {
     settings_sheet_hint: "Google Sheets s jednou záložkou na web. Sloupce: URL, Kliknutí, Zobrazení, CTR.",
     settings_sheet_30d_label: "Discover posledních 30 dní (URL Google Sheets)",
     settings_sheet_30d_hint: "Data Discover za posledních 30 dní. Stejný formát. Aktivuje detekci trendů.",
+    settings_sheet_10d_label: "Discover posledních 10 dní (URL Google Sheets)",
+    settings_sheet_10d_hint: "Data Discover za posledních 10 dní. Stejný formát. Doplňuje chronologii trendů.",
     settings_proxy_label: "CORS proxy (URL Google Apps Script)",
     settings_proxy_hint: "Vlastní proxy pro spolehlivé načítání.",
     settings_proxy_link: "Jak nastavit (30 sec)",
@@ -2768,6 +2797,7 @@ const T = {
     authority_nodata: "Žádná data",
     authority_90d: "Posledních 90 dní",
     authority_30d: "Posledních 30 dní",
+    authority_10d: "Posledních 10 dní",
     trend_consistent: "Stabilně na Discover",
     trend_fading: "Mizí z Discover",
     trend_trending: "Trendy na Discover",
@@ -2974,6 +3004,8 @@ document.addEventListener('DOMContentLoaded', () => {
   if (savedSheet) document.getElementById('settingsSheetUrl').value = savedSheet;
   const savedSheet30 = localStorage.getItem('media_dashboard_discover_sheet_30d');
   if (savedSheet30) document.getElementById('settingsSheetUrl30').value = savedSheet30;
+  const savedSheet10 = localStorage.getItem('media_dashboard_discover_sheet_10d');
+  if (savedSheet10) document.getElementById('settingsSheetUrl10').value = savedSheet10;
   const savedProxy = localStorage.getItem('media_dashboard_cors_proxy');
   if (savedProxy) document.getElementById('settingsProxyUrl').value = savedProxy;
   document.getElementById('urlInput').addEventListener('keydown', e => {
@@ -3011,6 +3043,9 @@ function saveSettings() {
   const sheetUrl30 = document.getElementById('settingsSheetUrl30').value.trim();
   if (sheetUrl30) localStorage.setItem('media_dashboard_discover_sheet_30d', sheetUrl30);
   else localStorage.removeItem('media_dashboard_discover_sheet_30d');
+  const sheetUrl10 = document.getElementById('settingsSheetUrl10').value.trim();
+  if (sheetUrl10) localStorage.setItem('media_dashboard_discover_sheet_10d', sheetUrl10);
+  else localStorage.removeItem('media_dashboard_discover_sheet_10d');
   const proxyUrl = document.getElementById('settingsProxyUrl').value.trim();
   if (proxyUrl) localStorage.setItem('media_dashboard_cors_proxy', proxyUrl);
   else localStorage.removeItem('media_dashboard_cors_proxy');
@@ -4300,6 +4335,17 @@ async function runDiscoverAuthority(url, title) {
     } catch(e) { console.warn('Discover 30d fetch failed:', e.message); }
   }
 
+  // Fetch 10-day data if configured
+  const sheetUrl10 = localStorage.getItem('media_dashboard_discover_sheet_10d') || '';
+  let rows10 = [];
+  if (sheetUrl10) {
+    try {
+      const csvUrl10 = buildCsvUrl(sheetUrl10, tab);
+      const csvText10 = await fetchViaProxy(csvUrl10);
+      rows10 = parseDiscoverCSV(csvText10);
+    } catch(e) { console.warn('Discover 10d fetch failed:', e.message); }
+  }
+
   // Compute site-wide stats for comparison
   const siteStats = {
     avg_impressions: allRows.reduce((a, r) => a + r.impressions, 0) / allRows.length,
@@ -4388,10 +4434,42 @@ URL list format: [index] path | clicks | impressions` },
       }
     }
 
-    // Trend: consistent (both), fading (90d only), trending (30d only), absent (neither)
+    // 10-day matching: same pattern as 30d
+    let match10 = { count: 0, avg_clicks: 0, avg_impressions: 0, avg_ctr: 0, total: rows10.length };
+    if (rows10.length > 0) {
+      const matchingUrls90 = match30.count > 0 ? new Set([...matchingRows.map(r => r.url)]) : new Set(matchingRows.map(r => r.url));
+      const candidates10 = rows10.filter(r => {
+        const slug = r.url.toLowerCase();
+        return keywords.some(kw => slug.includes(kw));
+      });
+      const matched10 = candidates10.filter(r => matchingUrls90.has(r.url) || keywords.filter(kw => r.url.toLowerCase().includes(kw)).length >= 2);
+      match10.count = matched10.length;
+      if (matched10.length > 0) {
+        match10.avg_clicks = matched10.reduce((a, r) => a + r.clicks, 0) / matched10.length;
+        match10.avg_impressions = matched10.reduce((a, r) => a + r.impressions, 0) / matched10.length;
+        match10.avg_ctr = matched10.reduce((a, r) => a + r.ctr, 0) / matched10.length;
+      }
+    }
+
+    // Trend: 3-period comparison (90d / 30d / 10d)
     const on90 = count > 0;
     const on30 = match30.count > 0;
-    const trend = on90 && on30 ? 'consistent' : on90 && !on30 ? 'fading' : !on90 && on30 ? 'trending' : 'absent';
+    const on10 = match10.count > 0;
+    // With 10d data: use all three periods for richer trend
+    // Without 10d data: fall back to 90d vs 30d like before
+    let trend;
+    if (rows10.length > 0) {
+      if (on90 && on30 && on10) trend = 'consistent';
+      else if (on90 && on30 && !on10) trend = 'fading';
+      else if (!on90 && on30 && on10) trend = 'trending';
+      else if (!on90 && !on30 && on10) trend = 'trending';
+      else if (on90 && !on30 && on10) trend = 'trending';
+      else if (on90 && !on30 && !on10) trend = 'fading';
+      else if (!on90 && on30 && !on10) trend = 'fading';
+      else trend = 'absent';
+    } else {
+      trend = on90 && on30 ? 'consistent' : on90 && !on30 ? 'fading' : !on90 && on30 ? 'trending' : 'absent';
+    }
 
     const result = {
       topic: gpt.topic,
@@ -4405,6 +4483,8 @@ URL list format: [index] path | clicks | impressions` },
       authority_level: count > 0 ? 'on_discover' : 'not_on_discover',
       has_30d: rows30.length > 0,
       match_30d: match30,
+      has_10d: rows10.length > 0,
+      match_10d: match10,
       trend: trend
     };
     return result;
@@ -4427,8 +4507,8 @@ function renderDiscoverInsights(d) {
     <span style="color:var(--text-muted);font-size:12px;margin-left:auto">${d.site} · ${t('authority_90d')}</span>
   </div>`;
 
-  // Trend badge (only if 30d data was available)
-  if (d.has_30d) {
+  // Trend badge (only if 30d or 10d data was available)
+  if (d.has_30d || d.has_10d) {
     const trendMap = {
       consistent: { icon: '🟢', color: 'var(--green,#22c55e)', tKey: 'trend_consistent' },
       fading:     { icon: '🔻', color: 'var(--red,#ef4444)', tKey: 'trend_fading' },
@@ -4436,10 +4516,15 @@ function renderDiscoverInsights(d) {
       absent:     { icon: '⚪', color: 'var(--text-muted)', tKey: 'trend_absent' }
     };
     const tr = trendMap[d.trend] || trendMap.absent;
+    // Build period counts string
+    let periods = [];
+    if (d.has_30d) periods.push(`${t('authority_30d')}: ${d.match_30d.count}`);
+    if (d.has_10d) periods.push(`${t('authority_10d')}: ${d.match_10d.count}`);
+    const periodStr = periods.join(' · ') + ' ' + t('trend_articles');
     html += `<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;padding:8px 12px;background:var(--surface-2);border-radius:var(--radius-sm);font-size:13px">
       <span>${tr.icon}</span>
       <strong style="color:${tr.color}">${t(tr.tKey)}</strong>
-      <span style="color:var(--text-muted);margin-left:auto">${t('authority_30d')}: ${d.match_30d.count} ${t('trend_articles')}</span>
+      <span style="color:var(--text-muted);margin-left:auto;font-size:12px">${periodStr}</span>
     </div>`;
   }
 
