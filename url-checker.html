@@ -2993,6 +2993,7 @@ const CORS_PROXIES = [
 ];
 const OPENAI_MODEL = 'gpt-4o';
 const DEFAULT_GAS_PROXY = 'https://script.google.com/macros/s/AKfycbydan3oxJpVWmT1VDWw3xKUWFqy7tW4Bkb2-guLhufwQItALaZpXTu2SlH2xKaQ_i77yg/exec';
+const DEFAULT_SEARCH_SHEET = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vS_xBBpbRcqRO8du0wSfLvPXms6LBBFyaqJX0KNwAARqV-iulmwz8PHqldYfbG9vffCday53ZrrsbNb/pubhtml';
 
 // ========== FLUFF FEEDBACK LEARNING ==========
 let _feedbackCache = null;
@@ -4674,7 +4675,7 @@ function renderDiscoverInsights(d) {
 
 // ========== SEARCH AUTHORITY ==========
 async function runSearchAuthority(url, title) {
-  const sheetUrl = localStorage.getItem('media_dashboard_search_sheet') || '';
+  const sheetUrl = localStorage.getItem('media_dashboard_search_sheet') || DEFAULT_SEARCH_SHEET;
   if (!sheetUrl) return null;
 
   let hostname;
