@@ -3433,11 +3433,24 @@ async function fetchSourceData(sheetUrl, tab) {
     });
   };
 
+  // Smart parse: try CSV first, fall back to HTML table if content is HTML
+  const smartParse = (text, label) => {
+    let rows = parseDiscoverCSV(text);
+    if (rows.length === 0 && text.includes('<table')) {
+      rows = parseHTMLTable(text);
+      if (rows.length > 0) console.log(`[fetchSourceData] ${label} parsed ${rows.length} rows from HTML table`);
+    }
+    if (rows.length === 0 && text.length > 0) {
+      console.warn(`[fetchSourceData] ${label} 0 rows from ${text.length} chars. First 300: ${text.substring(0, 300).replace(/\n/g, '\\n')}`);
+    }
+    return rows;
+  };
+
   // Try 1: fetch with tab name (works for sheets with per-site tabs like D90)
   try {
     const csvUrl = buildCsvUrl(sheetUrl, tab);
     const csvText = await fetchViaProxy(csvUrl);
-    const allRows = parseDiscoverCSV(csvText);
+    const allRows = smartParse(csvText, `tab=${tab}`);
     const filtered = filterByDomain(allRows);
     console.log(`[fetchSourceData] tab=${tab} rawRows=${allRows.length} filteredRows=${filtered.length}`);
     if (filtered.length > 0) return filtered;
@@ -3450,7 +3463,7 @@ async function fetchSourceData(sheetUrl, tab) {
   try {
     const csvUrlNoTab = buildCsvUrlNoTab(sheetUrl);
     const csvText = await fetchViaProxy(csvUrlNoTab);
-    const allRows = parseDiscoverCSV(csvText);
+    const allRows = smartParse(csvText, `tab=${tab} noTab`);
     const filtered = filterByDomain(allRows);
     console.log(`[fetchSourceData] tab=${tab} noTab rawRows=${allRows.length} filteredRows=${filtered.length}`);
     return filtered;
@@ -3979,7 +3992,7 @@ async function fetchViaProxy(targetUrl) {
         const sep = customProxy.includes('?') ? '&' : '?';
         const proxyUrl = customProxy + sep + 'url=' + encodeURIComponent(targetUrl);
         const resp = await fetchWithTimeout(proxyUrl, { redirect:'follow' }, 30000);
-        if (resp.ok) return await resp.text();
+        if (resp.ok) { console.log('[proxy] custom GAS OK for', targetUrl.substring(0, 80)); return await resp.text(); }
         errors.push(`custom: HTTP ${resp.status}`);
         break; // non-timeout HTTP error, no retry
       } catch(e) {
@@ -3996,7 +4009,7 @@ async function fetchViaProxy(targetUrl) {
   // 2. Try direct fetch (works if site allows CORS)
   try {
     const resp = await fetchWithTimeout(targetUrl, { mode:'cors' }, 8000);
-    if (resp.ok) return await resp.text();
+    if (resp.ok) { console.log('[proxy] direct OK for', targetUrl.substring(0, 80)); return await resp.text(); }
   } catch(e) { /* expected CORS block, continue to proxies */ }
 
   // 3. Try each free proxy
@@ -4007,9 +4020,10 @@ async function fetchViaProxy(targetUrl) {
       if (!resp.ok) { errors.push(`${proxy.name}: HTTP ${resp.status}`); continue; }
       if (proxy.json) {
         const j = await resp.json();
-        if (j && j.contents) return j.contents;
+        if (j && j.contents) { console.log(`[proxy] ${proxy.name} OK for`, targetUrl.substring(0, 80)); return j.contents; }
         errors.push(`${proxy.name}: empty contents`);
       } else {
+        console.log(`[proxy] ${proxy.name} OK for`, targetUrl.substring(0, 80));
         return await resp.text();
       }
     } catch(e) {
@@ -4544,7 +4558,7 @@ function buildCsvUrl(sheetUrl, tab) {
 function buildCsvUrlNoTab(sheetUrl) {
   const pubMatch = sheetUrl.match(/\/spreadsheets\/d\/e\/(2PACX[a-zA-Z0-9_-]+)/);
   if (pubMatch) {
-    return `https://docs.google.com/spreadsheets/d/e/${pubMatch[1]}/pub?single=true&output=csv`;
+    return `https://docs.google.com/spreadsheets/d/e/${pubMatch[1]}/pub?gid=0&single=true&output=csv`;
   }
   const sheetId = extractSheetId(sheetUrl);
   return `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv`;
@@ -4553,24 +4567,65 @@ function buildCsvUrlNoTab(sheetUrl) {
 function parseDiscoverCSV(text) {
   const lines = text.split('\n').filter(l => l.trim());
   if (lines.length < 2) return [];
+  // Auto-detect URL column (might not always be column 0)
+  let urlCol = -1;
+  const headerParts = lines[0].match(/(".*?"|[^,\t]+)/g);
+  if (headerParts) {
+    for (let c = 0; c < headerParts.length; c++) {
+      const h = headerParts[c].replace(/"/g, '').trim().toLowerCase();
+      if (['url','page','landing page','address','top pages'].includes(h)) { urlCol = c; break; }
+    }
+  }
+  // Check first data row if header didn't reveal URL column
+  if (urlCol < 0 && lines.length > 1) {
+    const firstParts = lines[1].match(/(".*?"|[^,\t]+)/g);
+    if (firstParts) {
+      for (let c = 0; c < firstParts.length; c++) {
+        if (firstParts[c].replace(/"/g, '').trim().startsWith('http')) { urlCol = c; break; }
+      }
+    }
+  }
+  if (urlCol < 0) urlCol = 0; // default to first column
   const rows = [];
   for (let i = 1; i < lines.length; i++) {
-    const parts = lines[i].match(/(".*?"|[^,]+)/g);
-    if (!parts || parts.length < 4) continue;
-    const urlVal = parts[0].replace(/^"|"$/g, '').trim();
+    const parts = lines[i].match(/(".*?"|[^,\t]+)/g);
+    if (!parts || parts.length < 3) continue;
+    const urlVal = (parts[urlCol] || '').replace(/^"|"$/g, '').trim();
     if (!urlVal.startsWith('http')) continue;
-    const clicks = parseInt(parts[1].replace(/"/g, '').trim(), 10) || 0;
-    const impressions = parseInt(parts[2].replace(/"/g, '').trim(), 10) || 0;
-    const ctrStr = parts[3].replace(/"/g, '').replace('%', '').replace(',', '.').trim();
-    const ctr = parseFloat(ctrStr) || 0;
-    const row = { url: urlVal, clicks, impressions, ctr };
-    // 5th column = position (Search Console data)
-    if (parts.length >= 5) {
-      const posStr = parts[4].replace(/"/g, '').replace(',', '.').trim();
-      const pos = parseFloat(posStr);
-      if (!isNaN(pos) && pos > 0) row.position = pos;
+    // Collect numeric columns (skip the URL column)
+    const nums = [];
+    for (let c = 0; c < parts.length; c++) {
+      if (c === urlCol) continue;
+      const v = parts[c].replace(/"/g, '').replace('%', '').replace(/,/g, '.').replace(/\s/g, '').trim();
+      if (/^-?[\d.]+$/.test(v)) nums.push(parseFloat(v));
     }
+    const row = { url: urlVal, clicks: nums[0] || 0, impressions: nums[1] || 0, ctr: nums[2] || 0 };
+    if (nums.length >= 4 && nums[3] > 0) row.position = nums[3];
     rows.push(row);
+  }
+  return rows;
+}
+// Fallback parser for when proxy returns HTML (pubhtml) instead of CSV
+function parseHTMLTable(html) {
+  const rows = [];
+  const trMatches = html.match(/<tr[^>]*>[\s\S]*?<\/tr>/gi);
+  if (!trMatches || trMatches.length < 2) return [];
+  for (let i = 1; i < trMatches.length; i++) {
+    const tdMatches = trMatches[i].match(/<td[^>]*>[\s\S]*?<\/td>/gi);
+    if (!tdMatches || tdMatches.length < 3) continue;
+    const cells = tdMatches.map(td => td.replace(/<[^>]*>/g, '').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').trim());
+    let urlVal = '', urlIdx = -1;
+    for (let c = 0; c < cells.length; c++) {
+      if (cells[c].startsWith('http')) { urlVal = cells[c]; urlIdx = c; break; }
+    }
+    if (!urlVal) continue;
+    const nums = [];
+    for (let c = 0; c < cells.length; c++) {
+      if (c === urlIdx) continue;
+      const v = parseFloat(cells[c].replace(/[,%\s]/g, ''));
+      if (!isNaN(v)) nums.push(v);
+    }
+    rows.push({ url: urlVal, clicks: nums[0]||0, impressions: nums[1]||0, ctr: nums[2]||0, position: (nums.length >= 4 && nums[3] > 0) ? nums[3] : undefined });
   }
   return rows;
 }
