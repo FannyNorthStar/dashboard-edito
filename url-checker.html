@@ -724,12 +724,24 @@ body {
 
   <div class="input-section">
     <div class="mode-tabs">
-      <button class="mode-tab active" onclick="switchMode('url')" data-mode="url" data-t="tab_url">Check URL</button>
+      <button class="mode-tab active" onclick="switchMode('keyword')" data-mode="keyword" data-t="tab_keyword">Keyword Checker</button>
+      <button class="mode-tab" onclick="switchMode('url')" data-mode="url" data-t="tab_url">Check URL</button>
       <button class="mode-tab" onclick="switchMode('html')" data-mode="html" data-t="tab_draft">Check Draft</button>
-      <button class="mode-tab" onclick="switchMode('keyword')" data-mode="keyword" data-t="tab_keyword">Keyword Checker</button>
     </div>
 
-    <div class="mode-panel active" id="panelUrl">
+    <div class="mode-panel active" id="panelKeyword">
+      <div class="site-select-row">
+        <label data-t="kw_site_label">Site</label>
+        <select class="site-select" id="kwSiteSelect"></select>
+      </div>
+      <textarea class="html-textarea" id="kwInput" data-t-placeholder="kw_placeholder" placeholder="Describe your article idea, keywords, or topic... e.g. 'Liverpool transfer Dutch midfielder' or 'I want to write about the best wonderkids in Eredivisie'" style="min-height:120px;font-family:inherit"></textarea>
+      <button class="btn" id="analyzeBtnKw" onclick="startAnalysis('keyword')" style="width:100%">
+        <span id="btnTextKw" data-t="btn_check_kw">Check Keywords</span>
+        <div class="spinner" id="btnSpinnerKw" style="display:none"></div>
+      </button>
+    </div>
+
+    <div class="mode-panel" id="panelUrl">
       <div class="input-row">
         <input type="text" id="urlInput" data-t-placeholder="input_placeholder" placeholder="https://www.example.com/my-article" autocomplete="url">
       </div>
@@ -744,18 +756,6 @@ body {
       <button class="btn" id="analyzeBtnHtml" onclick="startAnalysis('html')" style="width:100%">
         <span id="btnTextHtml" data-t="btn_check_html">Check HTML</span>
         <div class="spinner" id="btnSpinnerHtml" style="display:none"></div>
-      </button>
-    </div>
-
-    <div class="mode-panel" id="panelKeyword">
-      <div class="site-select-row">
-        <label data-t="kw_site_label">Site</label>
-        <select class="site-select" id="kwSiteSelect"></select>
-      </div>
-      <textarea class="html-textarea" id="kwInput" data-t-placeholder="kw_placeholder" placeholder="Describe your article idea, keywords, or topic... e.g. 'Liverpool transfer Dutch midfielder' or 'I want to write about the best wonderkids in Eredivisie'" style="min-height:120px;font-family:inherit"></textarea>
-      <button class="btn" id="analyzeBtnKw" onclick="startAnalysis('keyword')" style="width:100%">
-        <span id="btnTextKw" data-t="btn_check_kw">Check Keywords</span>
-        <div class="spinner" id="btnSpinnerKw" style="display:none"></div>
       </button>
     </div>
   </div>
@@ -4183,14 +4183,17 @@ IMPORTANT — DO NOT FLAG THESE (they are NOT errors in sports writing):
 3. HYPHENS IN CLUB NAMES: "Paris-Saint-Germain" and "Paris Saint-Germain" are BOTH correct. Do not flag one as a typo of the other. Same for any club with hyphens (Saint-Étienne, Red Bull, etc.).
 4. NICKNAMES: Clubs and players are often called by well-known nicknames. These are NOT errors. Examples: "Gunners" (Arsenal), "Reds" (Liverpool/Man Utd), "Blues" (Chelsea/Man City), "Toffees" (Everton), "Spurs" (Tottenham), "Magpies" (Newcastle), "Hammers" (West Ham), "Blaugrana" (Barcelona), "Merengues" (Real Madrid), "Rossoneri" (AC Milan), "Bianconeri" (Juventus), "Partenopei" (Napoli), "Les Bleus" (France), "Seleção" (Brazil), "Bafana Bafana" (South Africa), "Super Eagles" (Nigeria), "Amakhosi" (Kaizer Chiefs), "Bucs/Buccaneers" (Orlando Pirates), "Usuthu" (AmaZulu), "Timão" (Corinthians), "Mengão" (Flamengo), "Tricolor" (São Paulo/Fluminense), etc.
 5. SHORTENED NAMES: "CR7", "KDB", "VVD", "Messi", "Neymar", "Mbappé", "Salah" in headlines or text are fine.
-6. UPPERCASE ACCENTS: In French and Romance languages, missing accents on uppercase letters is standard ("L'Equipe" = "L'Équipe", "SERIE A" = "SÉRIE A").
-7. GENDER AGREEMENT ON PAST PARTICIPLES: In French/Italian/Spanish/Portuguese, past participle agreement (é/ée, amené/amenée, etc.) depends on the grammatical subject, which may be earlier in the sentence. If the visible context does not clearly show the subject's gender, do NOT flag it. "était amené" and "était amenée" can both be correct depending on context. Only flag when the subject is clearly visible AND the agreement is clearly wrong.
+6. UPPERCASE ACCENTS: In French and Romance languages, missing accents on uppercase letters is standard ("L'Equipe" = "L'Équipe", "SERIE A" = "SÉRIE A"). In Czech and Polish, missing diacritics on uppercase is also standard ("CESKE" = "ČESKÉ", "LODZ" = "ŁÓDŹ", "SLASKI" = "ŚLĄSKI"). Do not flag these.
+7. GENDER AGREEMENT ON PAST PARTICIPLES AND VERBS: In French/Italian/Spanish/Portuguese, past participle agreement (é/ée, amené/amenée, etc.) depends on the grammatical subject, which may be earlier in the sentence. In Czech, Polish, Russian, and Ukrainian, past tense verbs also agree in gender (CZ: dělal/dělala, PL: robił/robiła, RU: сделал/сделала). If the visible context does not clearly show the subject's gender, do NOT flag it. Only flag when the subject is clearly visible AND the agreement is clearly wrong.
 
-8. REGIONAL/GEOGRAPHIC ADJECTIVES: In French and other Romance languages, adjectives derived from regions, cities or areas are LOWERCASE and agree in gender. "club nordiste" (northern club), "formation artésienne" (from Artois / Lens area), "équipe marseillaise", "club nantais", "effectif parisien", "section stéphanoise" — these are correct as-is. Do NOT capitalize them and do NOT change their gender when they agree with the noun they describe. "artésienne" (feminine) is correct when modifying a feminine noun like "formation". Similarly, "lyonnais/lyonnaise", "lillois/lilloise", "bordelais/bordelaise", "toulousain/toulousaine" etc.
+8. REGIONAL/GEOGRAPHIC ADJECTIVES: In Romance and Slavic languages, adjectives derived from regions, cities or areas are LOWERCASE and agree in gender/number. French: "club nordiste", "formation artésienne", "équipe marseillaise", "effectif parisien", "section stéphanoise", "lyonnais/lyonnaise". Italian: "torinese", "milanese", "napoletano", "romanista", "laziale", "bergamasco", "fiorentino". Spanish: "madrileño", "barcelonés", "sevillano", "bilbaíno". Portuguese: "paulista", "gaúcho", "carioca", "mineiro", "paranaense". Czech: "pražský", "brněnský", "ostravský", "plzeňský". Polish: "warszawski", "krakowski", "poznański", "śląski". Do NOT capitalize them and do NOT flag gender agreement when the adjective agrees with its noun.
 9. COUNTRY NAMES AND ARTICLES: In sports writing, country names are routinely used WITHOUT the definite article. "England will face Czech Republic" is correct — do NOT suggest "the Czech Republic", "the Netherlands", "the United States", "the Philippines" etc. This is standard sports journalism convention across all languages. Similarly in French, "face à Brésil" or "contre Allemagne" may appear in certain styles. Do not flag missing articles before country, territory or national team names.
 10. SPORTS JARGON: Common sports terms like "clean sheet", "hat-trick", "derby", "el clásico", "clásico", "classique", "clássico", "set-piece", "box-to-box", "false nine", "playmaker", "sweeper-keeper", "gegenpressing", "tiki-taka", "catenaccio", "libero" etc. are correct in any language context. Do not flag foreign sports terms used in another language's article.
 11. TRANSFER MARKET TERMS: "free agent", "loan deal", "buy-back clause", "sell-on clause", "release clause", "swap deal", "pre-contract" are standard terms used in all languages.
 12. OPTIONAL COMMAS: Do NOT flag missing or extra commas when both forms (with and without the comma) are grammatically acceptable. In particular: commas before conjunctions like "et", "and", "e", "y", "ou", "or"; commas around adverbs like "néanmoins", "cependant", "toutefois", "however", "nevertheless", "pourtant", "infatti", "porém", "contudo", "sin embargo"; commas in enumerations or appositions where the style is a matter of preference. Comma placement in journalism is often a stylistic choice, not an error. Only flag a missing or misplaced comma when the sentence is genuinely ambiguous or unreadable without it.
+13. SLAVIC NOUN DECLENSION: In Czech, Polish, Russian, and Ukrainian, ALL nouns — including foreign player names, club names, and place names — are declined (their endings change by grammatical case). This is correct grammar, NOT a misspelling. Examples: "Messi" → "Messiho" (CZ gen.), "Messim" (CZ instr.), "Messiego" (PL gen.); "Ronaldo" → "Ronalda" (CZ/PL acc./gen.), "Ronaldem" (CZ/PL instr.); "Juventus" → "Juventusu" (CZ dat.), "Barcelona" → "Barcelony" (PL gen.), "Barcelonou" (CZ instr.); "Liverpool" → "Liverpoolu" (CZ/PL). Never flag a declined form of a proper noun as a typo.
+14. ANGLICISMS IN NON-ENGLISH SPORTS WRITING: Sports writing worldwide uses English loanwords. Words like "coach", "staff", "match", "corner", "penalty", "goal", "pressing", "dribble", "offside", "sponsor", "playoff", "MVP", "manager", "mister" (for coaches in IT/ES), "top scorer", "assist", "VAR", "fair play", "ranking", "weekend", "leader", "outsider" are standard in French, Italian, Spanish, Portuguese, Czech, and Polish sports articles. Do NOT flag them as foreign words or suggest native-language equivalents.
+15. ARTICLE-LESS LANGUAGES: Czech, Polish, Russian, and Ukrainian have NO articles (no "the", "a", "un", "le"). Do not suggest adding articles in these languages. Conversely, when these languages are the source text, do not flag the absence of articles.
 
 GENERAL RULE: When in doubt, do NOT flag it. A false positive (flagging something correct) is FAR worse than a false negative (missing a real error). Only flag things you are VERY confident are genuine mistakes that would confuse the reader. If your confidence is below 90%, skip it.
 
