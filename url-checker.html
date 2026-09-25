@@ -1162,7 +1162,7 @@ const T = {
     kw_evergreen: "Evergreen angles",
     kw_mag: "Magazine angles",
     kw_no_data: "No Discover data found for this site.",
-    kw_no_match: "No matching articles found in Discover data.",
+    kw_no_match: "No matching articles found in data.",
     kw_summary: "Checked {topics} topic(s) across {articles} Discover articles on {site}.",
   },
   fr: {
@@ -1386,7 +1386,7 @@ const T = {
     kw_evergreen: "Angles evergreen",
     kw_mag: "Angles magazine",
     kw_no_data: "Aucune donnee Discover trouvee pour ce site.",
-    kw_no_match: "Aucun article correspondant dans les donnees Discover.",
+    kw_no_match: "Aucun article correspondant dans les donnees.",
     kw_summary: "{topics} sujet(s) verifies parmi {articles} articles Discover sur {site}.",
   },
   "pt-br": {
@@ -1610,7 +1610,7 @@ const T = {
     kw_evergreen: "Angulos evergreen",
     kw_mag: "Angulos revista",
     kw_no_data: "Nenhum dado Discover encontrado para este site.",
-    kw_no_match: "Nenhum artigo correspondente nos dados Discover.",
+    kw_no_match: "Nenhum artigo correspondente nos dados.",
     kw_summary: "{topics} topico(s) verificado(s) em {articles} artigos Discover em {site}.",
   },
   es: {
@@ -1834,7 +1834,7 @@ const T = {
     kw_evergreen: "Angulos evergreen",
     kw_mag: "Angulos revista",
     kw_no_data: "No se encontraron datos Discover para este sitio.",
-    kw_no_match: "No se encontraron articulos coincidentes en los datos Discover.",
+    kw_no_match: "No se encontraron articulos coincidentes en los datos.",
     kw_summary: "{topics} tema(s) verificado(s) en {articles} articulos Discover en {site}.",
   },
   it: {
@@ -2058,7 +2058,7 @@ const T = {
     kw_evergreen: "Angolazioni evergreen",
     kw_mag: "Angolazioni magazine",
     kw_no_data: "Nessun dato Discover trovato per questo sito.",
-    kw_no_match: "Nessun articolo corrispondente nei dati Discover.",
+    kw_no_match: "Nessun articolo corrispondente nei dati.",
     kw_summary: "{topics} argomento/i verificato/i su {articles} articoli Discover su {site}.",
   },
   ru: {
@@ -2282,7 +2282,7 @@ const T = {
     kw_evergreen: "Вечнозелёные ракурсы",
     kw_mag: "Журнальные ракурсы",
     kw_no_data: "Данные Discover не найдены для этого сайта.",
-    kw_no_match: "Совпадающих статей в данных Discover не найдено.",
+    kw_no_match: "Совпадающих статей в данных не найдено.",
     kw_summary: "Проверено {topics} тем(ы) среди {articles} статей Discover на {site}.",
   },
   uk: {
@@ -2506,7 +2506,7 @@ const T = {
     kw_evergreen: "Вічнозелені ракурси",
     kw_mag: "Журнальні ракурси",
     kw_no_data: "Даних Discover не знайдено для цього сайту.",
-    kw_no_match: "Відповідних статей у даних Discover не знайдено.",
+    kw_no_match: "Відповідних статей у даних не знайдено.",
     kw_summary: "Перевірено {topics} тем серед {articles} статей Discover на {site}.",
   },
   pl: {
@@ -2730,7 +2730,7 @@ const T = {
     kw_evergreen: "Ujecia evergreen",
     kw_mag: "Ujecia magazynowe",
     kw_no_data: "Nie znaleziono danych Discover dla tej strony.",
-    kw_no_match: "Nie znaleziono pasujacych artykulow w danych Discover.",
+    kw_no_match: "Nie znaleziono pasujacych artykulow w danych.",
     kw_summary: "Sprawdzono {topics} temat(ow) wsrod {articles} artykulow Discover na {site}.",
   },
   cs: {
@@ -2954,7 +2954,7 @@ const T = {
     kw_evergreen: "Evergreen uhly",
     kw_mag: "Magazinove uhly",
     kw_no_data: "Pro tento web nebyla nalezena zadna data Discover.",
-    kw_no_match: "V datech Discover nebyly nalezeny zadne odpovidajici clanky.",
+    kw_no_match: "V datech nebyly nalezeny zadne odpovidajici clanky.",
     kw_summary: "Zkontrolovano {topics} temat mezi {articles} clanky Discover na {site}.",
   }
 };
@@ -3488,7 +3488,7 @@ async function startKeywordAnalysis() {
       const keywords = extractTopicKeywords(entity.name);
       if (keywords.length === 0) continue;
 
-      const entityData = { name: entity.name, sites: [] };
+      const entityData = { name: entity.name, scope: entity.scope || 'specific', sites: [] };
 
       for (const [tab, src] of Object.entries(sourceData)) {
         setProgress(30 + Math.round(45 * entityIdx / parsed.entities.length), `Matching "${entity.name}" on ${tab}...`);
@@ -3559,22 +3559,61 @@ async function parseKeywordInput(text) {
   const data = await callOpenAI({
     model: OPENAI_MODEL,
     messages: [
-      { role: 'system', content: `You extract article topics/entities from a user's free-text input. The user might type keywords, a sentence describing an article idea, or a question about what to write. Extract the distinct topics, entities, or angles they want to explore.
+      { role: 'system', content: `You are a sports editorial strategist covering football, basketball, boxing, tennis, and all sports. Given a user's free-text input about a potential article topic, decompose it into searchable angles to check editorial authority.
 
-For example:
-- "Liverpool transfer Dutch midfielder" → entities: ["Liverpool Dutch midfielder transfer"]
-- "I want to write about the best wonderkids in Eredivisie" → entities: ["Eredivisie wonderkids"]
-- "Liverpool vs Arsenal, who has better midfield" → entities: ["Liverpool midfield", "Arsenal midfield"]
-- "Should I write about Mbappe or Haaland for our next feature?" → entities: ["Mbappe", "Haaland"]
+Your job is NOT to repeat the input as one entity. Instead, break it into the building blocks that can be checked independently in performance data. Always include both the specific niche angle AND the broader components.
 
-Keep entity names concise (2-5 words). Extract 1-5 entities max.` },
+RULES:
+- Extract 2-5 entities, ordered from broadest to most specific
+- The broadest entities are the main subjects (a club, a player, a league, a nationality, a sport)
+- The most specific entity is the full niche angle the user described
+- Keep entity names concise (2-5 words)
+- Use the language/terms that would appear in article URLs (e.g. "olympique-marseille" not "OM", "lakers" not "LAL")
+- Works for ANY sport: football, basketball, boxing, tennis, rugby, etc.
+
+EXAMPLES:
+- "carrière d'un jour ivoirien à l'olympique de marseille" →
+  entities: ["Olympique Marseille", "Ivory Coast football", "Ivorian players Marseille"]
+  (broad club → nationality angle → specific niche)
+
+- "Liverpool transfer Dutch midfielder" →
+  entities: ["Liverpool", "Liverpool transfers", "Dutch midfielder Liverpool"]
+  (club → transfer topic → specific angle)
+
+- "best wonderkids in Eredivisie" →
+  entities: ["Eredivisie", "Eredivisie wonderkids"]
+  (league → specific topic)
+
+- "Lakers NBA draft picks analysis" →
+  entities: ["Lakers", "NBA draft", "Lakers draft picks"]
+  (team → draft topic → specific angle)
+
+- "Nigerian boxers world championship history" →
+  entities: ["boxing", "Nigeria boxing", "Nigerian world champions boxing"]
+  (sport → country angle → specific niche)
+
+- "EuroLeague top scorers comparison" →
+  entities: ["EuroLeague", "EuroLeague top scorers"]
+  (league → specific stat topic)
+
+- "Should I write about Mbappe or Haaland?" →
+  entities: ["Mbappe", "Haaland"]
+  (two distinct players, no decomposition needed)
+
+- "PSG transfer targets Ligue 1" →
+  entities: ["PSG", "PSG transfers", "Ligue 1 transfers"]
+  (club → club transfers → league transfers)
+
+- "South African Premier Soccer League relegation battle" →
+  entities: ["Premier Soccer League", "PSL relegation"]
+  (league → specific angle)` },
       { role: 'user', content: text }
     ],
     tools: [{
       type: 'function',
       function: {
         name: 'extract_entities',
-        description: 'Extract article topics from the input',
+        description: 'Extract article topics and sub-angles from the input',
         parameters: {
           type: 'object',
           properties: {
@@ -3583,11 +3622,12 @@ Keep entity names concise (2-5 words). Extract 1-5 entities max.` },
               items: {
                 type: 'object',
                 properties: {
-                  name: { type: 'string', description: 'Topic name (2-5 words)' }
+                  name: { type: 'string', description: 'Topic name (2-5 words)' },
+                  scope: { type: 'string', enum: ['broad', 'specific'], description: 'broad = general subject (club, player, league), specific = the niche angle' }
                 },
-                required: ['name']
+                required: ['name', 'scope']
               },
-              description: 'Extracted topics/entities'
+              description: 'Extracted topics from broad to specific'
             },
             user_intent: { type: 'string', description: 'Brief summary of what the user wants to write about' }
           },
@@ -4857,9 +4897,13 @@ function renderKeywordResults(inputText, selectedSite, entityResults, angleIdeas
       trendHtml = `<span style="font-size:12px;color:var(--text-muted);margin-left:8px">${trendIcon} ${trendLabel}</span>`;
     }
 
+    const scopeLabel = entity.scope === 'broad'
+      ? '<span style="font-size:10px;padding:2px 6px;border-radius:4px;background:var(--surface-2,#f0f0f0);color:var(--text-muted);margin-left:8px;font-weight:400;vertical-align:middle">broad</span>'
+      : '<span style="font-size:10px;padding:2px 6px;border-radius:4px;background:var(--accent-glow,#eef);color:var(--accent);margin-left:8px;font-weight:400;vertical-align:middle">niche</span>';
+
     let cardHtml = `<div class="card">
       <div class="card-header" onclick="toggleCard(this)">
-        <h3><span class="tl-dot ${authorityColor}"></span> ${esc(entity.name)}</h3>
+        <h3><span class="tl-dot ${authorityColor}"></span> ${esc(entity.name)}${scopeLabel}</h3>
         <span class="chevron">▼</span>
       </div>
       <div class="card-body">
