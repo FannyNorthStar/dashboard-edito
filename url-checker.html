@@ -3485,7 +3485,10 @@ async function startKeywordAnalysis() {
 
     for (const entity of parsed.entities) {
       entityIdx++;
-      const keywords = extractTopicKeywords(entity.name);
+      // Use GPT-generated URL keywords if available, fallback to basic extraction
+      const keywords = (entity.url_keywords && entity.url_keywords.length > 0)
+        ? entity.url_keywords.map(k => k.toLowerCase().trim()).filter(k => k.length > 1)
+        : extractTopicKeywords(entity.name);
       if (keywords.length === 0) continue;
 
       const entityData = { name: entity.name, scope: entity.scope || 'specific', sites: [] };
@@ -3567,46 +3570,41 @@ RULES:
 - Extract 2-5 entities, ordered from broadest to most specific
 - The broadest entities are the main subjects (a club, a player, a league, a nationality, a sport)
 - The most specific entity is the full niche angle the user described
-- Keep entity names concise (2-5 words)
-- Use the language/terms that would appear in article URLs (e.g. "olympique-marseille" not "OM", "lakers" not "LAL")
+- Keep entity names concise (2-5 words) — human-readable labels
+- For EACH entity, also provide url_keywords: lowercase terms that would appear in article URL slugs
+- url_keywords must include ALL variants: translations, abbreviations, demonyms, alternate spellings
+- Think about how a CMS generates URL slugs from article titles in multiple languages
 - Works for ANY sport: football, basketball, boxing, tennis, rugby, etc.
 
-EXAMPLES:
+URL KEYWORD EXAMPLES (critical — this is how articles are matched):
+- "Olympique Marseille" → url_keywords: ["marseille", "olympique-marseille", "om"]
+- "Ivory Coast" → url_keywords: ["cote-ivoire", "cote-d-ivoire", "ivoirien", "ivory-coast", "civ"]
+- "Liverpool" → url_keywords: ["liverpool"]
+- "transfers" angle → add: ["transfer", "mercato", "signing", "recruit"]
+- "Lakers" → url_keywords: ["lakers", "los-angeles-lakers"]
+- "Nigeria boxing" → url_keywords: ["nigeria", "nigerian", "naija", "boxing", "boxe"]
+- "EuroLeague" → url_keywords: ["euroleague", "euroligue", "euro-league"]
+- Country demonyms matter: "Dutch" → ["neerlandais", "pays-bas", "dutch", "holland"]
+- Player names are valid keywords if strongly associated with the topic
+
+ENTITY EXAMPLES:
 - "carrière d'un jour ivoirien à l'olympique de marseille" →
-  entities: ["Olympique Marseille", "Ivory Coast football", "Ivorian players Marseille"]
-  (broad club → nationality angle → specific niche)
+  entity "Olympique Marseille" (broad), url_keywords: ["marseille", "olympique-marseille", "om"]
+  entity "Ivory Coast football" (broad), url_keywords: ["cote-ivoire", "cote-d-ivoire", "ivoirien", "ivory-coast"]
+  entity "Ivorian players Marseille" (specific), url_keywords: ["marseille", "ivoirien", "cote-ivoire"]
 
 - "Liverpool transfer Dutch midfielder" →
-  entities: ["Liverpool", "Liverpool transfers", "Dutch midfielder Liverpool"]
-  (club → transfer topic → specific angle)
-
-- "best wonderkids in Eredivisie" →
-  entities: ["Eredivisie", "Eredivisie wonderkids"]
-  (league → specific topic)
-
-- "Lakers NBA draft picks analysis" →
-  entities: ["Lakers", "NBA draft", "Lakers draft picks"]
-  (team → draft topic → specific angle)
-
-- "Nigerian boxers world championship history" →
-  entities: ["boxing", "Nigeria boxing", "Nigerian world champions boxing"]
-  (sport → country angle → specific niche)
-
-- "EuroLeague top scorers comparison" →
-  entities: ["EuroLeague", "EuroLeague top scorers"]
-  (league → specific stat topic)
+  entity "Liverpool" (broad), url_keywords: ["liverpool"]
+  entity "Liverpool transfers" (broad), url_keywords: ["liverpool", "transfer", "mercato", "signing"]
+  entity "Dutch midfielder Liverpool" (specific), url_keywords: ["liverpool", "neerlandais", "pays-bas", "dutch"]
 
 - "Should I write about Mbappe or Haaland?" →
-  entities: ["Mbappe", "Haaland"]
-  (two distinct players, no decomposition needed)
+  entity "Mbappe" (broad), url_keywords: ["mbappe", "kylian-mbappe"]
+  entity "Haaland" (broad), url_keywords: ["haaland", "erling-haaland"]
 
-- "PSG transfer targets Ligue 1" →
-  entities: ["PSG", "PSG transfers", "Ligue 1 transfers"]
-  (club → club transfers → league transfers)
-
-- "South African Premier Soccer League relegation battle" →
-  entities: ["Premier Soccer League", "PSL relegation"]
-  (league → specific angle)` },
+- "South African Premier Soccer League relegation" →
+  entity "Premier Soccer League" (broad), url_keywords: ["psl", "premier-soccer-league", "betway-premiership"]
+  entity "PSL relegation" (specific), url_keywords: ["psl", "relegation", "relegate"]` },
       { role: 'user', content: text }
     ],
     tools: [{
@@ -3622,10 +3620,11 @@ EXAMPLES:
               items: {
                 type: 'object',
                 properties: {
-                  name: { type: 'string', description: 'Topic name (2-5 words)' },
-                  scope: { type: 'string', enum: ['broad', 'specific'], description: 'broad = general subject (club, player, league), specific = the niche angle' }
+                  name: { type: 'string', description: 'Human-readable topic label (2-5 words)' },
+                  scope: { type: 'string', enum: ['broad', 'specific'], description: 'broad = general subject (club, player, league), specific = the niche angle' },
+                  url_keywords: { type: 'array', items: { type: 'string' }, description: 'Lowercase URL-slug terms to match articles. Include all variants: translations, abbreviations, demonyms, alternate spellings across languages (EN, FR, PT, ES, IT, etc.).' }
                 },
-                required: ['name', 'scope']
+                required: ['name', 'scope', 'url_keywords']
               },
               description: 'Extracted topics from broad to specific'
             },
