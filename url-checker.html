@@ -887,7 +887,7 @@ body {
     <div class="hint" data-t="settings_sheet_10d_hint">Rolling 10-day Discover data. Same format. Completes the trend timeline.</div>
     <label for="settingsSearchSheet" style="margin-top:16px" data-t="settings_search_sheet_label">Search Data Last 10 Days (Google Sheets URL)</label>
     <input type="text" id="settingsSearchSheet" placeholder="https://docs.google.com/spreadsheets/d/...">
-    <div class="hint" data-t="settings_search_sheet_hint">Rolling 10-day Google Search data. Same format (URL, Clicks, Impressions, CTR). Enables Search authority check.</div>
+    <div class="hint" data-t="settings_search_sheet_hint">Rolling 10-day Google Search data. Format: URL, Clicks, Impressions, CTR, Position. Enables Search authority check.</div>
     <label for="settingsProxyUrl" style="margin-top:16px" data-t="settings_proxy_label">CORS Proxy (Google Apps Script URL)</label>
     <input type="text" id="settingsProxyUrl" placeholder="https://script.google.com/macros/s/.../exec">
     <div class="hint" data-t="settings_proxy_hint">Your own proxy for reliable page fetching. <a href="#" onclick="showProxyHelp();return false" data-t="settings_proxy_link">How to set up (30 sec)</a></div>
@@ -1097,7 +1097,7 @@ const T = {
     settings_sheet_10d_label: "Discover Last 10 Days (Google Sheets URL)",
     settings_sheet_10d_hint: "Rolling 10-day Discover data. Same format. Completes the trend timeline.",
     settings_search_sheet_label: "Search Data Last 10 Days (Google Sheets URL)",
-    settings_search_sheet_hint: "Rolling 10-day Google Search data. Same format (URL, Clicks, Impressions, CTR). Enables Search authority check.",
+    settings_search_sheet_hint: "Rolling 10-day Google Search data. Format: URL, Clicks, Impressions, CTR, Position. Enables Search authority check.",
     settings_proxy_label: "CORS Proxy (Google Apps Script URL)",
     settings_proxy_hint: "Your own proxy for reliable page fetching.",
     settings_proxy_link: "How to set up (30 sec)",
@@ -1323,7 +1323,7 @@ const T = {
     settings_sheet_10d_label: "Discover 10 derniers jours (URL Google Sheets)",
     settings_sheet_10d_hint: "Donnees Discover glissantes sur 10 jours. Meme format. Complete la chronologie des tendances.",
     settings_search_sheet_label: "Donnees Search 10 derniers jours (URL Google Sheets)",
-    settings_search_sheet_hint: "Donnees Google Search glissantes sur 10 jours. Meme format (URL, Clics, Impressions, CTR). Active la verification d'autorite Search.",
+    settings_search_sheet_hint: "Donnees Google Search glissantes sur 10 jours. Format : URL, Clics, Impressions, CTR, Position. Active la verification d'autorite Search.",
     settings_proxy_label: "Proxy CORS (URL Google Apps Script)",
     settings_proxy_hint: "Votre propre proxy pour un chargement fiable.",
     settings_proxy_link: "Comment configurer (30 sec)",
@@ -1547,7 +1547,7 @@ const T = {
     settings_sheet_10d_label: "Discover Últimos 10 Dias (URL Google Sheets)",
     settings_sheet_10d_hint: "Dados Discover dos últimos 10 dias. Mesmo formato. Completa a linha do tempo de tendências.",
     settings_search_sheet_label: "Dados Search ultimos 10 dias (URL Google Sheets)",
-    settings_search_sheet_hint: "Dados Google Search dos ultimos 10 dias. Mesmo formato (URL, Cliques, Impressoes, CTR). Ativa verificacao de autoridade Search.",
+    settings_search_sheet_hint: "Dados Google Search dos ultimos 10 dias. Formato: URL, Cliques, Impressoes, CTR, Position. Ativa verificacao de autoridade Search.",
     settings_proxy_label: "Proxy CORS (URL Google Apps Script)",
     settings_proxy_hint: "Seu proxy próprio para carregamento confiável.",
     settings_proxy_link: "Como configurar (30 seg)",
@@ -1771,7 +1771,7 @@ const T = {
     settings_sheet_10d_label: "Discover Últimos 10 Días (URL Google Sheets)",
     settings_sheet_10d_hint: "Datos Discover de los últimos 10 días. Mismo formato. Completa la línea temporal de tendencias.",
     settings_search_sheet_label: "Datos Search ultimos 10 dias (URL Google Sheets)",
-    settings_search_sheet_hint: "Datos Google Search de los ultimos 10 dias. Mismo formato (URL, Clics, Impresiones, CTR). Activa la verificacion de autoridad Search.",
+    settings_search_sheet_hint: "Datos Google Search de los ultimos 10 dias. Formato: URL, Clics, Impresiones, CTR, Position. Activa la verificacion de autoridad Search.",
     settings_proxy_label: "Proxy CORS (URL Google Apps Script)",
     settings_proxy_hint: "Tu propio proxy para carga fiable.",
     settings_proxy_link: "Cómo configurar (30 seg)",
@@ -1995,7 +1995,7 @@ const T = {
     settings_sheet_10d_label: "Discover Ultimi 10 Giorni (URL Google Sheets)",
     settings_sheet_10d_hint: "Dati Discover degli ultimi 10 giorni. Stesso formato. Completa la cronologia delle tendenze.",
     settings_search_sheet_label: "Dati Search ultimi 10 giorni (URL Google Sheets)",
-    settings_search_sheet_hint: "Dati Google Search degli ultimi 10 giorni. Stesso formato (URL, Clic, Impressioni, CTR). Attiva il controllo autorita Search.",
+    settings_search_sheet_hint: "Dati Google Search degli ultimi 10 giorni. Formato: URL, Clic, Impressioni, CTR, Position. Attiva il controllo autorita Search.",
     settings_proxy_label: "Proxy CORS (URL Google Apps Script)",
     settings_proxy_hint: "Il tuo proxy personale per un caricamento affidabile.",
     settings_proxy_link: "Come configurare (30 sec)",
@@ -2219,7 +2219,7 @@ const T = {
     settings_sheet_10d_label: "Discover за 10 дней (URL Google Sheets)",
     settings_sheet_10d_hint: "Данные Discover за последние 10 дней. Тот же формат. Дополняет хронологию трендов.",
     settings_search_sheet_label: "Данные Search за 10 дней (URL Google Sheets)",
-    settings_search_sheet_hint: "Данные Google Search за последние 10 дней. Тот же формат (URL, Клики, Показы, CTR). Включает проверку авторитета Search.",
+    settings_search_sheet_hint: "Данные Google Search за последние 10 дней. Формат: URL, Клики, Показы, CTR, Position. Включает проверку авторитета Search.",
     settings_proxy_label: "CORS-прокси (URL Google Apps Script)",
     settings_proxy_hint: "Ваш собственный прокси для надёжной загрузки.",
     settings_proxy_link: "Как настроить (30 сек)",
@@ -2443,7 +2443,7 @@ const T = {
     settings_sheet_10d_label: "Discover за 10 днів (URL Google Sheets)",
     settings_sheet_10d_hint: "Дані Discover за останні 10 днів. Той самий формат. Доповнює хронологію трендів.",
     settings_search_sheet_label: "Дані Search за 10 днів (URL Google Sheets)",
-    settings_search_sheet_hint: "Дані Google Search за останні 10 днів. Той самий формат (URL, Кліки, Покази, CTR). Вмикає перевірку авторитету Search.",
+    settings_search_sheet_hint: "Дані Google Search за останні 10 днів. Формат: URL, Кліки, Покази, CTR, Position. Вмикає перевірку авторитету Search.",
     settings_proxy_label: "CORS-проксі (URL Google Apps Script)",
     settings_proxy_hint: "Ваш власний проксі для надійного завантаження.",
     settings_proxy_link: "Як налаштувати (30 сек)",
@@ -2667,7 +2667,7 @@ const T = {
     settings_sheet_10d_label: "Discover ostatnie 10 dni (URL Google Sheets)",
     settings_sheet_10d_hint: "Dane Discover z ostatnich 10 dni. Ten sam format. Uzupełnia chronologię trendów.",
     settings_search_sheet_label: "Dane Search ostatnie 10 dni (URL Google Sheets)",
-    settings_search_sheet_hint: "Dane Google Search z ostatnich 10 dni. Ten sam format (URL, Kliknięcia, Wyświetlenia, CTR). Włącza sprawdzanie autorytetu Search.",
+    settings_search_sheet_hint: "Dane Google Search z ostatnich 10 dni. Format: URL, Kliknięcia, Wyświetlenia, CTR, Position. Włącza sprawdzanie autorytetu Search.",
     settings_proxy_label: "Proxy CORS (URL Google Apps Script)",
     settings_proxy_hint: "Własny proxy do niezawodnego ładowania.",
     settings_proxy_link: "Jak skonfigurować (30 sek)",
@@ -2891,7 +2891,7 @@ const T = {
     settings_sheet_10d_label: "Discover posledních 10 dní (URL Google Sheets)",
     settings_sheet_10d_hint: "Data Discover za posledních 10 dní. Stejný formát. Doplňuje chronologii trendů.",
     settings_search_sheet_label: "Data Search poslednich 10 dni (URL Google Sheets)",
-    settings_search_sheet_hint: "Data Google Search za poslednich 10 dni. Stejny format (URL, Kliknuti, Zobrazeni, CTR). Aktivuje kontrolu autority Search.",
+    settings_search_sheet_hint: "Data Google Search za poslednich 10 dni. Format: URL, Kliknuti, Zobrazeni, CTR, Position. Aktivuje kontrolu autority Search.",
     settings_proxy_label: "CORS proxy (URL Google Apps Script)",
     settings_proxy_hint: "Vlastní proxy pro spolehlivé načítání.",
     settings_proxy_link: "Jak nastavit (30 sec)",
@@ -3369,12 +3369,71 @@ async function startAnalysis(mode) {
 }
 
 // ========== KEYWORD CHECKER ==========
+// GPT matching helper: given a topic name, keywords, rows and a source label, returns matched rows
+async function gptMatchRows(topicName, keywords, allRows, sourceLabel) {
+  const candidates = allRows.filter(r => {
+    const slug = r.url.toLowerCase();
+    return keywords.some(kw => slug.includes(kw));
+  });
+  if (candidates.length === 0) return [];
+
+  const subset = candidates.slice(0, 150);
+  const compactList = subset.map((r, i) => {
+    const path = r.url.replace(/https?:\/\/[^/]+/, '');
+    return `[${i}] ${path} | ${r.clicks} | ${r.impressions}`;
+  }).join('\n');
+
+  try {
+    const data = await callOpenAI({
+      model: OPENAI_MODEL,
+      messages: [
+        { role: 'system', content: `You are a ${sourceLabel} performance analyst. You have a numbered list of URLs (pre-filtered by keyword). Identify which URLs are truly about the SAME TOPIC (same team, player, event, or subject). Return the indices. Be inclusive.\n\nURL list format: [index] path | clicks | impressions` },
+        { role: 'user', content: `Topic: "${topicName}"\n\nCandidate URLs (${subset.length} from ${allRows.length} total):\n${compactList}` }
+      ],
+      tools: [{
+        type: 'function',
+        function: {
+          name: 'topic_matches',
+          description: 'Return the indices of matching URLs',
+          parameters: {
+            type: 'object',
+            properties: { matching_indices: { type: 'array', items: { type: 'integer' }, description: 'Zero-based indices of matching URLs. Empty if none.' } },
+            required: ['matching_indices']
+          }
+        }
+      }],
+      tool_choice: { type: 'function', function: { name: 'topic_matches' } },
+      temperature: 0.1
+    });
+    const tc = data.choices?.[0]?.message?.tool_calls?.[0];
+    if (tc) {
+      const gpt = JSON.parse(tc.function.arguments);
+      return (gpt.matching_indices || []).filter(i => i >= 0 && i < subset.length).map(i => subset[i]);
+    }
+  } catch(e) { console.warn(`GPT matching failed for ${topicName} (${sourceLabel}):`, e.message); }
+  return [];
+}
+
+// Fetch CSV data for a sheet+tab, returns parsed rows or empty array
+async function fetchSourceData(sheetUrl, tab) {
+  if (!sheetUrl) return [];
+  try {
+    const csvUrl = buildCsvUrl(sheetUrl, tab);
+    const csvText = await fetchViaProxy(csvUrl);
+    return parseDiscoverCSV(csvText);
+  } catch(e) { return []; }
+}
+
 async function startKeywordAnalysis() {
   const kwText = document.getElementById('kwInput').value.trim();
   if (!kwText) { showError(t('err_empty_kw')); return; }
 
-  const sheetUrl = localStorage.getItem('media_dashboard_discover_sheet') || DEFAULT_DISCOVER_SHEET;
-  if (!sheetUrl) { showError(t('kw_no_sheet')); return; }
+  const sheetUrl90 = localStorage.getItem('media_dashboard_discover_sheet') || DEFAULT_DISCOVER_SHEET;
+  const sheetUrl30 = localStorage.getItem('media_dashboard_discover_sheet_30d') || DEFAULT_DISCOVER_SHEET_30D;
+  const sheetUrl10 = localStorage.getItem('media_dashboard_discover_sheet_10d') || DEFAULT_DISCOVER_SHEET_10D;
+  const sheetUrlSearch = localStorage.getItem('media_dashboard_search_sheet') || DEFAULT_SEARCH_SHEET;
+
+  if (!sheetUrl90) { showError(t('kw_no_sheet')); return; }
 
   const selectedSite = document.getElementById('kwSiteSelect').value;
 
@@ -3391,7 +3450,7 @@ async function startKeywordAnalysis() {
 
   try {
     // Step 1: GPT extracts entities/topics from free text
-    setProgress(10, t('prog_kw_parse'));
+    setProgress(5, t('prog_kw_parse'));
     const parsed = await parseKeywordInput(kwText);
 
     if (!parsed.entities || parsed.entities.length === 0) {
@@ -3403,102 +3462,61 @@ async function startKeywordAnalysis() {
       ? [...new Set(Object.values(DOMAIN_TAB_MAP))]
       : [selectedSite];
 
-    const allTabData = {};
-
-    // Step 3: Fetch CSV data for each tab
+    // Step 3: Fetch all 4 sources per tab
+    const sourceData = {}; // { tab: { d90, d30, d10, search } }
     let fetchIdx = 0;
+    const totalFetches = tabsToCheck.length;
+
     for (const tab of tabsToCheck) {
       fetchIdx++;
-      setProgress(10 + Math.round(30 * fetchIdx / tabsToCheck.length),
-        t('prog_kw_fetch', { site: tab }));
-      try {
-        const csvUrl = buildCsvUrl(sheetUrl, tab);
-        const csvText = await fetchViaProxy(csvUrl);
-        const rows = parseDiscoverCSV(csvText);
-        if (rows.length > 0) allTabData[tab] = rows;
-      } catch(e) {
-        console.warn(`Failed to fetch Discover data for ${tab}:`, e.message);
+      setProgress(5 + Math.round(25 * fetchIdx / totalFetches), `Fetching data for ${tab}...`);
+      const [d90, d30, d10, search] = await Promise.all([
+        fetchSourceData(sheetUrl90, tab),
+        fetchSourceData(sheetUrl30, tab),
+        fetchSourceData(sheetUrl10, tab),
+        fetchSourceData(sheetUrlSearch, tab)
+      ]);
+      if (d90.length > 0 || d30.length > 0 || d10.length > 0 || search.length > 0) {
+        sourceData[tab] = { d90, d30, d10, search };
       }
     }
 
-    if (Object.keys(allTabData).length === 0) {
+    if (Object.keys(sourceData).length === 0) {
       throw new Error(t('kw_no_data'));
     }
 
-    // Step 4: For each entity, match against Discover data
-    setProgress(50, t('prog_kw_match'));
+    // Step 4: For each entity, match against ALL sources
     const entityResults = [];
+    let entityIdx = 0;
 
     for (const entity of parsed.entities) {
+      entityIdx++;
       const keywords = extractTopicKeywords(entity.name);
       if (keywords.length === 0) continue;
 
       const entityData = { name: entity.name, sites: [] };
 
-      for (const [tab, rows] of Object.entries(allTabData)) {
-        // Pre-filter: rows where URL slug contains at least 1 keyword
-        const candidates = rows.filter(r => {
-          const slug = r.url.toLowerCase();
-          return keywords.some(kw => slug.includes(kw));
+      for (const [tab, src] of Object.entries(sourceData)) {
+        setProgress(30 + Math.round(45 * entityIdx / parsed.entities.length), `Matching "${entity.name}" on ${tab}...`);
+
+        // Match against each source — reuse GPT call for d90, then use URL set for d30/d10
+        const matchD90 = src.d90.length > 0 ? await gptMatchRows(entity.name, keywords, src.d90, 'Discover 90d') : [];
+        const matchD90Urls = new Set(matchD90.map(r => r.url));
+
+        // For 30d/10d, match by URL overlap with 90d matches (no extra GPT call)
+        const matchD30 = src.d30.filter(r => matchD90Urls.has(r.url));
+        const matchD10 = src.d10.filter(r => matchD90Urls.has(r.url));
+
+        // Search needs its own GPT call (different URL set)
+        const matchSearch = src.search.length > 0 ? await gptMatchRows(entity.name, keywords, src.search, 'Search 10d') : [];
+
+        entityData.sites.push({
+          tab,
+          discover90: { matchingRows: matchD90, siteStats: src.d90.length > 0 ? computeSiteStats(src.d90) : null, totalArticles: src.d90.length },
+          discover30: { matchingRows: matchD30, siteStats: src.d30.length > 0 ? computeSiteStats(src.d30) : null, totalArticles: src.d30.length },
+          discover10: { matchingRows: matchD10, siteStats: src.d10.length > 0 ? computeSiteStats(src.d10) : null, totalArticles: src.d10.length },
+          search: { matchingRows: matchSearch, siteStats: src.search.length > 0 ? computeSiteStats(src.search) : null, totalArticles: src.search.length }
         });
-
-        if (candidates.length === 0 && rows.length > 0) {
-          // No keyword matches but site has data
-          const siteStats = computeSiteStats(rows);
-          entityData.sites.push({ tab, matchingRows: [], candidates: 0, siteStats, totalArticles: rows.length });
-          continue;
-        }
-
-        // Use GPT to identify true topic matches (same as discover authority)
-        const subset = candidates.slice(0, 150);
-        const compactList = subset.map((r, i) => {
-          const path = r.url.replace(/https?:\/\/[^/]+/, '');
-          return `[${i}] ${path} | ${r.clicks} | ${r.impressions}`;
-        }).join('\n');
-
-        let matchingRows = [];
-        try {
-          const data = await callOpenAI({
-            model: OPENAI_MODEL,
-            messages: [
-              { role: 'system', content: `You are a Discover performance analyst. The user wants to write about a topic. You have a numbered list of Discover URLs (pre-filtered by keyword).
-
-Identify which URLs are truly about the SAME TOPIC (same team, player, event, or subject). Return the indices of matching URLs. Be inclusive: include closely related articles.
-
-URL list format: [index] path | clicks | impressions` },
-              { role: 'user', content: `Topic: "${entity.name}"\n\nCandidate URLs (${subset.length} from ${rows.length} total on ${tab}):\n${compactList || '(no keyword matches)'}` }
-            ],
-            tools: [{
-              type: 'function',
-              function: {
-                name: 'discover_matches',
-                description: 'Return the indices of matching URLs',
-                parameters: {
-                  type: 'object',
-                  properties: {
-                    matching_indices: { type: 'array', items: { type: 'integer' }, description: 'Zero-based indices of matching URLs. Empty if none.' }
-                  },
-                  required: ['matching_indices']
-                }
-              }
-            }],
-            tool_choice: { type: 'function', function: { name: 'discover_matches' } },
-            temperature: 0.1
-          });
-
-          const tc = data.choices?.[0]?.message?.tool_calls?.[0];
-          if (tc) {
-            const gpt = JSON.parse(tc.function.arguments);
-            matchingRows = (gpt.matching_indices || [])
-              .filter(i => i >= 0 && i < subset.length)
-              .map(i => subset[i]);
-          }
-        } catch(e) {
-          console.warn(`GPT matching failed for ${entity.name} on ${tab}:`, e.message);
-        }
-
-        const siteStats = computeSiteStats(rows);
-        entityData.sites.push({ tab, matchingRows, candidates: candidates.length, siteStats, totalArticles: rows.length });
       }
 
       entityResults.push(entityData);
@@ -3526,7 +3544,7 @@ URL list format: [index] path | clicks | impressions` },
 }
 
 function computeSiteStats(rows) {
-  return {
+  const stats = {
     avg_impressions: rows.reduce((a, r) => a + r.impressions, 0) / rows.length,
     avg_clicks: rows.reduce((a, r) => a + r.clicks, 0) / rows.length,
     avg_ctr: rows.reduce((a, r) => a + r.ctr, 0) / rows.length,
@@ -3534,6 +3552,13 @@ function computeSiteStats(rows) {
     median_clicks: computeMedian(rows.map(r => r.clicks)),
     median_ctr: computeMedian(rows.map(r => r.ctr))
   };
+  // Add position stats if data has position (Search Console)
+  const withPos = rows.filter(r => r.position != null);
+  if (withPos.length > 0) {
+    stats.avg_position = withPos.reduce((a, r) => a + r.position, 0) / withPos.length;
+    stats.median_position = computeMedian(withPos.map(r => r.position));
+  }
+  return stats;
 }
 
 async function parseKeywordInput(text) {
@@ -4389,7 +4414,14 @@ function parseDiscoverCSV(text) {
     const impressions = parseInt(parts[2].replace(/"/g, '').trim(), 10) || 0;
     const ctrStr = parts[3].replace(/"/g, '').replace('%', '').replace(',', '.').trim();
     const ctr = parseFloat(ctrStr) || 0;
-    rows.push({ url: urlVal, clicks, impressions, ctr });
+    const row = { url: urlVal, clicks, impressions, ctr };
+    // 5th column = position (Search Console data)
+    if (parts.length >= 5) {
+      const posStr = parts[4].replace(/"/g, '').replace(',', '.').trim();
+      const pos = parseFloat(posStr);
+      if (!isNaN(pos) && pos > 0) row.position = pos;
+    }
+    rows.push(row);
   }
   return rows;
 }
@@ -4756,15 +4788,10 @@ function renderSearchInsights(d) {
 
 // ========== KEYWORD RESULTS RENDERER ==========
 function renderKeywordResults(inputText, selectedSite, entityResults, angleIdeas) {
-  // Hide the normal results cards, show keyword-specific results
   document.getElementById('results').classList.remove('active');
-
   const container = document.getElementById('kwResults');
   container.style.display = 'block';
 
-  const siteName = selectedSite === '_all' ? t('kw_all_sites') : selectedSite;
-
-  // Build full HTML string first, assign once (avoids repeated DOM reparse)
   let allHtml = `<div class="result-header">
     <div>
       <div class="result-title">${esc(t('kw_results_title'))}</div>
@@ -4772,73 +4799,147 @@ function renderKeywordResults(inputText, selectedSite, entityResults, angleIdeas
     </div>
   </div>`;
 
-  // Per-entity cards
   for (const entity of entityResults) {
-    const totalMatches = entity.sites.reduce((a, s) => a + s.matchingRows.length, 0);
-    const totalArticles = entity.sites.reduce((a, s) => a + s.totalArticles, 0);
+    // Aggregate counts across all sites
+    let totalD90 = 0, totalD30 = 0, totalD10 = 0, totalSearch = 0;
+    for (const s of entity.sites) {
+      totalD90 += s.discover90.matchingRows.length;
+      totalD30 += s.discover30.matchingRows.length;
+      totalD10 += s.discover10.matchingRows.length;
+      totalSearch += s.search.matchingRows.length;
+    }
 
-    // Determine potential level
-    let potentialLabel, potentialColor;
-    if (totalMatches >= 10) {
-      potentialLabel = t('kw_potential_high');
-      potentialColor = 'green';
-    } else if (totalMatches >= 3) {
-      potentialLabel = t('kw_potential_medium');
-      potentialColor = 'amber';
-    } else if (totalMatches >= 1) {
-      potentialLabel = t('kw_potential_low');
-      potentialColor = 'red';
-    } else {
-      potentialLabel = t('kw_potential_new');
-      potentialColor = 'blue';
+    // Authority level based on combined presence
+    const onDiscover = totalD90 > 0;
+    const onSearch = totalSearch > 0;
+    let authorityLabel, authorityColor;
+    if (onDiscover && onSearch) { authorityLabel = 'Strong authority'; authorityColor = 'green'; }
+    else if (onDiscover) { authorityLabel = 'Discover authority'; authorityColor = 'green'; }
+    else if (onSearch && totalSearch >= 5) { authorityLabel = 'Search authority'; authorityColor = 'amber'; }
+    else if (onSearch) { authorityLabel = 'Some Search presence'; authorityColor = 'amber'; }
+    else { authorityLabel = 'New topic'; authorityColor = 'blue'; }
+
+    // Cross-source insight
+    let insightHtml = '';
+    if (onSearch && !onDiscover) {
+      insightHtml = `<div style="font-size:12px;padding:8px 12px;margin:8px 0;border-radius:6px;background:var(--accent-glow,#eef);color:var(--accent)">💡 ${totalSearch} article(s) on Search but none on Discover — Discover opportunity for this topic</div>`;
+    } else if (onDiscover && !onSearch) {
+      insightHtml = `<div style="font-size:12px;padding:8px 12px;margin:8px 0;border-radius:6px;background:var(--green-bg,#efe);color:var(--green,#22c55e)">💡 ${totalD90} article(s) on Discover but none on Search — topic performs via Discover, not organic search</div>`;
+    } else if (onDiscover && onSearch && totalSearch > totalD90 * 3) {
+      insightHtml = `<div style="font-size:12px;padding:8px 12px;margin:8px 0;border-radius:6px;background:var(--accent-glow,#eef);color:var(--accent)">💡 ${totalSearch} on Search vs ${totalD90} on Discover — room to grow Discover presence</div>`;
+    }
+
+    // Discover trend indicator (90d → 30d → 10d)
+    let trendHtml = '';
+    if (totalD90 > 0) {
+      const pct30 = totalD30 > 0 ? Math.round(totalD30 / totalD90 * 100) : 0;
+      const pct10 = totalD10 > 0 ? Math.round(totalD10 / totalD90 * 100) : 0;
+      // Rough interpretation: if 10d articles are >15% of 90d, topic is hot
+      let trendLabel, trendIcon;
+      if (pct10 >= 20) { trendLabel = 'Trending up'; trendIcon = '🔥'; }
+      else if (pct10 >= 10) { trendLabel = 'Active'; trendIcon = '📈'; }
+      else if (pct30 > 0) { trendLabel = 'Cooling down'; trendIcon = '📉'; }
+      else { trendLabel = 'Older coverage only'; trendIcon = '⏳'; }
+      trendHtml = `<span style="font-size:12px;color:var(--text-muted);margin-left:8px">${trendIcon} ${trendLabel}</span>`;
     }
 
     let cardHtml = `<div class="card">
       <div class="card-header" onclick="toggleCard(this)">
-        <h3><span class="tl-dot ${potentialColor}"></span> ${esc(entity.name)} <span class="count">${t('kw_matching_urls', { count: totalMatches })}</span></h3>
+        <h3><span class="tl-dot ${authorityColor}"></span> ${esc(entity.name)}</h3>
         <span class="chevron">▼</span>
       </div>
       <div class="card-body">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-          <span style="font-size:12px;padding:3px 10px;border-radius:12px;font-weight:600;background:var(--${potentialColor === 'blue' ? 'accent-glow' : potentialColor + '-bg'},var(--surface-2));color:var(--${potentialColor === 'blue' ? 'accent' : potentialColor},var(--text))">${potentialLabel}</span>
-          <span style="color:var(--text-muted);font-size:12px;margin-left:auto">${t('kw_summary', { topics: entityResults.length, articles: totalArticles.toLocaleString(), site: siteName })}</span>
+        <div style="display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px">
+          <span style="font-size:12px;padding:3px 10px;border-radius:12px;font-weight:600;background:var(--${authorityColor === 'blue' ? 'accent-glow' : authorityColor + '-bg'},var(--surface-2));color:var(--${authorityColor === 'blue' ? 'accent' : authorityColor},var(--text))">${authorityLabel}</span>
+          ${trendHtml}
+        </div>
+
+        ${insightHtml}
+
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:12px 0;text-align:center">
+          <div style="padding:10px;border-radius:8px;background:var(--surface-2,#f5f5f5)">
+            <div style="font-size:20px;font-weight:700">${totalD90}</div>
+            <div style="font-size:11px;color:var(--text-muted)">Discover 90d</div>
+          </div>
+          <div style="padding:10px;border-radius:8px;background:var(--surface-2,#f5f5f5)">
+            <div style="font-size:20px;font-weight:700">${totalD30}</div>
+            <div style="font-size:11px;color:var(--text-muted)">Discover 30d</div>
+          </div>
+          <div style="padding:10px;border-radius:8px;background:var(--surface-2,#f5f5f5)">
+            <div style="font-size:20px;font-weight:700">${totalD10}</div>
+            <div style="font-size:11px;color:var(--text-muted)">Discover 10d</div>
+          </div>
+          <div style="padding:10px;border-radius:8px;background:var(--surface-2,#f5f5f5)">
+            <div style="font-size:20px;font-weight:700">${totalSearch}</div>
+            <div style="font-size:11px;color:var(--text-muted)">Search 10d</div>
+          </div>
         </div>`;
 
-    // Per-site stats tables
+    // Per-site detail sections (only sites with matches)
     for (const site of entity.sites) {
-      if (site.matchingRows.length === 0 && entity.sites.length > 1) continue; // Skip empty sites in multi-site view
+      const d90 = site.discover90, search = site.search;
+      const hasD90 = d90.matchingRows.length > 0;
+      const hasSearch = search.matchingRows.length > 0;
+      if (!hasD90 && !hasSearch) continue;
 
-      const ss = site.siteStats;
-      const matchCount = site.matchingRows.length;
+      if (entity.sites.length > 1) {
+        cardHtml += `<div style="font-weight:600;font-size:13px;margin:16px 0 8px;padding-top:8px;border-top:1px solid var(--border)">${site.tab}</div>`;
+      }
 
-      if (matchCount > 0) {
+      // Discover stats table (based on 90d, with trend columns)
+      if (hasD90) {
+        const mr = d90.matchingRows;
+        const cnt = mr.length;
         const topicStats = {
-          avg_impressions: site.matchingRows.reduce((a, r) => a + r.impressions, 0) / matchCount,
-          avg_clicks: site.matchingRows.reduce((a, r) => a + r.clicks, 0) / matchCount,
-          avg_ctr: site.matchingRows.reduce((a, r) => a + r.ctr, 0) / matchCount
+          avg_impressions: mr.reduce((a, r) => a + r.impressions, 0) / cnt,
+          avg_clicks: mr.reduce((a, r) => a + r.clicks, 0) / cnt,
+          avg_ctr: mr.reduce((a, r) => a + r.ctr, 0) / cnt
         };
+        cardHtml += `<div style="font-size:12px;color:var(--text-muted);margin-bottom:4px">Discover (${cnt} matching / ${d90.totalArticles} total)</div>`;
+        cardHtml += buildComparisonTable(topicStats, d90.siteStats, 'Topic');
+      }
 
-        if (entity.sites.length > 1 || selectedSite === '_all') {
-          cardHtml += `<div style="font-weight:600;font-size:13px;margin:12px 0 6px">${site.tab}</div>`;
+      // Search stats table
+      if (hasSearch) {
+        const mr = search.matchingRows;
+        const cnt = mr.length;
+        const topicStats = {
+          avg_impressions: mr.reduce((a, r) => a + r.impressions, 0) / cnt,
+          avg_clicks: mr.reduce((a, r) => a + r.clicks, 0) / cnt,
+          avg_ctr: mr.reduce((a, r) => a + r.ctr, 0) / cnt
+        };
+        // Add position if available
+        const withPos = mr.filter(r => r.position != null);
+        if (withPos.length > 0) {
+          topicStats.avg_position = withPos.reduce((a, r) => a + r.position, 0) / withPos.length;
         }
 
-        cardHtml += buildComparisonTable(topicStats, ss);
+        cardHtml += `<div style="font-size:12px;color:var(--text-muted);margin:${hasD90 ? '12px' : '0'} 0 4px">Search (${cnt} matching / ${search.totalArticles} total)</div>`;
+        cardHtml += buildComparisonTable(topicStats, search.siteStats, 'Topic', true);
+      }
 
-        // Show top matching URLs
-        const topRows = site.matchingRows.slice(0, 5);
-        cardHtml += `<div style="margin-top:10px;font-size:12px;color:var(--text-muted)">Top matching URLs:</div>`;
-        cardHtml += `<div style="margin-top:4px">`;
-        for (const r of topRows) {
+      // Top matching URLs (combined, max 5)
+      const allMatches = [...d90.matchingRows.map(r => ({...r, src: 'D'})), ...search.matchingRows.map(r => ({...r, src: 'S'}))]
+        .sort((a, b) => b.clicks - a.clicks).slice(0, 5);
+      if (allMatches.length > 0) {
+        cardHtml += `<div style="margin-top:10px;font-size:12px;color:var(--text-muted)">Top matching URLs:</div><div style="margin-top:4px">`;
+        for (const r of allMatches) {
           const path = r.url.replace(/https?:\/\/[^/]+/, '');
+          const srcBadge = r.src === 'D' ? '<span style="font-size:10px;padding:1px 4px;border-radius:3px;background:var(--green-bg,#dcfce7);color:var(--green,#22c55e);margin-right:4px">D</span>' : '<span style="font-size:10px;padding:1px 4px;border-radius:3px;background:var(--accent-glow,#dbeafe);color:var(--accent);margin-right:4px">S</span>';
+          const posText = r.position != null ? ` · pos ${r.position.toFixed(1)}` : '';
           cardHtml += `<div style="font-size:12px;padding:4px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;gap:8px">
-            <a href="${esc(r.url)}" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(path)}</a>
-            <span style="white-space:nowrap;color:var(--text-muted)">${r.clicks.toLocaleString()} clicks · ${r.impressions.toLocaleString()} imp</span>
+            <span style="display:flex;align-items:center;overflow:hidden">${srcBadge}<a href="${esc(r.url)}" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(path)}</a></span>
+            <span style="white-space:nowrap;color:var(--text-muted)">${r.clicks.toLocaleString()} clicks · ${r.impressions.toLocaleString()} imp${posText}</span>
           </div>`;
         }
         cardHtml += `</div>`;
-      } else if (entity.sites.length === 1) {
-        cardHtml += `<p style="color:var(--text-muted);font-size:13px;margin:8px 0">${t('kw_no_match')}</p>`;
       }
+    }
+
+    // If no sites had any matches at all
+    const totalAll = totalD90 + totalSearch;
+    if (totalAll === 0) {
+      cardHtml += `<p style="color:var(--text-muted);font-size:13px;margin:8px 0">${t('kw_no_match')}</p>`;
     }
 
     cardHtml += `</div></div>`;
@@ -4857,30 +4958,21 @@ function renderKeywordResults(inputText, selectedSite, entityResults, angleIdeas
     if (angleIdeas.interconnect && angleIdeas.interconnect.length > 0) {
       anglesHtml += `<div style="font-weight:600;font-size:13px;margin-bottom:8px;color:var(--accent)">🔗 ${t('kw_interconnect')}</div>`;
       anglesHtml += `<ul style="margin:0 0 16px 20px;padding:0;font-size:13px;line-height:1.8">`;
-      for (const idea of angleIdeas.interconnect) {
-        anglesHtml += `<li>${esc(idea)}</li>`;
-      }
+      for (const idea of angleIdeas.interconnect) anglesHtml += `<li>${esc(idea)}</li>`;
       anglesHtml += `</ul>`;
     }
-
     if (angleIdeas.evergreen && angleIdeas.evergreen.length > 0) {
       anglesHtml += `<div style="font-weight:600;font-size:13px;margin-bottom:8px;color:var(--green,#22c55e)">🌿 ${t('kw_evergreen')}</div>`;
       anglesHtml += `<ul style="margin:0 0 16px 20px;padding:0;font-size:13px;line-height:1.8">`;
-      for (const idea of angleIdeas.evergreen) {
-        anglesHtml += `<li>${esc(idea)}</li>`;
-      }
+      for (const idea of angleIdeas.evergreen) anglesHtml += `<li>${esc(idea)}</li>`;
       anglesHtml += `</ul>`;
     }
-
     if (angleIdeas.magazine && angleIdeas.magazine.length > 0) {
       anglesHtml += `<div style="font-weight:600;font-size:13px;margin-bottom:8px;color:var(--purple,#a855f7)">📰 ${t('kw_mag')}</div>`;
       anglesHtml += `<ul style="margin:0 0 0 20px;padding:0;font-size:13px;line-height:1.8">`;
-      for (const idea of angleIdeas.magazine) {
-        anglesHtml += `<li>${esc(idea)}</li>`;
-      }
+      for (const idea of angleIdeas.magazine) anglesHtml += `<li>${esc(idea)}</li>`;
       anglesHtml += `</ul>`;
     }
-
     anglesHtml += `</div></div>`;
     allHtml += anglesHtml;
   }
@@ -4888,13 +4980,21 @@ function renderKeywordResults(inputText, selectedSite, entityResults, angleIdeas
   container.innerHTML = allHtml;
 }
 
-function buildComparisonTable(topicStats, siteStats, topicLabel) {
+function buildComparisonTable(topicStats, siteStats, topicLabel, includePosition) {
   const colLabel = topicLabel || t('kw_entity');
   const metrics = [
     { label: 'Impressions', topic: topicStats.avg_impressions, avg: siteStats.avg_impressions, median: siteStats.median_impressions, fmt: v => Math.round(v).toLocaleString() },
     { label: 'Clicks', topic: topicStats.avg_clicks, avg: siteStats.avg_clicks, median: siteStats.median_clicks, fmt: v => Math.round(v).toLocaleString() },
     { label: 'CTR', topic: topicStats.avg_ctr, avg: siteStats.avg_ctr, median: siteStats.median_ctr, fmt: v => v.toFixed(1) + '%' }
   ];
+  // Add position row for Search tables when data is available
+  if (includePosition && topicStats.avg_position != null && siteStats.avg_position != null) {
+    metrics.push({
+      label: 'Position', topic: topicStats.avg_position, avg: siteStats.avg_position, median: siteStats.median_position,
+      fmt: v => v != null ? v.toFixed(1) : '—',
+      invert: true // lower position = better
+    });
+  }
 
   let html = `<table style="width:100%;font-size:13px;border-collapse:collapse">
     <thead><tr style="border-bottom:2px solid var(--border)">
@@ -4908,9 +5008,12 @@ function buildComparisonTable(topicStats, siteStats, topicLabel) {
 
   for (const m of metrics) {
     const vsAvg = m.avg > 0 ? ((m.topic - m.avg) / m.avg * 100) : 0;
-    const vsMed = m.median > 0 ? ((m.topic - m.median) / m.median * 100) : 0;
-    const ac = vsAvg >= 0 ? 'var(--green,#22c55e)' : 'var(--red,#ef4444)';
-    const mc = vsMed >= 0 ? 'var(--green,#22c55e)' : 'var(--red,#ef4444)';
+    const vsMed = (m.median != null && m.median > 0) ? ((m.topic - m.median) / m.median * 100) : 0;
+    // For inverted metrics (position), lower = better, so flip colors
+    const goodUp = m.invert ? vsAvg <= 0 : vsAvg >= 0;
+    const goodUpMed = m.invert ? vsMed <= 0 : vsMed >= 0;
+    const ac = goodUp ? 'var(--green,#22c55e)' : 'var(--red,#ef4444)';
+    const mc = goodUpMed ? 'var(--green,#22c55e)' : 'var(--red,#ef4444)';
     html += `<tr style="border-bottom:1px solid var(--border)">
       <td style="padding:6px 8px;font-weight:600">${m.label}</td>
       <td style="padding:6px 8px;text-align:right;font-weight:600">${m.fmt(m.topic)}</td>
