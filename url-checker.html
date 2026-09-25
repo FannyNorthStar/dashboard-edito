@@ -3366,7 +3366,7 @@ async function startAnalysis(mode) {
 
 // ========== KEYWORD CHECKER ==========
 // GPT matching helper: given a topic name, keywords, rows and a source label, returns matched rows
-async function gptMatchRows(topicName, keywords, allRows, sourceLabel) {
+async function gptMatchRows(topicName, keywords, allRows, sourceLabel, scope) {
   const candidates = allRows.filter(r => {
     const slug = r.url.toLowerCase();
     return keywords.some(kw => slug.includes(kw));
@@ -3379,11 +3379,15 @@ async function gptMatchRows(topicName, keywords, allRows, sourceLabel) {
     return `[${i}] ${path} | ${r.clicks} | ${r.impressions}`;
   }).join('\n');
 
+  const strictness = scope === 'specific'
+    ? `You are a ${sourceLabel} performance analyst. You have a numbered list of URLs (pre-filtered by keyword). The topic is a NICHE angle combining multiple concepts. A URL matches ONLY if it covers the INTERSECTION of ALL concepts in the topic — not just one of them. For example, "Ivorian players Marseille" requires BOTH an Ivory Coast connection AND a Marseille connection in the same article. An article about Ivory Coast alone or Marseille alone does NOT match. Be strict. Return only URLs that genuinely cover the combined angle.\n\nURL list format: [index] path | clicks | impressions`
+    : `You are a ${sourceLabel} performance analyst. You have a numbered list of URLs (pre-filtered by keyword). Identify which URLs are truly about the SAME TOPIC (same team, player, event, or subject). Return the indices. Be inclusive — if the URL is reasonably about this topic, include it.\n\nURL list format: [index] path | clicks | impressions`;
+
   try {
     const data = await callOpenAI({
       model: OPENAI_MODEL,
       messages: [
-        { role: 'system', content: `You are a ${sourceLabel} performance analyst. You have a numbered list of URLs (pre-filtered by keyword). Identify which URLs are truly about the SAME TOPIC (same team, player, event, or subject). Return the indices. Be inclusive.\n\nURL list format: [index] path | clicks | impressions` },
+        { role: 'system', content: strictness },
         { role: 'user', content: `Topic: "${topicName}"\n\nCandidate URLs (${subset.length} from ${allRows.length} total):\n${compactList}` }
       ],
       tools: [{
@@ -3479,33 +3483,98 @@ async function startKeywordAnalysis() {
       throw new Error(t('kw_no_data'));
     }
 
-    // Step 4: For each entity, match against ALL sources
+    // Step 4: Match entities — broad first (GPT), then niche (set intersection, no GPT)
     const entityResults = [];
+    const broadEntities = parsed.entities.filter(e => (e.scope || 'specific') === 'broad');
+    const nicheEntities = parsed.entities.filter(e => (e.scope || 'specific') === 'specific');
+
+    // 4a: Process broad entities with GPT matching
+    // Store matched URL sets per broad entity per tab per source for intersection later
+    const broadUrlSets = {}; // { entityName: { tab: { d90: Set, search: Set } } }
     let entityIdx = 0;
 
-    for (const entity of parsed.entities) {
+    for (const entity of broadEntities) {
       entityIdx++;
-      // Use GPT-generated URL keywords if available, fallback to basic extraction
       const keywords = (entity.url_keywords && entity.url_keywords.length > 0)
         ? entity.url_keywords.map(k => k.toLowerCase().trim()).filter(k => k.length > 1)
         : extractTopicKeywords(entity.name);
       if (keywords.length === 0) continue;
 
-      const entityData = { name: entity.name, scope: entity.scope || 'specific', sites: [] };
+      const entityData = { name: entity.name, scope: 'broad', sites: [] };
+      broadUrlSets[entity.name] = {};
 
       for (const [tab, src] of Object.entries(sourceData)) {
-        setProgress(30 + Math.round(45 * entityIdx / parsed.entities.length), `Matching "${entity.name}" on ${tab}...`);
+        setProgress(30 + Math.round(30 * entityIdx / broadEntities.length), `Matching "${entity.name}" on ${tab}...`);
 
-        // Match against each source — reuse GPT call for d90, then use URL set for d30/d10
-        const matchD90 = src.d90.length > 0 ? await gptMatchRows(entity.name, keywords, src.d90, 'Discover 90d') : [];
+        const matchD90 = src.d90.length > 0 ? await gptMatchRows(entity.name, keywords, src.d90, 'Discover 90d', 'broad') : [];
         const matchD90Urls = new Set(matchD90.map(r => r.url));
-
-        // For 30d/10d, match by URL overlap with 90d matches (no extra GPT call)
         const matchD30 = src.d30.filter(r => matchD90Urls.has(r.url));
         const matchD10 = src.d10.filter(r => matchD90Urls.has(r.url));
+        const matchSearch = src.search.length > 0 ? await gptMatchRows(entity.name, keywords, src.search, 'Search 10d', 'broad') : [];
+        const matchSearchUrls = new Set(matchSearch.map(r => r.url));
 
-        // Search needs its own GPT call (different URL set)
-        const matchSearch = src.search.length > 0 ? await gptMatchRows(entity.name, keywords, src.search, 'Search 10d') : [];
+        // Store URL sets for niche intersection
+        broadUrlSets[entity.name][tab] = {
+          d90: matchD90Urls,
+          d90Rows: matchD90,
+          search: matchSearchUrls,
+          searchRows: matchSearch
+        };
+
+        entityData.sites.push({
+          tab,
+          discover90: { matchingRows: matchD90, siteStats: src.d90.length > 0 ? computeSiteStats(src.d90) : null, totalArticles: src.d90.length },
+          discover30: { matchingRows: matchD30, siteStats: src.d30.length > 0 ? computeSiteStats(src.d30) : null, totalArticles: src.d30.length },
+          discover10: { matchingRows: matchD10, siteStats: src.d10.length > 0 ? computeSiteStats(src.d10) : null, totalArticles: src.d10.length },
+          search: { matchingRows: matchSearch, siteStats: src.search.length > 0 ? computeSiteStats(src.search) : null, totalArticles: src.search.length }
+        });
+      }
+
+      entityResults.push(entityData);
+    }
+
+    // 4b: Process niche entities via set intersection of broad results (no GPT call)
+    const broadNames = Object.keys(broadUrlSets);
+
+    for (const entity of nicheEntities) {
+      entityIdx++;
+      const entityData = { name: entity.name, scope: 'specific', sites: [] };
+
+      for (const [tab, src] of Object.entries(sourceData)) {
+        setProgress(60 + Math.round(15 * entityIdx / (broadEntities.length + nicheEntities.length)), `Computing "${entity.name}" overlap on ${tab}...`);
+
+        // Intersect ALL broad entities' URL sets for this tab
+        // A URL must appear in EVERY broad entity's matches to be in the niche result
+        let matchD90 = [];
+        let matchSearch = [];
+
+        if (broadNames.length >= 2) {
+          // Get broad sets that have data for this tab
+          const tabSets = broadNames.map(n => broadUrlSets[n][tab]).filter(Boolean);
+
+          if (tabSets.length >= 2) {
+            // D90 intersection: URL must be in ALL broad entity d90 sets
+            const firstD90 = tabSets[0].d90Rows || [];
+            matchD90 = firstD90.filter(r => tabSets.every(ts => ts.d90.has(r.url)));
+
+            // Search intersection: URL must be in ALL broad entity search sets
+            const firstSearch = tabSets[0].searchRows || [];
+            matchSearch = firstSearch.filter(r => tabSets.every(ts => ts.search.has(r.url)));
+          }
+        } else if (broadNames.length === 1) {
+          // Only one broad entity — niche falls back to GPT matching
+          const keywords = (entity.url_keywords && entity.url_keywords.length > 0)
+            ? entity.url_keywords.map(k => k.toLowerCase().trim()).filter(k => k.length > 1)
+            : extractTopicKeywords(entity.name);
+          if (keywords.length > 0) {
+            matchD90 = src.d90.length > 0 ? await gptMatchRows(entity.name, keywords, src.d90, 'Discover 90d', 'specific') : [];
+            matchSearch = src.search.length > 0 ? await gptMatchRows(entity.name, keywords, src.search, 'Search 10d', 'specific') : [];
+          }
+        }
+
+        const matchD90Urls = new Set(matchD90.map(r => r.url));
+        const matchD30 = src.d30.filter(r => matchD90Urls.has(r.url));
+        const matchD10 = src.d10.filter(r => matchD90Urls.has(r.url));
 
         entityData.sites.push({
           tab,
