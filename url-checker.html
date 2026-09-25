@@ -3172,6 +3172,44 @@ function saveSettings() {
   closeSettings();
 }
 
+// ========== SITE MAPS ==========
+const DOMAIN_TAB_MAP = {
+  'topmercato.com': 'TOPMERCATO',
+  'sportsmole.co.uk': 'SPORTSMOLE',
+  'trivela.com.br': 'TRIVELA',
+  'umdoisesportes.com.br': 'UMDOISESPORTES',
+  'afrik-foot.com': 'AFRIKFOOTFR',
+  'afrikfoot.com': 'AFRIKFOOTFR',
+  'za.afrik-foot.com': 'AFRIKFOOTZA',
+  'ng.afrik-foot.com': 'AFRIKFOOTNG',
+  'footballwhispers.com': 'FOOTBALLWHISPERS',
+  'footballgroundguide.com': 'FOOTBALLGROUNDGUIDE',
+  'mrfixitstips.co.uk': 'MRFIXITSTIPS',
+  'solobasket.com': 'SOLOBASKET',
+  'fotbalportal.cz': 'FOTBALPORTAL',
+  'vrfringe.com': 'VRINGE',
+  'alairelibrechile.cl': 'ALAIRELIBRE',
+  'calciodangolo.com': 'CALCIODANGOLO',
+  'soccernet.ng': 'SOCCERNET',
+  'basketusa.com': 'BASKETUSA',
+  'basketeurope.com': 'BASKETEUROPE',
+  'lubsport.com': 'LUBSPORT',
+  'lakersbrasil.com': 'LAKERSBRASIL',
+};
+// Display labels for tab codes (used by SITE_OPTIONS and keyword checker)
+const TAB_LABELS = {
+  'TOPMERCATO': 'TopMercato', 'SPORTSMOLE': 'SportsMole', 'TRIVELA': 'Trivela',
+  'UMDOISESPORTES': 'UmDoisEsportes', 'AFRIKFOOTFR': 'Afrik-Foot (FR)',
+  'AFRIKFOOTZA': 'Afrik-Foot (ZA)', 'AFRIKFOOTNG': 'Afrik-Foot (NG)',
+  'FOOTBALLWHISPERS': 'Football Whispers', 'FOOTBALLGROUNDGUIDE': 'Football Ground Guide',
+  'MRFIXITSTIPS': 'Mr Fixits Tips', 'SOLOBASKET': 'SoloBasket',
+  'FOTBALPORTAL': 'Fotbal Portal', 'VRINGE': 'Vringe',
+  'ALAIRELIBRE': 'Al Aire Libre', 'CALCIODANGOLO': 'CalcioDAngolo',
+  'SOCCERNET': 'Soccernet', 'BASKETUSA': 'Basket USA',
+  'BASKETEUROPE': 'Basket Europe', 'LUBSPORT': 'LubSport',
+  'LAKERSBRASIL': 'Lakers Brasil',
+};
+
 // ========== MODE TABS ==========
 const SITE_OPTIONS = [
   { value: '_all', label: 'All sites' },
@@ -4149,8 +4187,11 @@ IMPORTANT — DO NOT FLAG THESE (they are NOT errors in sports writing):
 7. GENDER AGREEMENT ON PAST PARTICIPLES: In French/Italian/Spanish/Portuguese, past participle agreement (é/ée, amené/amenée, etc.) depends on the grammatical subject, which may be earlier in the sentence. If the visible context does not clearly show the subject's gender, do NOT flag it. "était amené" and "était amenée" can both be correct depending on context. Only flag when the subject is clearly visible AND the agreement is clearly wrong.
 
 8. REGIONAL/GEOGRAPHIC ADJECTIVES: In French and other Romance languages, adjectives derived from regions, cities or areas are LOWERCASE and agree in gender. "club nordiste" (northern club), "formation artésienne" (from Artois / Lens area), "équipe marseillaise", "club nantais", "effectif parisien", "section stéphanoise" — these are correct as-is. Do NOT capitalize them and do NOT change their gender when they agree with the noun they describe. "artésienne" (feminine) is correct when modifying a feminine noun like "formation". Similarly, "lyonnais/lyonnaise", "lillois/lilloise", "bordelais/bordelaise", "toulousain/toulousaine" etc.
+9. COUNTRY NAMES AND ARTICLES: In sports writing, country names are routinely used WITHOUT the definite article. "England will face Czech Republic" is correct — do NOT suggest "the Czech Republic", "the Netherlands", "the United States", "the Philippines" etc. This is standard sports journalism convention across all languages. Similarly in French, "face à Brésil" or "contre Allemagne" may appear in certain styles. Do not flag missing articles before country, territory or national team names.
+10. SPORTS JARGON: Common sports terms like "clean sheet", "hat-trick", "derby", "el clásico", "clásico", "classique", "clássico", "set-piece", "box-to-box", "false nine", "playmaker", "sweeper-keeper", "gegenpressing", "tiki-taka", "catenaccio", "libero" etc. are correct in any language context. Do not flag foreign sports terms used in another language's article.
+11. TRANSFER MARKET TERMS: "free agent", "loan deal", "buy-back clause", "sell-on clause", "release clause", "swap deal", "pre-contract" are standard terms used in all languages.
 
-GENERAL RULE: When in doubt, do NOT flag it. A false positive (flagging something correct) is worse than a false negative (missing a real error). Only flag things you are very confident are genuine mistakes.
+GENERAL RULE: When in doubt, do NOT flag it. A false positive (flagging something correct) is FAR worse than a false negative (missing a real error). Only flag things you are VERY confident are genuine mistakes that would confuse the reader. If your confidence is below 90%, skip it.
 
 Respond ONLY via the spellcheck_report tool.`;
 
@@ -4325,43 +4366,6 @@ function computeMedian(arr) {
   const m = Math.floor(s.length / 2);
   return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
 }
-const DOMAIN_TAB_MAP = {
-  'topmercato.com': 'TOPMERCATO',
-  'sportsmole.co.uk': 'SPORTSMOLE',
-  'trivela.com.br': 'TRIVELA',
-  'umdoisesportes.com.br': 'UMDOISESPORTES',
-  'afrik-foot.com': 'AFRIKFOOTFR',
-  'afrikfoot.com': 'AFRIKFOOTFR',
-  'za.afrik-foot.com': 'AFRIKFOOTZA',
-  'ng.afrik-foot.com': 'AFRIKFOOTNG',
-  'footballwhispers.com': 'FOOTBALLWHISPERS',
-  'footballgroundguide.com': 'FOOTBALLGROUNDGUIDE',
-  'mrfixitstips.co.uk': 'MRFIXITSTIPS',
-  'solobasket.com': 'SOLOBASKET',
-  'fotbalportal.cz': 'FOTBALPORTAL',
-  'vrfringe.com': 'VRINGE',
-  'alairelibrechile.cl': 'ALAIRELIBRE',
-  'calciodangolo.com': 'CALCIODANGOLO',
-  'soccernet.ng': 'SOCCERNET',
-  'basketusa.com': 'BASKETUSA',
-  'basketeurope.com': 'BASKETEUROPE',
-  'lubsport.com': 'LUBSPORT',
-  'lakersbrasil.com': 'LAKERSBRASIL',
-};
-// Display labels for tab codes (used by SITE_OPTIONS and keyword checker)
-const TAB_LABELS = {
-  'TOPMERCATO': 'TopMercato', 'SPORTSMOLE': 'SportsMole', 'TRIVELA': 'Trivela',
-  'UMDOISESPORTES': 'UmDoisEsportes', 'AFRIKFOOTFR': 'Afrik-Foot (FR)',
-  'AFRIKFOOTZA': 'Afrik-Foot (ZA)', 'AFRIKFOOTNG': 'Afrik-Foot (NG)',
-  'FOOTBALLWHISPERS': 'Football Whispers', 'FOOTBALLGROUNDGUIDE': 'Football Ground Guide',
-  'MRFIXITSTIPS': 'Mr Fixits Tips', 'SOLOBASKET': 'SoloBasket',
-  'FOTBALPORTAL': 'Fotbal Portal', 'VRINGE': 'Vringe',
-  'ALAIRELIBRE': 'Al Aire Libre', 'CALCIODANGOLO': 'CalcioDAngolo',
-  'SOCCERNET': 'Soccernet', 'BASKETUSA': 'Basket USA',
-  'BASKETEUROPE': 'Basket Europe', 'LUBSPORT': 'LubSport',
-  'LAKERSBRASIL': 'Lakers Brasil',
-};
-
 function extractSheetId(url) {
   const m = url.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/);
   return m ? m[1] : url.trim();
