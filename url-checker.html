@@ -3417,10 +3417,45 @@ async function gptMatchRows(topicName, keywords, allRows, sourceLabel, scope) {
 // Fetch CSV data for a sheet+tab, returns parsed rows or empty array
 async function fetchSourceData(sheetUrl, tab) {
   if (!sheetUrl) return [];
+
+  // Domains associated with this tab code (e.g. TRIVELA → ['trivela.com.br'])
+  const domains = Object.entries(DOMAIN_TAB_MAP)
+    .filter(([, t]) => t === tab)
+    .map(([d]) => d);
+
+  const filterByDomain = (rows) => {
+    if (domains.length === 0) return rows;
+    return rows.filter(r => {
+      try {
+        const h = new URL(r.url).hostname.replace(/^www\./, '');
+        return domains.includes(h);
+      } catch { return false; }
+    });
+  };
+
   try {
+    // Try 1: fetch with the tab code (e.g. sheet=TRIVELA)
     const csvUrl = buildCsvUrl(sheetUrl, tab);
     const csvText = await fetchViaProxy(csvUrl);
-    return parseDiscoverCSV(csvText);
+    const allRows = parseDiscoverCSV(csvText);
+    const filtered = filterByDomain(allRows);
+    if (filtered.length > 0) return filtered;
+
+    // If rows came back but none matched our domain, Google likely
+    // redirected to a different tab (tab name doesn't exist in this sheet).
+    // Try 2: use the domain itself as the tab name (e.g. sheet=trivela.com.br)
+    if (allRows.length > 0 && domains.length > 0) {
+      for (const domain of domains) {
+        try {
+          const csvUrl2 = buildCsvUrl(sheetUrl, domain);
+          const csvText2 = await fetchViaProxy(csvUrl2);
+          const rows2 = filterByDomain(parseDiscoverCSV(csvText2));
+          if (rows2.length > 0) return rows2;
+        } catch(e2) {}
+      }
+    }
+
+    return filtered; // empty if nothing matched
   } catch(e) { return []; }
 }
 
@@ -4547,37 +4582,17 @@ async function runDiscoverAuthority(url, title) {
   const tab = DOMAIN_TAB_MAP[hostname] || DOMAIN_TAB_MAP[hostname.replace('www.', '')];
   if (!tab) return null;
 
-  const csvUrl = buildCsvUrl(sheetUrl, tab);
-
-  let csvText;
-  try {
-    csvText = await fetchViaProxy(csvUrl);
-  } catch(e) { return null; }
-
-  const allRows = parseDiscoverCSV(csvText);
+  // Use fetchSourceData for tab-name resilience across all sheets
+  const allRows = await fetchSourceData(sheetUrl, tab);
   if (allRows.length === 0) return null;
 
   // Fetch 30-day data if configured
   const sheetUrl30 = localStorage.getItem('media_dashboard_discover_sheet_30d') || DEFAULT_DISCOVER_SHEET_30D;
-  let rows30 = [];
-  if (sheetUrl30) {
-    try {
-      const csvUrl30 = buildCsvUrl(sheetUrl30, tab);
-      const csvText30 = await fetchViaProxy(csvUrl30);
-      rows30 = parseDiscoverCSV(csvText30);
-    } catch(e) { console.warn('Discover 30d fetch failed:', e.message); }
-  }
+  const rows30 = await fetchSourceData(sheetUrl30, tab);
 
   // Fetch 10-day data if configured
   const sheetUrl10 = localStorage.getItem('media_dashboard_discover_sheet_10d') || DEFAULT_DISCOVER_SHEET_10D;
-  let rows10 = [];
-  if (sheetUrl10) {
-    try {
-      const csvUrl10 = buildCsvUrl(sheetUrl10, tab);
-      const csvText10 = await fetchViaProxy(csvUrl10);
-      rows10 = parseDiscoverCSV(csvText10);
-    } catch(e) { console.warn('Discover 10d fetch failed:', e.message); }
-  }
+  const rows10 = await fetchSourceData(sheetUrl10, tab);
 
   const siteStats = computeSiteStats(allRows);
 
@@ -4775,14 +4790,8 @@ async function runSearchAuthority(url, title) {
   const tab = DOMAIN_TAB_MAP[hostname] || DOMAIN_TAB_MAP[hostname.replace('www.', '')];
   if (!tab) return null;
 
-  const csvUrl = buildCsvUrl(sheetUrl, tab);
-
-  let csvText;
-  try {
-    csvText = await fetchViaProxy(csvUrl);
-  } catch(e) { return null; }
-
-  const allRows = parseDiscoverCSV(csvText);
+  // Use fetchSourceData for tab-name resilience (handles mismatched tab names)
+  const allRows = await fetchSourceData(sheetUrl, tab);
   if (allRows.length === 0) return null;
 
   const siteStats = computeSiteStats(allRows);
