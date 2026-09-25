@@ -3433,30 +3433,32 @@ async function fetchSourceData(sheetUrl, tab) {
     });
   };
 
+  // Try 1: fetch with tab name (works for sheets with per-site tabs like D90)
   try {
-    // Try 1: fetch with the tab code (e.g. sheet=TRIVELA)
     const csvUrl = buildCsvUrl(sheetUrl, tab);
     const csvText = await fetchViaProxy(csvUrl);
     const allRows = parseDiscoverCSV(csvText);
     const filtered = filterByDomain(allRows);
+    console.log(`[fetchSourceData] tab=${tab} rawRows=${allRows.length} filteredRows=${filtered.length}`);
     if (filtered.length > 0) return filtered;
+    // Got data but no domain match — sheet probably redirected to default tab
+  } catch(e) {
+    console.log(`[fetchSourceData] tab=${tab} error: ${e.message}`);
+  }
 
-    // If rows came back but none matched our domain, Google likely
-    // redirected to a different tab (tab name doesn't exist in this sheet).
-    // Try 2: use the domain itself as the tab name (e.g. sheet=trivela.com.br)
-    if (allRows.length > 0 && domains.length > 0) {
-      for (const domain of domains) {
-        try {
-          const csvUrl2 = buildCsvUrl(sheetUrl, domain);
-          const csvText2 = await fetchViaProxy(csvUrl2);
-          const rows2 = filterByDomain(parseDiscoverCSV(csvText2));
-          if (rows2.length > 0) return rows2;
-        } catch(e2) {}
-      }
-    }
+  // Try 2: fetch WITHOUT tab name (for sheets with all data in one tab)
+  try {
+    const csvUrlNoTab = buildCsvUrlNoTab(sheetUrl);
+    const csvText = await fetchViaProxy(csvUrlNoTab);
+    const allRows = parseDiscoverCSV(csvText);
+    const filtered = filterByDomain(allRows);
+    console.log(`[fetchSourceData] tab=${tab} noTab rawRows=${allRows.length} filteredRows=${filtered.length}`);
+    return filtered;
+  } catch(e) {
+    console.log(`[fetchSourceData] tab=${tab} noTab error: ${e.message}`);
+  }
 
-    return filtered; // empty if nothing matched
-  } catch(e) { return []; }
+  return [];
 }
 
 async function startKeywordAnalysis() {
@@ -3502,13 +3504,15 @@ async function startKeywordAnalysis() {
 
     for (const tab of tabsToCheck) {
       fetchIdx++;
-      setProgress(5 + Math.round(25 * fetchIdx / totalFetches), `Fetching data for ${tab}...`);
-      const [d90, d30, d10, search] = await Promise.all([
-        fetchSourceData(sheetUrl90, tab),
-        fetchSourceData(sheetUrl30, tab),
-        fetchSourceData(sheetUrl10, tab),
-        fetchSourceData(sheetUrlSearch, tab)
-      ]);
+      // Sequential fetches to avoid overwhelming the GAS proxy with concurrent calls
+      setProgress(5 + Math.round(6 * fetchIdx / totalFetches), `Fetching D90 for ${tab}...`);
+      const d90 = await fetchSourceData(sheetUrl90, tab);
+      setProgress(5 + Math.round(12 * fetchIdx / totalFetches), `Fetching D30 for ${tab}...`);
+      const d30 = await fetchSourceData(sheetUrl30, tab);
+      setProgress(5 + Math.round(18 * fetchIdx / totalFetches), `Fetching D10 for ${tab}...`);
+      const d10 = await fetchSourceData(sheetUrl10, tab);
+      setProgress(5 + Math.round(25 * fetchIdx / totalFetches), `Fetching Search for ${tab}...`);
+      const search = await fetchSourceData(sheetUrlSearch, tab);
       if (d90.length > 0 || d30.length > 0 || d10.length > 0 || search.length > 0) {
         sourceData[tab] = { d90, d30, d10, search };
       }
@@ -4536,6 +4540,14 @@ function buildCsvUrl(sheetUrl, tab) {
   // Regular sheet URL
   const sheetId = extractSheetId(sheetUrl);
   return `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(tab)}`;
+}
+function buildCsvUrlNoTab(sheetUrl) {
+  const pubMatch = sheetUrl.match(/\/spreadsheets\/d\/e\/(2PACX[a-zA-Z0-9_-]+)/);
+  if (pubMatch) {
+    return `https://docs.google.com/spreadsheets/d/e/${pubMatch[1]}/pub?single=true&output=csv`;
+  }
+  const sheetId = extractSheetId(sheetUrl);
+  return `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv`;
 }
 
 function parseDiscoverCSV(text) {
