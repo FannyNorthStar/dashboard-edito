@@ -5868,7 +5868,6 @@ function closePdfModal() {
 
 function generatePdf() {
   closePdfModal();
-  // Hide/show sections based on checkboxes
   const map = {
     pdfKpi: 'kpiRow',
     pdfDiscover: 'discoverCard',
@@ -5879,25 +5878,85 @@ function generatePdf() {
     pdfAi: 'aiSection',
     pdfAngles: 'anglesCard'
   };
-  // Mark unchecked sections for print hide
+  // Hide unchecked sections
+  const hidden = [];
   for (const [cbId, elId] of Object.entries(map)) {
     const el = document.getElementById(elId);
     if (!el) continue;
     if (!document.getElementById(cbId).checked) {
-      el.setAttribute('data-pdf-hide', '1');
-    } else {
-      el.removeAttribute('data-pdf-hide');
+      el.style.display = 'none';
+      hidden.push(el);
     }
   }
-  // Trigger print
-  window.print();
-  // Clean up after print
-  setTimeout(() => {
-    for (const elId of Object.values(map)) {
-      const el = document.getElementById(elId);
-      if (el) el.removeAttribute('data-pdf-hide');
-    }
-  }, 1000);
+  // Build a container with only the results
+  const resultsEl = document.getElementById('results');
+  if (!resultsEl) { hidden.forEach(el => el.style.display = ''); return; }
+
+  // Load html2canvas + jsPDF dynamically
+  const loadScript = (url) => new Promise((resolve, reject) => {
+    if (document.querySelector(`script[src="${url}"]`)) return resolve();
+    const s = document.createElement('script');
+    s.src = url;
+    s.onload = resolve;
+    s.onerror = reject;
+    document.head.appendChild(s);
+  });
+
+  Promise.all([
+    loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'),
+    loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js')
+  ]).then(() => {
+    // Capture the results area
+    html2canvas(resultsEl, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: '#ffffff',
+      logging: false
+    }).then(canvas => {
+      const imgData = canvas.toDataURL('image/jpeg', 0.95);
+      const { jsPDF } = window.jspdf;
+      const pdfW = 210; // A4 width mm
+      const margin = 10;
+      const contentW = pdfW - margin * 2;
+      const imgW = canvas.width;
+      const imgH = canvas.height;
+      const ratio = contentW / imgW;
+      const contentH = imgH * ratio;
+      const pageH = 297 - margin * 2; // A4 height mm minus margins
+
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      let y = 0;
+      let page = 0;
+      while (y < contentH) {
+        if (page > 0) pdf.addPage();
+        // Calculate source crop for this page
+        const srcY = (y / ratio);
+        const srcH = Math.min(pageH / ratio, imgH - srcY);
+        const sliceCanvas = document.createElement('canvas');
+        sliceCanvas.width = imgW;
+        sliceCanvas.height = srcH;
+        sliceCanvas.getContext('2d').drawImage(canvas, 0, srcY, imgW, srcH, 0, 0, imgW, srcH);
+        const sliceData = sliceCanvas.toDataURL('image/jpeg', 0.95);
+        const sliceH = srcH * ratio;
+        pdf.addImage(sliceData, 'JPEG', margin, margin, contentW, sliceH);
+        y += pageH;
+        page++;
+      }
+      // Build filename from URL or title
+      const urlInput = document.getElementById('url');
+      let fname = 'url-checker-report';
+      if (urlInput && urlInput.value) {
+        try { fname = new URL(urlInput.value).pathname.replace(/\//g, '-').replace(/^-|-$/g, '') || fname; } catch(e) {}
+      }
+      pdf.save(fname + '.pdf');
+    }).finally(() => {
+      hidden.forEach(el => el.style.display = '');
+    });
+  }).catch(err => {
+    console.error('PDF generation failed:', err);
+    alert('PDF generation failed. Check console for details.');
+    hidden.forEach(el => el.style.display = '');
+  });
 }
 
 function esc(str) { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
