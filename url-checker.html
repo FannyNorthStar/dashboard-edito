@@ -2994,15 +2994,35 @@ const FEEDBACK_CACHE_TTL = 5 * 60 * 1000; // 5 min cache
 async function fetchFluffFeedback() {
   // Return cached if fresh
   if (_feedbackCache && (Date.now() - _feedbackCacheTime) < FEEDBACK_CACHE_TTL) return _feedbackCache;
+  // Try remote first
+  let remote = [];
   try {
     const proxy = localStorage.getItem('media_dashboard_cors_proxy') || DEFAULT_GAS_PROXY;
     const resp = await fetchWithTimeout(proxy + '?action=feedback', {redirect:'follow'}, 10000);
     if (resp.ok) {
       const j = await resp.json();
-      if (j.feedback) { _feedbackCache = j.feedback; _feedbackCacheTime = Date.now(); return j.feedback; }
+      if (j.feedback && j.feedback.length > 0) remote = j.feedback;
     }
   } catch(e) {}
-  return [];
+  // Always merge with localStorage (the reliable local store)
+  let local = [];
+  try {
+    const raw = JSON.parse(localStorage.getItem('media_dashboard_fluff_feedback') || '[]');
+    local = raw.map(e => ({
+      domain: e.domain || '',
+      quote: e.quote || '',
+      tests_failed: e.tests_failed || '',
+      verdict: e.action === 'confirm' ? 'YES fluff' : 'NO not fluff'
+    }));
+  } catch(e) {}
+  // Deduplicate: if remote has the same quote, skip the local copy
+  const remoteQuotes = new Set(remote.map(r => (r.quote || '').substring(0, 80)));
+  const merged = [...remote];
+  for (const entry of local) {
+    if (!remoteQuotes.has((entry.quote || '').substring(0, 80))) merged.push(entry);
+  }
+  if (merged.length > 0) { _feedbackCache = merged; _feedbackCacheTime = Date.now(); }
+  return merged;
 }
 
 function buildCalibrationBlock(feedback, currentDomain) {
