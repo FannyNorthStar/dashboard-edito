@@ -2978,9 +2978,6 @@ function applyTranslations() {
   document.querySelectorAll('[data-t-placeholder]').forEach(el => {
     el.placeholder = t(el.dataset.tPlaceholder);
   });
-  // Refresh site selector label for "All sites"
-  const allOpt = document.querySelector('#kwSiteSelect option[value="_all"]');
-  if (allOpt) allOpt.textContent = t('kw_all_sites');
 }
 
 // ========== CONFIG ==========
@@ -3212,7 +3209,6 @@ const TAB_LABELS = {
 
 // ========== MODE TABS ==========
 const SITE_OPTIONS = [
-  { value: '_all', label: 'All sites' },
   ...[...new Set(Object.values(DOMAIN_TAB_MAP))].sort().map(tab => ({ value: tab, label: TAB_LABELS[tab] || tab }))
 ];
 
@@ -3222,7 +3218,7 @@ function populateSiteSelect() {
   for (const s of SITE_OPTIONS) {
     const opt = document.createElement('option');
     opt.value = s.value;
-    opt.textContent = s.value === '_all' ? t('kw_all_sites') : s.label;
+    opt.textContent = s.label;
     sel.appendChild(opt);
   }
 }
@@ -3457,10 +3453,8 @@ async function startKeywordAnalysis() {
       throw new Error('Could not extract topics from your input. Try being more specific.');
     }
 
-    // Step 2: Determine which tabs to check
-    const tabsToCheck = selectedSite === '_all'
-      ? [...new Set(Object.values(DOMAIN_TAB_MAP))]
-      : [selectedSite];
+    // Step 2: Site to check (single site only)
+    const tabsToCheck = [selectedSite];
 
     // Step 3: Fetch all 4 sources per tab
     const sourceData = {}; // { tab: { d90, d30, d10, search } }
@@ -4810,23 +4804,43 @@ function renderKeywordResults(inputText, selectedSite, entityResults, angleIdeas
     }
 
     // Authority level based on combined presence
+    // Use D10 for fair comparison with Search 10d; D90 alone shows historical, not current authority
     const onDiscover = totalD90 > 0;
+    const activeDiscover = totalD10 > 0;
+    const recentDiscover = totalD30 > 0;
     const onSearch = totalSearch > 0;
     let authorityLabel, authorityColor;
-    if (onDiscover && onSearch) { authorityLabel = 'Strong authority'; authorityColor = 'green'; }
-    else if (onDiscover) { authorityLabel = 'Discover authority'; authorityColor = 'green'; }
+    if (activeDiscover && onSearch) { authorityLabel = 'Strong authority'; authorityColor = 'green'; }
+    else if (activeDiscover) { authorityLabel = 'Discover authority'; authorityColor = 'green'; }
+    else if (recentDiscover && onSearch) { authorityLabel = 'Strong authority'; authorityColor = 'green'; }
+    else if (recentDiscover) { authorityLabel = 'Discover authority'; authorityColor = 'green'; }
+    else if (onDiscover && onSearch) { authorityLabel = 'Established topic'; authorityColor = 'amber'; }
+    else if (onDiscover) { authorityLabel = 'Past coverage'; authorityColor = 'amber'; }
     else if (onSearch && totalSearch >= 5) { authorityLabel = 'Search authority'; authorityColor = 'amber'; }
     else if (onSearch) { authorityLabel = 'Some Search presence'; authorityColor = 'amber'; }
     else { authorityLabel = 'New topic'; authorityColor = 'blue'; }
 
     // Cross-source insight
+    // Note: Discover covers 90/30/10 days, Search covers 10 days only.
+    // Comparing D90 vs S10 directly is misleading — use D10 for fair comparison.
     let insightHtml = '';
     if (onSearch && !onDiscover) {
-      insightHtml = `<div style="font-size:12px;padding:8px 12px;margin:8px 0;border-radius:6px;background:var(--accent-glow,#eef);color:var(--accent)">💡 ${totalSearch} article(s) on Search but none on Discover — Discover opportunity for this topic</div>`;
+      insightHtml = `<div style="font-size:12px;padding:8px 12px;margin:8px 0;border-radius:6px;background:var(--accent-glow,#eef);color:var(--accent)">💡 ${totalSearch} article(s) on Search (10d) but none on Discover — Discover opportunity for this topic</div>`;
     } else if (onDiscover && !onSearch) {
-      insightHtml = `<div style="font-size:12px;padding:8px 12px;margin:8px 0;border-radius:6px;background:var(--green-bg,#efe);color:var(--green,#22c55e)">💡 ${totalD90} article(s) on Discover but none on Search — topic performs via Discover, not organic search</div>`;
-    } else if (onDiscover && onSearch && totalSearch > totalD90 * 3) {
-      insightHtml = `<div style="font-size:12px;padding:8px 12px;margin:8px 0;border-radius:6px;background:var(--accent-glow,#eef);color:var(--accent)">💡 ${totalSearch} on Search vs ${totalD90} on Discover — room to grow Discover presence</div>`;
+      // Only flag as "Discover-only" if the topic is still active recently
+      if (totalD10 > 0) {
+        insightHtml = `<div style="font-size:12px;padding:8px 12px;margin:8px 0;border-radius:6px;background:var(--green-bg,#efe);color:var(--green,#22c55e)">💡 ${totalD10} article(s) on Discover in last 10d but none on Search — topic performs via Discover, not organic search</div>`;
+      } else if (totalD30 > 0) {
+        insightHtml = `<div style="font-size:12px;padding:8px 12px;margin:8px 0;border-radius:6px;background:var(--surface-2,#f5f5f5);color:var(--text-muted,#888)">⏳ ${totalD90} article(s) on Discover (90d) but none in last 10d — likely seasonal. Search 10d also empty, which is expected.</div>`;
+      } else {
+        insightHtml = `<div style="font-size:12px;padding:8px 12px;margin:8px 0;border-radius:6px;background:var(--surface-2,#f5f5f5);color:var(--text-muted,#888)">⏳ ${totalD90} article(s) on Discover (90d) but none in last 30d — older coverage only. No recent Search activity either.</div>`;
+      }
+    } else if (onDiscover && onSearch) {
+      if (totalSearch > totalD10 * 3 && totalD10 > 0) {
+        insightHtml = `<div style="font-size:12px;padding:8px 12px;margin:8px 0;border-radius:6px;background:var(--accent-glow,#eef);color:var(--accent)">💡 ${totalSearch} on Search vs ${totalD10} on Discover (last 10d) — room to grow Discover presence</div>`;
+      } else if (totalD10 > totalSearch * 3 && totalSearch > 0) {
+        insightHtml = `<div style="font-size:12px;padding:8px 12px;margin:8px 0;border-radius:6px;background:var(--green-bg,#efe);color:var(--green,#22c55e)">💡 ${totalD10} on Discover vs ${totalSearch} on Search (last 10d) — topic is Discover-dominant</div>`;
+      }
     }
 
     // Discover trend indicator (90d → 30d → 10d)
