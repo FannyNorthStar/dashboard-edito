@@ -3414,6 +3414,28 @@ async function gptMatchRows(topicName, keywords, allRows, sourceLabel, scope) {
   return [];
 }
 
+// Cache for pubhtml gid lookups: { sheetPubId: { TABNAME: gid, ... } }
+const _gidCache = {};
+
+// Discover tab gids from a pubhtml page's JavaScript
+async function discoverTabGids(sheetUrl) {
+  const pubMatch = sheetUrl.match(/\/spreadsheets\/d\/e\/(2PACX[a-zA-Z0-9_-]+)/);
+  if (!pubMatch) return {};
+  const pubId = pubMatch[1];
+  if (_gidCache[pubId]) return _gidCache[pubId];
+  const pubHtmlUrl = `https://docs.google.com/spreadsheets/d/e/${pubId}/pubhtml`;
+  const html = await fetchViaProxy(pubHtmlUrl);
+  const gids = {};
+  const regex = /name:\s*"([^"]+)"[^}]*gid:\s*"(\d+)"/g;
+  let m;
+  while ((m = regex.exec(html)) !== null) {
+    gids[m[1]] = m[2];
+  }
+  console.log(`[discoverTabGids] Found ${Object.keys(gids).length} tabs:`, Object.keys(gids).join(', '));
+  _gidCache[pubId] = gids;
+  return gids;
+}
+
 // Fetch CSV data for a sheet+tab, returns parsed rows or empty array
 async function fetchSourceData(sheetUrl, tab) {
   if (!sheetUrl) return [];
@@ -3459,25 +3481,26 @@ async function fetchSourceData(sheetUrl, tab) {
     console.log(`[fetchSourceData] tab=${tab} error: ${e.message}`);
   }
 
-  // Try 2: fetch full pubhtml (contains ALL tabs as HTML tables)
-  // This handles sheets where data is NOT in the first tab (D30/D10/Search)
+  // Try 2: discover the tab's gid from pubhtml, then fetch CSV by gid
+  // Handles sheets where pub?sheet=NAME redirects to the wrong tab (D30/D10/Search)
   try {
-    const pubMatch = sheetUrl.match(/\/spreadsheets\/d\/e\/(2PACX[a-zA-Z0-9_-]+)/);
-    if (pubMatch) {
-      const pubHtmlUrl = `https://docs.google.com/spreadsheets/d/e/${pubMatch[1]}/pubhtml`;
-      const html = await fetchViaProxy(pubHtmlUrl);
-      const allRows = parseHTMLTable(html);
-      const filtered = filterByDomain(allRows);
-      console.log(`[fetchSourceData] tab=${tab} pubhtml rawRows=${allRows.length} filteredRows=${filtered.length}`);
-      if (filtered.length > 0) return filtered;
-      if (allRows.length > 0) {
-        console.log(`[fetchSourceData] tab=${tab} pubhtml had ${allRows.length} rows but 0 matched domains`);
-      } else {
-        console.warn(`[fetchSourceData] tab=${tab} pubhtml 0 rows from ${html.length} chars`);
+    const gids = await discoverTabGids(sheetUrl);
+    const gid = gids[tab];
+    if (gid && gid !== '0') {
+      const pubMatch = sheetUrl.match(/\/spreadsheets\/d\/e\/(2PACX[a-zA-Z0-9_-]+)/);
+      if (pubMatch) {
+        const csvUrl = `https://docs.google.com/spreadsheets/d/e/${pubMatch[1]}/pub?gid=${gid}&single=true&output=csv`;
+        const csvText = await fetchViaProxy(csvUrl);
+        const allRows = smartParse(csvText, `tab=${tab} gid=${gid}`);
+        const filtered = filterByDomain(allRows);
+        console.log(`[fetchSourceData] tab=${tab} gid=${gid} rawRows=${allRows.length} filteredRows=${filtered.length}`);
+        if (filtered.length > 0) return filtered;
       }
+    } else if (!gid) {
+      console.warn(`[fetchSourceData] tab=${tab} not found in pubhtml gid map`);
     }
   } catch(e) {
-    console.log(`[fetchSourceData] tab=${tab} pubhtml error: ${e.message}`);
+    console.log(`[fetchSourceData] tab=${tab} gid fallback error: ${e.message}`);
   }
 
   return [];
