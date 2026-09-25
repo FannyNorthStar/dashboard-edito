@@ -3510,12 +3510,11 @@ async function startKeywordAnalysis() {
   const kwText = document.getElementById('kwInput').value.trim();
   if (!kwText) { showError(t('err_empty_kw')); return; }
 
-  const sheetUrl90 = localStorage.getItem('media_dashboard_discover_sheet') || DEFAULT_DISCOVER_SHEET;
   const sheetUrl30 = localStorage.getItem('media_dashboard_discover_sheet_30d') || DEFAULT_DISCOVER_SHEET_30D;
   const sheetUrl10 = localStorage.getItem('media_dashboard_discover_sheet_10d') || DEFAULT_DISCOVER_SHEET_10D;
   const sheetUrlSearch = localStorage.getItem('media_dashboard_search_sheet') || DEFAULT_SEARCH_SHEET;
 
-  if (!sheetUrl90) { showError(t('kw_no_sheet')); return; }
+  if (!sheetUrl30) { showError(t('kw_no_sheet')); return; }
 
   const selectedSite = document.getElementById('kwSiteSelect').value;
 
@@ -3542,24 +3541,22 @@ async function startKeywordAnalysis() {
     // Step 2: Site to check (single site only)
     const tabsToCheck = [selectedSite];
 
-    // Step 3: Fetch all 4 sources per tab
-    const sourceData = {}; // { tab: { d90, d30, d10, search } }
+    // Step 3: Fetch 3 sources per tab (D30 + D10 + Search)
+    const sourceData = {}; // { tab: { d30, d10, search } }
     let fetchIdx = 0;
     const totalFetches = tabsToCheck.length;
 
     for (const tab of tabsToCheck) {
       fetchIdx++;
       // Sequential fetches to avoid overwhelming the GAS proxy with concurrent calls
-      setProgress(5 + Math.round(6 * fetchIdx / totalFetches), `Fetching D90 for ${tab}...`);
-      const d90 = await fetchSourceData(sheetUrl90, tab);
-      setProgress(5 + Math.round(12 * fetchIdx / totalFetches), `Fetching D30 for ${tab}...`);
+      setProgress(5 + Math.round(8 * fetchIdx / totalFetches), `Fetching D30 for ${tab}...`);
       const d30 = await fetchSourceData(sheetUrl30, tab);
-      setProgress(5 + Math.round(18 * fetchIdx / totalFetches), `Fetching D10 for ${tab}...`);
+      setProgress(5 + Math.round(16 * fetchIdx / totalFetches), `Fetching D10 for ${tab}...`);
       const d10 = await fetchSourceData(sheetUrl10, tab);
       setProgress(5 + Math.round(25 * fetchIdx / totalFetches), `Fetching Search for ${tab}...`);
       const search = await fetchSourceData(sheetUrlSearch, tab);
-      if (d90.length > 0 || d30.length > 0 || d10.length > 0 || search.length > 0) {
-        sourceData[tab] = { d90, d30, d10, search };
+      if (d30.length > 0 || d10.length > 0 || search.length > 0) {
+        sourceData[tab] = { d30, d10, search };
       }
     }
 
@@ -3574,7 +3571,7 @@ async function startKeywordAnalysis() {
 
     // 4a: Process broad entities with GPT matching
     // Store matched URL sets per broad entity per tab per source for intersection later
-    const broadUrlSets = {}; // { entityName: { tab: { d90: Set, search: Set } } }
+    const broadUrlSets = {}; // { entityName: { tab: { d30: Set, search: Set } } }
     let entityIdx = 0;
 
     for (const entity of broadEntities) {
@@ -3590,24 +3587,22 @@ async function startKeywordAnalysis() {
       for (const [tab, src] of Object.entries(sourceData)) {
         setProgress(30 + Math.round(30 * entityIdx / broadEntities.length), `Matching "${entity.name}" on ${tab}...`);
 
-        const matchD90 = src.d90.length > 0 ? await gptMatchRows(entity.name, keywords, src.d90, 'Discover 90d', 'broad') : [];
-        const matchD90Urls = new Set(matchD90.map(r => r.url));
-        const matchD30 = src.d30.filter(r => matchD90Urls.has(r.url));
-        const matchD10 = src.d10.filter(r => matchD90Urls.has(r.url));
+        const matchD30 = src.d30.length > 0 ? await gptMatchRows(entity.name, keywords, src.d30, 'Discover 30d', 'broad') : [];
+        const matchD30Urls = new Set(matchD30.map(r => r.url));
+        const matchD10 = src.d10.filter(r => matchD30Urls.has(r.url));
         const matchSearch = src.search.length > 0 ? await gptMatchRows(entity.name, keywords, src.search, 'Search 10d', 'broad') : [];
         const matchSearchUrls = new Set(matchSearch.map(r => r.url));
 
         // Store URL sets for niche intersection
         broadUrlSets[entity.name][tab] = {
-          d90: matchD90Urls,
-          d90Rows: matchD90,
+          d30: matchD30Urls,
+          d30Rows: matchD30,
           search: matchSearchUrls,
           searchRows: matchSearch
         };
 
         entityData.sites.push({
           tab,
-          discover90: { matchingRows: matchD90, siteStats: src.d90.length > 0 ? computeSiteStats(src.d90) : null, totalArticles: src.d90.length },
           discover30: { matchingRows: matchD30, siteStats: src.d30.length > 0 ? computeSiteStats(src.d30) : null, totalArticles: src.d30.length },
           discover10: { matchingRows: matchD10, siteStats: src.d10.length > 0 ? computeSiteStats(src.d10) : null, totalArticles: src.d10.length },
           search: { matchingRows: matchSearch, siteStats: src.search.length > 0 ? computeSiteStats(src.search) : null, totalArticles: src.search.length }
@@ -3629,7 +3624,7 @@ async function startKeywordAnalysis() {
 
         // Intersect ALL broad entities' URL sets for this tab
         // A URL must appear in EVERY broad entity's matches to be in the niche result
-        let matchD90 = [];
+        let matchD30 = [];
         let matchSearch = [];
 
         if (broadNames.length >= 2) {
@@ -3637,9 +3632,9 @@ async function startKeywordAnalysis() {
           const tabSets = broadNames.map(n => broadUrlSets[n][tab]).filter(Boolean);
 
           if (tabSets.length >= 2) {
-            // D90 intersection: URL must be in ALL broad entity d90 sets
-            const firstD90 = tabSets[0].d90Rows || [];
-            matchD90 = firstD90.filter(r => tabSets.every(ts => ts.d90.has(r.url)));
+            // D30 intersection: URL must be in ALL broad entity d30 sets
+            const firstD30 = tabSets[0].d30Rows || [];
+            matchD30 = firstD30.filter(r => tabSets.every(ts => ts.d30.has(r.url)));
 
             // Search intersection: URL must be in ALL broad entity search sets
             const firstSearch = tabSets[0].searchRows || [];
@@ -3651,18 +3646,16 @@ async function startKeywordAnalysis() {
             ? entity.url_keywords.map(k => k.toLowerCase().trim()).filter(k => k.length > 1)
             : extractTopicKeywords(entity.name);
           if (keywords.length > 0) {
-            matchD90 = src.d90.length > 0 ? await gptMatchRows(entity.name, keywords, src.d90, 'Discover 90d', 'specific') : [];
+            matchD30 = src.d30.length > 0 ? await gptMatchRows(entity.name, keywords, src.d30, 'Discover 30d', 'specific') : [];
             matchSearch = src.search.length > 0 ? await gptMatchRows(entity.name, keywords, src.search, 'Search 10d', 'specific') : [];
           }
         }
 
-        const matchD90Urls = new Set(matchD90.map(r => r.url));
-        const matchD30 = src.d30.filter(r => matchD90Urls.has(r.url));
-        const matchD10 = src.d10.filter(r => matchD90Urls.has(r.url));
+        const matchD30Urls = new Set(matchD30.map(r => r.url));
+        const matchD10 = src.d10.filter(r => matchD30Urls.has(r.url));
 
         entityData.sites.push({
           tab,
-          discover90: { matchingRows: matchD90, siteStats: src.d90.length > 0 ? computeSiteStats(src.d90) : null, totalArticles: src.d90.length },
           discover30: { matchingRows: matchD30, siteStats: src.d30.length > 0 ? computeSiteStats(src.d30) : null, totalArticles: src.d30.length },
           discover10: { matchingRows: matchD10, siteStats: src.d10.length > 0 ? computeSiteStats(src.d10) : null, totalArticles: src.d10.length },
           search: { matchingRows: matchSearch, siteStats: src.search.length > 0 ? computeSiteStats(src.search) : null, totalArticles: src.search.length }
@@ -3800,9 +3793,9 @@ async function generateArticleAngles(originalInput, entities, entityResults) {
   // Build context about what Discover data shows
   let discoverContext = '';
   for (const er of entityResults) {
-    const totalMatches = er.sites.reduce((a, s) => a + s.matchingRows.length, 0);
+    const totalMatches = er.sites.reduce((a, s) => a + s.discover30.matchingRows.length, 0);
     const topUrls = er.sites
-      .flatMap(s => s.matchingRows.slice(0, 3).map(r => r.url))
+      .flatMap(s => s.discover30.matchingRows.slice(0, 3).map(r => r.url))
       .slice(0, 5);
     discoverContext += `\nTopic "${er.name}": ${totalMatches} matching articles on Discover.`;
     if (topUrls.length > 0) discoverContext += ` Top URLs: ${topUrls.join(', ')}`;
@@ -5020,17 +5013,14 @@ function renderKeywordResults(inputText, selectedSite, entityResults, angleIdeas
 
   for (const entity of entityResults) {
     // Aggregate counts across all sites
-    let totalD90 = 0, totalD30 = 0, totalD10 = 0, totalSearch = 0;
+    let totalD30 = 0, totalD10 = 0, totalSearch = 0;
     for (const s of entity.sites) {
-      totalD90 += s.discover90.matchingRows.length;
       totalD30 += s.discover30.matchingRows.length;
       totalD10 += s.discover10.matchingRows.length;
       totalSearch += s.search.matchingRows.length;
     }
 
     // Authority level based on combined presence
-    // Use D10 for fair comparison with Search 10d; D90 alone shows historical, not current authority
-    const onDiscover = totalD90 > 0;
     const activeDiscover = totalD10 > 0;
     const recentDiscover = totalD30 > 0;
     const onSearch = totalSearch > 0;
@@ -5039,28 +5029,21 @@ function renderKeywordResults(inputText, selectedSite, entityResults, angleIdeas
     else if (activeDiscover) { authorityLabel = 'Discover authority'; authorityColor = 'green'; }
     else if (recentDiscover && onSearch) { authorityLabel = 'Strong authority'; authorityColor = 'green'; }
     else if (recentDiscover) { authorityLabel = 'Discover authority'; authorityColor = 'green'; }
-    else if (onDiscover && onSearch) { authorityLabel = 'Established topic'; authorityColor = 'amber'; }
-    else if (onDiscover) { authorityLabel = 'Past coverage'; authorityColor = 'amber'; }
     else if (onSearch && totalSearch >= 5) { authorityLabel = 'Search authority'; authorityColor = 'amber'; }
     else if (onSearch) { authorityLabel = 'Some Search presence'; authorityColor = 'amber'; }
     else { authorityLabel = 'New topic'; authorityColor = 'blue'; }
 
-    // Cross-source insight
-    // Note: Discover covers 90/30/10 days, Search covers 10 days only.
-    // Comparing D90 vs S10 directly is misleading — use D10 for fair comparison.
+    // Cross-source insight (D30/D10 vs Search 10d)
     let insightHtml = '';
-    if (onSearch && !onDiscover) {
+    if (onSearch && !recentDiscover) {
       insightHtml = `<div style="font-size:12px;padding:8px 12px;margin:8px 0;border-radius:6px;background:var(--accent-glow,#eef);color:var(--accent)">💡 ${totalSearch} article(s) on Search (10d) but none on Discover — Discover opportunity for this topic</div>`;
-    } else if (onDiscover && !onSearch) {
-      // Only flag as "Discover-only" if the topic is still active recently
+    } else if (recentDiscover && !onSearch) {
       if (totalD10 > 0) {
         insightHtml = `<div style="font-size:12px;padding:8px 12px;margin:8px 0;border-radius:6px;background:var(--green-bg,#efe);color:var(--green,#22c55e)">💡 ${totalD10} article(s) on Discover in last 10d but none on Search — topic performs via Discover, not organic search</div>`;
-      } else if (totalD30 > 0) {
-        insightHtml = `<div style="font-size:12px;padding:8px 12px;margin:8px 0;border-radius:6px;background:var(--surface-2,#f5f5f5);color:var(--text-muted,#888)">⏳ ${totalD90} article(s) on Discover (90d) but none in last 10d — likely seasonal. Search 10d also empty, which is expected.</div>`;
       } else {
-        insightHtml = `<div style="font-size:12px;padding:8px 12px;margin:8px 0;border-radius:6px;background:var(--surface-2,#f5f5f5);color:var(--text-muted,#888)">⏳ ${totalD90} article(s) on Discover (90d) but none in last 30d — older coverage only. No recent Search activity either.</div>`;
+        insightHtml = `<div style="font-size:12px;padding:8px 12px;margin:8px 0;border-radius:6px;background:var(--surface-2,#f5f5f5);color:var(--text-muted,#888)">⏳ ${totalD30} article(s) on Discover (30d) but none in last 10d — cooling down. No Search activity either.</div>`;
       }
-    } else if (onDiscover && onSearch) {
+    } else if (recentDiscover && onSearch) {
       if (totalSearch > totalD10 * 3 && totalD10 > 0) {
         insightHtml = `<div style="font-size:12px;padding:8px 12px;margin:8px 0;border-radius:6px;background:var(--accent-glow,#eef);color:var(--accent)">💡 ${totalSearch} on Search vs ${totalD10} on Discover (last 10d) — room to grow Discover presence</div>`;
       } else if (totalD10 > totalSearch * 3 && totalSearch > 0) {
@@ -5068,17 +5051,15 @@ function renderKeywordResults(inputText, selectedSite, entityResults, angleIdeas
       }
     }
 
-    // Discover trend indicator (90d → 30d → 10d)
+    // Discover trend indicator (30d → 10d)
     let trendHtml = '';
-    if (totalD90 > 0) {
-      const pct30 = totalD30 > 0 ? Math.round(totalD30 / totalD90 * 100) : 0;
-      const pct10 = totalD10 > 0 ? Math.round(totalD10 / totalD90 * 100) : 0;
-      // Rough interpretation: if 10d articles are >15% of 90d, topic is hot
+    if (totalD30 > 0) {
+      const pct10 = totalD10 > 0 ? Math.round(totalD10 / totalD30 * 100) : 0;
       let trendLabel, trendIcon;
-      if (pct10 >= 20) { trendLabel = 'Trending up'; trendIcon = '🔥'; }
-      else if (pct10 >= 10) { trendLabel = 'Active'; trendIcon = '📈'; }
-      else if (pct30 > 0) { trendLabel = 'Cooling down'; trendIcon = '📉'; }
-      else { trendLabel = 'Older coverage only'; trendIcon = '⏳'; }
+      if (pct10 >= 50) { trendLabel = 'Trending up'; trendIcon = '🔥'; }
+      else if (pct10 >= 25) { trendLabel = 'Active'; trendIcon = '📈'; }
+      else if (pct10 > 0) { trendLabel = 'Cooling down'; trendIcon = '📉'; }
+      else { trendLabel = 'Last 30d only'; trendIcon = '⏳'; }
       trendHtml = `<span style="font-size:12px;color:var(--text-muted);margin-left:8px">${trendIcon} ${trendLabel}</span>`;
     }
 
@@ -5099,11 +5080,7 @@ function renderKeywordResults(inputText, selectedSite, entityResults, angleIdeas
 
         ${insightHtml}
 
-        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:12px 0;text-align:center">
-          <div style="padding:10px;border-radius:8px;background:var(--surface-2,#f5f5f5)">
-            <div style="font-size:20px;font-weight:700">${totalD90}</div>
-            <div style="font-size:11px;color:var(--text-muted)">Discover 90d</div>
-          </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:12px 0;text-align:center">
           <div style="padding:10px;border-radius:8px;background:var(--surface-2,#f5f5f5)">
             <div style="font-size:20px;font-weight:700">${totalD30}</div>
             <div style="font-size:11px;color:var(--text-muted)">Discover 30d</div>
@@ -5120,26 +5097,26 @@ function renderKeywordResults(inputText, selectedSite, entityResults, angleIdeas
 
     // Per-site detail sections (only sites with matches)
     for (const site of entity.sites) {
-      const d90 = site.discover90, search = site.search;
-      const hasD90 = d90.matchingRows.length > 0;
+      const d30 = site.discover30, search = site.search;
+      const hasD30 = d30.matchingRows.length > 0;
       const hasSearch = search.matchingRows.length > 0;
-      if (!hasD90 && !hasSearch) continue;
+      if (!hasD30 && !hasSearch) continue;
 
       if (entity.sites.length > 1) {
         cardHtml += `<div style="font-weight:600;font-size:13px;margin:16px 0 8px;padding-top:8px;border-top:1px solid var(--border)">${site.tab}</div>`;
       }
 
-      // Discover stats table (based on 90d, with trend columns)
-      if (hasD90) {
-        const mr = d90.matchingRows;
+      // Discover stats table (based on 30d)
+      if (hasD30) {
+        const mr = d30.matchingRows;
         const cnt = mr.length;
         const topicStats = {
           avg_impressions: mr.reduce((a, r) => a + r.impressions, 0) / cnt,
           avg_clicks: mr.reduce((a, r) => a + r.clicks, 0) / cnt,
           avg_ctr: mr.reduce((a, r) => a + r.ctr, 0) / cnt
         };
-        cardHtml += `<div style="font-size:12px;color:var(--text-muted);margin-bottom:4px">Discover (${cnt} matching / ${d90.totalArticles} total)</div>`;
-        cardHtml += buildComparisonTable(topicStats, d90.siteStats, 'Topic');
+        cardHtml += `<div style="font-size:12px;color:var(--text-muted);margin-bottom:4px">Discover (${cnt} matching / ${d30.totalArticles} total)</div>`;
+        cardHtml += buildComparisonTable(topicStats, d30.siteStats, 'Topic');
       }
 
       // Search stats table
@@ -5157,12 +5134,12 @@ function renderKeywordResults(inputText, selectedSite, entityResults, angleIdeas
           topicStats.avg_position = withPos.reduce((a, r) => a + r.position, 0) / withPos.length;
         }
 
-        cardHtml += `<div style="font-size:12px;color:var(--text-muted);margin:${hasD90 ? '12px' : '0'} 0 4px">Search (${cnt} matching / ${search.totalArticles} total)</div>`;
+        cardHtml += `<div style="font-size:12px;color:var(--text-muted);margin:${hasD30 ? '12px' : '0'} 0 4px">Search (${cnt} matching / ${search.totalArticles} total)</div>`;
         cardHtml += buildComparisonTable(topicStats, search.siteStats, 'Topic', true);
       }
 
       // Top matching URLs (combined, max 5)
-      const allMatches = [...d90.matchingRows.map(r => ({...r, src: 'D'})), ...search.matchingRows.map(r => ({...r, src: 'S'}))]
+      const allMatches = [...d30.matchingRows.map(r => ({...r, src: 'D'})), ...search.matchingRows.map(r => ({...r, src: 'S'}))]
         .sort((a, b) => b.clicks - a.clicks).slice(0, 5);
       if (allMatches.length > 0) {
         cardHtml += `<div style="margin-top:10px;font-size:12px;color:var(--text-muted)">Top matching URLs:</div><div style="margin-top:4px">`;
@@ -5180,7 +5157,7 @@ function renderKeywordResults(inputText, selectedSite, entityResults, angleIdeas
     }
 
     // If no sites had any matches at all
-    const totalAll = totalD90 + totalSearch;
+    const totalAll = totalD30 + totalSearch;
     if (totalAll === 0) {
       cardHtml += `<p style="color:var(--text-muted);font-size:13px;margin:8px 0">${t('kw_no_match')}</p>`;
     }
