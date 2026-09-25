@@ -3459,16 +3459,25 @@ async function fetchSourceData(sheetUrl, tab) {
     console.log(`[fetchSourceData] tab=${tab} error: ${e.message}`);
   }
 
-  // Try 2: fetch WITHOUT tab name (for sheets with all data in one tab)
+  // Try 2: fetch full pubhtml (contains ALL tabs as HTML tables)
+  // This handles sheets where data is NOT in the first tab (D30/D10/Search)
   try {
-    const csvUrlNoTab = buildCsvUrlNoTab(sheetUrl);
-    const csvText = await fetchViaProxy(csvUrlNoTab);
-    const allRows = smartParse(csvText, `tab=${tab} noTab`);
-    const filtered = filterByDomain(allRows);
-    console.log(`[fetchSourceData] tab=${tab} noTab rawRows=${allRows.length} filteredRows=${filtered.length}`);
-    return filtered;
+    const pubMatch = sheetUrl.match(/\/spreadsheets\/d\/e\/(2PACX[a-zA-Z0-9_-]+)/);
+    if (pubMatch) {
+      const pubHtmlUrl = `https://docs.google.com/spreadsheets/d/e/${pubMatch[1]}/pubhtml`;
+      const html = await fetchViaProxy(pubHtmlUrl);
+      const allRows = parseHTMLTable(html);
+      const filtered = filterByDomain(allRows);
+      console.log(`[fetchSourceData] tab=${tab} pubhtml rawRows=${allRows.length} filteredRows=${filtered.length}`);
+      if (filtered.length > 0) return filtered;
+      if (allRows.length > 0) {
+        console.log(`[fetchSourceData] tab=${tab} pubhtml had ${allRows.length} rows but 0 matched domains`);
+      } else {
+        console.warn(`[fetchSourceData] tab=${tab} pubhtml 0 rows from ${html.length} chars`);
+      }
+    }
   } catch(e) {
-    console.log(`[fetchSourceData] tab=${tab} noTab error: ${e.message}`);
+    console.log(`[fetchSourceData] tab=${tab} pubhtml error: ${e.message}`);
   }
 
   return [];
@@ -4610,10 +4619,18 @@ function parseHTMLTable(html) {
   const rows = [];
   const trMatches = html.match(/<tr[^>]*>[\s\S]*?<\/tr>/gi);
   if (!trMatches || trMatches.length < 2) return [];
-  for (let i = 1; i < trMatches.length; i++) {
+  for (let i = 0; i < trMatches.length; i++) {
     const tdMatches = trMatches[i].match(/<td[^>]*>[\s\S]*?<\/td>/gi);
     if (!tdMatches || tdMatches.length < 3) continue;
-    const cells = tdMatches.map(td => td.replace(/<[^>]*>/g, '').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').trim());
+    // Extract cell text, but also check for URLs in href attributes
+    const cells = tdMatches.map(td => {
+      // Check if there's a URL in an href attribute
+      const hrefMatch = td.match(/href="(https?:\/\/[^"]+)"/i);
+      const text = td.replace(/<[^>]*>/g, '').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&nbsp;/g,' ').trim();
+      // Prefer href URL if text doesn't start with http
+      if (hrefMatch && !text.startsWith('http')) return hrefMatch[1];
+      return text;
+    });
     let urlVal = '', urlIdx = -1;
     for (let c = 0; c < cells.length; c++) {
       if (cells[c].startsWith('http')) { urlVal = cells[c]; urlIdx = c; break; }
@@ -4622,8 +4639,9 @@ function parseHTMLTable(html) {
     const nums = [];
     for (let c = 0; c < cells.length; c++) {
       if (c === urlIdx) continue;
-      const v = parseFloat(cells[c].replace(/[,%\s]/g, ''));
-      if (!isNaN(v)) nums.push(v);
+      const v = cells[c].replace(/[,%\s]/g, '').replace(/,/g, '.');
+      const n = parseFloat(v);
+      if (!isNaN(n)) nums.push(n);
     }
     rows.push({ url: urlVal, clicks: nums[0]||0, impressions: nums[1]||0, ctr: nums[2]||0, position: (nums.length >= 4 && nums[3] > 0) ? nums[3] : undefined });
   }
