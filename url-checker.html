@@ -4472,50 +4472,45 @@ async function runQualityCheck(title, bodyText, articleUrl) {
     data = await callOpenAI({
       model: OPENAI_MODEL,
       messages: [
-        { role: 'system', content: `You are a senior editorial quality analyst focused on HARM REDUCTION. Your job is NOT to flag every imperfect sentence. Your job is to flag content that could actively HURT the article's performance on Google — content that Google's spam update, helpful content system, or quality raters would penalize or that would reduce Discover picks and Search visibility.
+        { role: 'system', content: `You are a Google Search quality rater. Your ONLY job is to flag content that would directly damage the article in a Google Discover update, Search update, or spam update. You are NOT an editorial coach. Standard sports journalism writing is fine — even if it is not perfect prose.
 
-Think like a Google Search quality rater: would this content pattern make Google see the article as low-quality, thin, or auto-generated? Would it reduce the chance of being picked up by Discover? Only flag sentences that are genuinely harmful to ranking and visibility — not just "could be better".
+FLAG ONLY content that Google would classify as:
+- Auto-generated or AI-generated filler (template sentences that could appear in any article with names swapped)
+- Thin content signals (paragraphs that exist only to inflate word count with no information)
+- Spam patterns (circular repetition of the same point 3+ times, keyword stuffing disguised as sentences)
+- Copy-paste boilerplate (identical phrasing reused across articles)
+
+DO NOT FLAG (this is normal sports journalism, not fluff):
+- Context sentences explaining who a player is, their form, their contract situation, their age
+- Transitions, scene-setting, background paragraphs
+- Quotes, even if they restate a point
+- Opinions, predictions, or analysis — even generic ones like "this will be a tough match"
+- Sentences that state consequences, hopes, or objectives — these are standard in previews and transfer articles
+- Brief obvious statements that serve as transitions between substantive paragraphs
+- Any sentence that contains at least one specific fact (a name, a date, a stat, a place)
+
+THRESHOLD: Flag a sentence ONLY if a Google quality rater would specifically highlight it as evidence of low-quality or auto-generated content. If you are unsure whether something is fluff, DO NOT flag it. Err heavily on the side of NOT flagging. A typical well-written sports article should have 0-2 flags, not 5-10.
 
 You must:
-1. Check if the title accurately reflects and aligns with the chapô and the full article content. Rate as "aligned", "partial", or "misaligned" with a clear explanation.
-2. Check TITLE BALANCE — the title must strike the right balance between clickbait and bland:
-   - "clickbait": Title overpromises or uses sensational language ("You won't believe...", "SHOCKING", "BOMBSHELL") but the article content is ordinary or thin. The reader will feel disappointed or misled after reading.
-   - "bland": Title is factually accurate but flat and generic, gives no reason to click. No hook, no angle, no curiosity trigger. Examples: "Player makes statement", "Match result update".
-   - "balanced": Title is catchy and triggers curiosity (the reader wonders "what happened?" or "what's in it for me?") while honestly reflecting what the article delivers. The promise matches the payoff.
-   Rate as "clickbait", "bland", or "balanced" with a clear explanation of WHY.
-3. Detect SEMANTIC PADDING — but with a HARM-REDUCTION lens. Only flag sentences that genuinely damage the article's quality signal to Google.
+1. Check if the title accurately reflects the chapô and article content. Rate as "aligned", "partial", or "misaligned".
+2. Check TITLE BALANCE:
+   - "clickbait": Title overpromises or uses sensational language but the article is ordinary.
+   - "bland": Title is flat and generic, gives no reason to click.
+   - "balanced": Title triggers curiosity while honestly reflecting the article content.
+3. Detect DAMAGING PADDING only — content that would hurt Google ranking.
 
-SEVERITY GUIDE — be conservative:
-- "high": Would directly trigger Google spam signals or make Google classify the article as thin/auto-generated content. Multiple sentences like this = real ranking damage. Examples: blatant filler paragraphs, copy-paste template sentences, circular repetition of the same point 3+ times.
-- "medium": Weakens the article enough that Google's helpful content system would score it lower. A few of these won't kill the article, but they accumulate. Examples: generic consequence statements, restatement of stats without adding value.
-- "low": Minor quality issue. Would not hurt Google ranking on its own. Only flag these if there are MANY of them (5+ similar patterns). Examples: slightly generic transitions, mild obviousness statements.
+SEVERITY (use only "high" or "medium" — there is no "low"):
+- "high": Would directly trigger Google spam signals or make Google classify the article as auto-generated. Examples: blatant filler paragraphs with zero information, word-for-word repetition of the same point, template sentences.
+- "medium": A Google quality rater would mark this as evidence of thin content if they saw several like it. Examples: a paragraph that restates the previous paragraph in different words with nothing new added.
 
-DO NOT flag "low" severity issues unless they appear in clusters of 5+. A few mediocre sentences in an otherwise solid article are NORMAL and NOT harmful.
-
-IMPORTANT: Ignore text from embedded content (tweets, Facebook posts, Instagram embeds). Only analyze the author's own writing.
-
-Apply these tests. A sentence must trigger 2-3 of these AND be genuinely harmful to article quality to be flagged:
+Apply these tests. A sentence must fail at least 2 tests AND be the kind of content Google penalizes:
 - DELETE TEST: If you delete this sentence, does the reader lose any fact, argument, evidence or insight?
-- ANY-TEAM TEST: Could the same sentence be used for almost any team/player simply by changing the names?
-- OBVIOUSNESS TEST: Does it merely state an obvious consequence? ("A victory would boost their hopes of qualification.")
-- HOPE/WANT TEST: Does it merely tell us what somebody "will hope", "will want", "will look to" or "will be eager" to do? ("Arteta will hope Arsenal can secure all three points.")
-- RESTATEMENT TEST: Does it translate the previous statistic/fact into words without adding anything? ("They've won five straight games. They therefore enter the fixture in excellent form.")
-- GENERIC-CONSEQUENCE TEST: Fact → completely predictable conclusion. ("Haaland has scored eight in five and will therefore be a major threat.")
-- FUTURE-UNCERTAINTY TEST: Does it merely say nobody knows what will happen? ("Only time will tell whether the transfer proves successful.")
-- IMPORTANCE-WITHOUT-EXPLANATION TEST: Does it declare something "crucial", "important", "key" or "significant" without explaining why/how? ("Salah will once again be crucial for Liverpool.")
-- MOMENTUM TEST: Does it use "momentum", "build on", "bounce back", "positive result", "strong start" etc. without supplying additional information?
-- DETERMINATION TEST: Does it invent an obvious mental state? ("The striker will be determined to get back among the goals.")
-- INTRIGUE TEST: Does it tell the reader the match/story is interesting instead of providing the interesting information? ("It promises to be a fascinating encounter.")
-- CHALLENGE TEST: Does it merely say a difficult opponent will be difficult? ("Manchester City will represent a stern test for the visitors.")
-- OPPORTUNITY TEST: Generic opportunity statement. ("He will be looking to make the most of his opportunities.")
-- OBJECTIVE TEST: Does it state the obvious objective? ("They will need to perform at their best if they are to achieve their objectives this season.")
-- CONTEXT-FREE TEST: Could the writer have produced the sentence WITHOUT researching the fixture/player/story at all?
-- EVIDENCE-FREE JUDGEMENT TEST: Does it make an assessment without giving the reader evidence?
-- REPETITION/CIRCULAR TEST: Does it repeat the same point already made in a previous sentence, just with different words? Is the argument circular?
+- ANY-TEAM TEST: Could the exact same sentence appear in any article by swapping names?
+- CONTEXT-FREE TEST: Could the writer have produced this sentence without reading anything about the topic?
+- REPETITION TEST: Does it repeat the same point already made, just with different words?
+- EVIDENCE-FREE TEST: Does it make a judgment without giving any evidence?
 
-NOT padding: providing context about who a player is or their current form, naming related players or teams involved, brief background that helps understand the news, quotes from sources even if they restate a point, transitional words like "pourtant" or "en effet", scene-setting for context. Only flag sentences that genuinely add zero information AND would hurt Google's perception of the article.
-
-For each padding instance, provide: the exact quote, a category from this list (delete-test, any-team, obviousness, hope-want, restatement, generic-consequence, future-uncertainty, importance-no-explanation, momentum, determination, intrigue, challenge, opportunity, objective, context-free, evidence-free, repetition), the severity (high/medium/low), which test(s) it fails, and a suggested rewrite in the same language as the article. If the sentence should just be deleted, say "delete".` + calibration },
+For each padding instance: the exact quote, a category (delete-test, any-team, context-free, repetition, evidence-free), the severity (high/medium), which tests it fails, and a suggested rewrite in the same language. If the sentence should just be deleted, say "delete".` + calibration },
         { role: 'user', content: `TITLE: ${title}\n\nCHAPÔ (lead paragraph):\n${chapo}\n\nFULL ARTICLE:\n${excerpt}` }
       ],
       tools: [{
@@ -5378,16 +5373,15 @@ function renderQuality(q, bodyText) {
   const body = document.getElementById('qualityBody');
   const a = q.title_alignment || {};
   const b = q.title_balance || {};
-  const fluff = q.fluff || [];
+  // Filter out "low" severity — only show high and medium (damaging fluff)
+  const fluff = (q.fluff || []).filter(f => f.severity === 'high' || f.severity === 'medium');
   const alignColor = a.status === 'aligned' ? 'green' : a.status === 'partial' ? 'amber' : 'red';
   const alignLabel = a.status === 'aligned' ? t('quality_align_ok') : a.status === 'partial' ? t('quality_align_partial') : t('quality_align_misaligned');
   const balanceColor = b.status === 'balanced' ? 'green' : 'red';
   const balanceLabel = b.status === 'clickbait' ? t('quality_balance_clickbait') : b.status === 'bland' ? t('quality_balance_bland') : t('quality_balance_ok');
-
   // Severity counts for header
   const highCount = fluff.filter(f => f.severity === 'high').length;
   const medCount = fluff.filter(f => f.severity === 'medium').length;
-  const lowCount = fluff.filter(f => f.severity === 'low').length;
   const totalIssues = (a.status !== 'aligned' ? 1 : 0) + (b.status !== 'balanced' ? 1 : 0) + fluff.length;
   const countColor = highCount > 0 ? 'red' : (medCount > 0 || totalIssues > 0) ? 'amber' : 'green';
   document.getElementById('qualityCount').innerHTML = `<span class="tl-dot ${countColor}" style="width:8px;height:8px"></span> ${totalIssues === 0 ? 'OK' : totalIssues + ' issue(s)'}`;
