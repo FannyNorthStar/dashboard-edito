@@ -829,6 +829,13 @@ body {
       </div>
       <div class="ai-body" id="aiBody"></div>
     </div>
+    <div class="card" id="newsCard" style="display:none">
+      <div class="card-header" onclick="toggleCard(this)">
+        <h3>📰 <span data-t="news_title">Latest News</span></h3>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="card-body" id="newsCardBody"></div>
+    </div>
     <div class="card" id="anglesCard" style="display:none">
       <div class="card-header" onclick="toggleCard(this)">
         <h3>💡 <span data-t="angles_title">Suggested Angles</span></h3>
@@ -1085,6 +1092,11 @@ const T = {
     angles_longtail: "Long Tail SEO",
     angles_discover: "Discover Focused",
     angles_threads: "Story Threads",
+    news_title: "Latest News",
+    news_just_now: "just now",
+    news_hours_ago: "{n}h ago",
+    news_1_day_ago: "1 day ago",
+    news_days_ago: "{n} days ago",
     err_empty_html: "Paste HTML code to analyze.",
     kpi_spell: "Spelling",
     kpi_quality: "Quality",
@@ -1313,6 +1325,11 @@ const T = {
     angles_longtail: "Long Tail SEO",
     angles_discover: "Orienté Discover",
     angles_threads: "Story Threads",
+    news_title: "Dernières actualités",
+    news_just_now: "à l'instant",
+    news_hours_ago: "il y a {n}h",
+    news_1_day_ago: "il y a 1 jour",
+    news_days_ago: "il y a {n} jours",
     err_empty_html: "Collez du code HTML à analyser.",
     kpi_spell: "Orthographe",
     kpi_quality: "Qualité",
@@ -1538,6 +1555,11 @@ const T = {
     angles_longtail: "Long Tail SEO",
     angles_discover: "Foco no Discover",
     angles_threads: "Story Threads",
+    news_title: "Últimas notícias",
+    news_just_now: "agora mesmo",
+    news_hours_ago: "há {n}h",
+    news_1_day_ago: "há 1 dia",
+    news_days_ago: "há {n} dias",
     err_empty_html: "Cole o código HTML para analisar.",
     kpi_spell: "Ortografia",
     kpi_quality: "Qualidade",
@@ -1764,6 +1786,11 @@ const T = {
     angles_longtail: "Long Tail SEO",
     angles_discover: "Enfoque Discover",
     angles_threads: "Story Threads",
+    news_title: "Últimas noticias",
+    news_just_now: "ahora mismo",
+    news_hours_ago: "hace {n}h",
+    news_1_day_ago: "hace 1 día",
+    news_days_ago: "hace {n} días",
     kpi_spell: "Ortografía",
     kpi_quality: "Calidad",
     discover_insights_title: "Discover IA Insights",
@@ -1989,6 +2016,11 @@ const T = {
     angles_longtail: "Long Tail SEO",
     angles_discover: "Focus Discover",
     angles_threads: "Story Threads",
+    news_title: "Ultime notizie",
+    news_just_now: "adesso",
+    news_hours_ago: "{n}h fa",
+    news_1_day_ago: "1 giorno fa",
+    news_days_ago: "{n} giorni fa",
     kpi_spell: "Ortografia",
     kpi_quality: "Qualità",
     discover_insights_title: "Discover IA Insights",
@@ -2214,6 +2246,11 @@ const T = {
     angles_longtail: "Long Tail SEO",
     angles_discover: "Фокус на Discover",
     angles_threads: "Story Threads",
+    news_title: "Последние новости",
+    news_just_now: "только что",
+    news_hours_ago: "{n}ч назад",
+    news_1_day_ago: "1 день назад",
+    news_days_ago: "{n} дней назад",
     kpi_spell: "Орфография",
     kpi_quality: "Качество",
     discover_insights_title: "Discover ИИ-аналитика",
@@ -2439,6 +2476,11 @@ const T = {
     angles_longtail: "Long Tail SEO",
     angles_discover: "Фокус на Discover",
     angles_threads: "Story Threads",
+    news_title: "Останні новини",
+    news_just_now: "щойно",
+    news_hours_ago: "{n}г тому",
+    news_1_day_ago: "1 день тому",
+    news_days_ago: "{n} днів тому",
     kpi_spell: "Орфографія",
     kpi_quality: "Якість",
     discover_insights_title: "Discover ШІ-аналітика",
@@ -2664,6 +2706,11 @@ const T = {
     angles_longtail: "Long Tail SEO",
     angles_discover: "Fokus na Discover",
     angles_threads: "Story Threads",
+    news_title: "Najnowsze wiadomości",
+    news_just_now: "właśnie teraz",
+    news_hours_ago: "{n}h temu",
+    news_1_day_ago: "1 dzień temu",
+    news_days_ago: "{n} dni temu",
     kpi_spell: "Ortografia",
     kpi_quality: "Jakość",
     discover_insights_title: "Discover AI Insights",
@@ -2889,6 +2936,11 @@ const T = {
     angles_longtail: "Long Tail SEO",
     angles_discover: "Zaměření na Discover",
     angles_threads: "Story Threads",
+    news_title: "Nejnovější zprávy",
+    news_just_now: "právě teď",
+    news_hours_ago: "před {n}h",
+    news_1_day_ago: "před 1 dnem",
+    news_days_ago: "před {n} dny",
     kpi_spell: "Pravopis",
     kpi_quality: "Kvalita",
     discover_insights_title: "Discover AI Insights",
@@ -3323,6 +3375,7 @@ async function startAnalysis(mode) {
   document.getElementById('discoverInsightsCard').style.display = 'none';
   document.getElementById('searchInsightsCard').style.display = 'none';
   document.getElementById('anglesCard').style.display = 'none';
+  document.getElementById('newsCard').style.display = 'none';
 
   try {
     if (mode === 'url') {
@@ -3348,6 +3401,7 @@ async function startAnalysis(mode) {
     let spellResult = null;
     let qualityResult = null;
     let anglesResult = null;
+  let newsHeadlines = [];
     let discoverAuthority = null;
     let searchAuthority = null;
     let aiError = null, spellError = null, qualityError = null;
@@ -3377,13 +3431,15 @@ async function startAnalysis(mode) {
     setProgress(88, t('prog_angles'));
     // Angles runs after AI so it can use aiResult for richer context
     try {
-      anglesResult = await generateEditorialAngles(title, bodyText, aiResult, url);
+      const anglesData = await generateEditorialAngles(title, bodyText, aiResult, url);
+      anglesResult = anglesData.angles;
+      newsHeadlines = anglesData.newsHeadlines;
     } catch(e) {
       console.warn('Editorial angles failed:', e.message);
     }
 
     setProgress(100, t('prog_done'));
-    renderResults(url, title, discoverChecks, contentChecks, aiResult, spellResult, qualityResult, discoverAuthority, { aiError, spellError, qualityError }, bodyText, anglesResult, searchAuthority);
+    renderResults(url, title, discoverChecks, contentChecks, aiResult, spellResult, qualityResult, discoverAuthority, { aiError, spellError, qualityError }, bodyText, anglesResult, searchAuthority, newsHeadlines);
   } catch (err) {
     showError('Error: ' + err.message);
     document.getElementById('progressBar').classList.remove('active');
@@ -3697,14 +3753,17 @@ async function startKeywordAnalysis() {
     // Step 5: Generate article ideas and angles
     setProgress(80, t('prog_kw_angles'));
     let angleIdeas = null;
+    let kwNewsHeadlines = [];
     try {
-      angleIdeas = await generateArticleAngles(kwText, parsed.entities, entityResults);
+      const anglesData = await generateArticleAngles(kwText, parsed.entities, entityResults);
+      angleIdeas = anglesData.angles;
+      kwNewsHeadlines = anglesData.newsHeadlines;
     } catch(e) {
       console.warn('Angle generation failed:', e.message);
     }
 
     setProgress(100, t('prog_done'));
-    renderKeywordResults(kwText, selectedSite, entityResults, angleIdeas);
+    renderKeywordResults(kwText, selectedSite, entityResults, angleIdeas, kwNewsHeadlines);
 
   } catch(err) {
     showError('Error: ' + err.message);
@@ -3820,28 +3879,34 @@ ENTITY EXAMPLES:
 
 async function fetchLatestNews(query) {
   // Fetch latest news headlines via Google News RSS through the proxy
+  // Returns { text: string for AI prompt, headlines: array for UI display }
   try {
     const newsUrl = 'https://news.google.com/rss/search?q=' + encodeURIComponent(query) + '&hl=en&gl=US&ceid=US:en';
     const xml = await fetchViaProxy(newsUrl);
-    if (!xml) return '';
-    // Parse RSS XML — extract <title> from <item> elements
-    const items = [];
+    if (!xml) return { text: '', headlines: [] };
+    // Parse RSS XML — extract <title> and <link> from <item> elements
+    const headlines = [];
     const itemRegex = /<item>[\s\S]*?<\/item>/g;
     let match;
-    while ((match = itemRegex.exec(xml)) !== null && items.length < 8) {
+    while ((match = itemRegex.exec(xml)) !== null && headlines.length < 10) {
       const titleMatch = match[0].match(/<title><!\[CDATA\[(.*?)\]\]><\/title>|<title>(.*?)<\/title>/);
       const pubMatch = match[0].match(/<pubDate>(.*?)<\/pubDate>/);
+      const linkMatch = match[0].match(/<link>(.*?)<\/link>/);
+      const sourceMatch = match[0].match(/<source[^>]*>(.*?)<\/source>/);
       if (titleMatch) {
         const headline = (titleMatch[1] || titleMatch[2] || '').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&#39;/g, "'").replace(/&quot;/g, '"');
         const pubDate = pubMatch ? pubMatch[1] : '';
-        items.push(headline + (pubDate ? ` (${pubDate})` : ''));
+        const link = linkMatch ? linkMatch[1] : '';
+        const source = sourceMatch ? sourceMatch[1].replace(/&amp;/g, '&') : '';
+        headlines.push({ title: headline, date: pubDate, link, source });
       }
     }
-    if (items.length === 0) return '';
-    return '\n\nLATEST NEWS HEADLINES (from Google News):\n' + items.map((h, i) => `${i + 1}. ${h}`).join('\n');
+    if (headlines.length === 0) return { text: '', headlines: [] };
+    const text = '\n\nLATEST NEWS HEADLINES (from Google News):\n' + headlines.map((h, i) => `${i + 1}. ${h.title}${h.source ? ' — ' + h.source : ''}${h.date ? ' (' + h.date + ')' : ''}`).join('\n');
+    return { text, headlines };
   } catch (e) {
     console.warn('[news] Failed to fetch latest news:', e.message);
-    return '';
+    return { text: '', headlines: [] };
   }
 }
 
@@ -3859,7 +3924,8 @@ async function generateArticleAngles(originalInput, entities, entityResults) {
 
   // Fetch latest news about the topic for grounded suggestions
   const newsQuery = entities.map(e => e.name).join(' ');
-  const latestNews = await fetchLatestNews(newsQuery || originalInput);
+  const newsResult = await fetchLatestNews(newsQuery || originalInput);
+  const latestNews = newsResult.text;
 
   const data = await callOpenAI({
     model: OPENAI_MODEL,
@@ -3917,8 +3983,8 @@ Each idea should be a specific, publishable article title. Give 3-5 ideas per ca
   });
 
   const tc = data.choices?.[0]?.message?.tool_calls?.[0];
-  if (!tc) return null;
-  return JSON.parse(tc.function.arguments);
+  if (!tc) return { angles: null, newsHeadlines: newsResult.headlines };
+  return { angles: JSON.parse(tc.function.arguments), newsHeadlines: newsResult.headlines };
 }
 
 // ========== EDITORIAL ANGLES (URL/Draft) ==========
@@ -3941,7 +4007,8 @@ async function generateEditorialAngles(title, bodyText, aiResult, articleUrl) {
 
   // Fetch latest news about the article's topic for grounded suggestions
   const newsQuery = keyword || entities || title.split(/\s+/).slice(0, 6).join(' ');
-  const latestNews = await fetchLatestNews(newsQuery);
+  const newsResult = await fetchLatestNews(newsQuery);
+  const latestNews = newsResult.text;
 
   const data = await callOpenAI({
     model: OPENAI_MODEL,
@@ -4042,8 +4109,49 @@ ${excerpt}${latestNews}` }
   });
 
   const tc = data.choices?.[0]?.message?.tool_calls?.[0];
-  if (!tc) return null;
-  return JSON.parse(tc.function.arguments);
+  if (!tc) return { angles: null, newsHeadlines: newsResult.headlines };
+  return { angles: JSON.parse(tc.function.arguments), newsHeadlines: newsResult.headlines };
+}
+
+function renderLatestNews(headlines, containerId) {
+  const card = document.getElementById(containerId);
+  if (!card) return;
+  if (!headlines || headlines.length === 0) { card.style.display = 'none'; return; }
+  card.style.display = 'block';
+
+  // Format relative time
+  function timeAgo(dateStr) {
+    if (!dateStr) return '';
+    try {
+      const d = new Date(dateStr);
+      const now = new Date();
+      const diffMs = now - d;
+      const diffH = Math.floor(diffMs / 3600000);
+      if (diffH < 1) return t('news_just_now');
+      if (diffH < 24) return t('news_hours_ago', { n: diffH });
+      const diffD = Math.floor(diffH / 24);
+      if (diffD === 1) return t('news_1_day_ago');
+      return t('news_days_ago', { n: diffD });
+    } catch(e) { return ''; }
+  }
+
+  let html = `<div style="display:flex;flex-direction:column;gap:6px">`;
+  for (const h of headlines) {
+    const ago = timeAgo(h.date);
+    const sourceHtml = h.source ? `<span style="color:var(--text-muted);font-size:11px">${esc(h.source)}</span>` : '';
+    const agoHtml = ago ? `<span style="color:var(--text-muted);font-size:11px">${esc(ago)}</span>` : '';
+    const metaParts = [sourceHtml, agoHtml].filter(Boolean);
+    html += `<div style="padding:6px 10px;background:var(--surface-2);border-radius:var(--radius-sm);font-size:13px;line-height:1.5">`;
+    if (h.link) {
+      html += `<a href="${esc(h.link)}" target="_blank" rel="noopener" style="color:var(--text);text-decoration:none;font-weight:500">${esc(h.title)}</a>`;
+    } else {
+      html += `<span style="font-weight:500">${esc(h.title)}</span>`;
+    }
+    if (metaParts.length > 0) html += `<div style="margin-top:2px">${metaParts.join(' · ')}</div>`;
+    html += `</div>`;
+  }
+  html += `</div>`;
+  document.getElementById(containerId + 'Body').innerHTML = html;
 }
 
 function renderAngles(angles) {
@@ -5099,7 +5207,7 @@ function renderSearchInsights(d) {
 }
 
 // ========== KEYWORD RESULTS RENDERER ==========
-function renderKeywordResults(inputText, selectedSite, entityResults, angleIdeas) {
+function renderKeywordResults(inputText, selectedSite, entityResults, angleIdeas, newsHeadlines) {
   document.getElementById('results').classList.remove('active');
   const container = document.getElementById('kwResults');
   container.style.display = 'block';
@@ -5266,6 +5374,38 @@ function renderKeywordResults(inputText, selectedSite, entityResults, angleIdeas
     allHtml += cardHtml;
   }
 
+  // Latest news card
+  if (newsHeadlines && newsHeadlines.length > 0) {
+    let newsHtml = `<div class="card">
+      <div class="card-header" onclick="toggleCard(this)">
+        <h3>📰 ${esc(t('news_title'))}</h3>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="card-body"><div style="display:flex;flex-direction:column;gap:6px">`;
+    for (const h of newsHeadlines) {
+      let ago = '';
+      if (h.date) {
+        try {
+          const d = new Date(h.date);
+          const diffH = Math.floor((new Date() - d) / 3600000);
+          if (diffH < 1) ago = t('news_just_now');
+          else if (diffH < 24) ago = t('news_hours_ago', { n: diffH });
+          else { const diffD = Math.floor(diffH / 24); ago = diffD === 1 ? t('news_1_day_ago') : t('news_days_ago', { n: diffD }); }
+        } catch(e) {}
+      }
+      const srcHtml = h.source ? `<span style="color:var(--text-muted);font-size:11px">${esc(h.source)}</span>` : '';
+      const agoHtml = ago ? `<span style="color:var(--text-muted);font-size:11px">${esc(ago)}</span>` : '';
+      const meta = [srcHtml, agoHtml].filter(Boolean);
+      newsHtml += `<div style="padding:6px 10px;background:var(--surface-2);border-radius:var(--radius-sm);font-size:13px;line-height:1.5">`;
+      if (h.link) newsHtml += `<a href="${esc(h.link)}" target="_blank" rel="noopener" style="color:var(--text);text-decoration:none;font-weight:500">${esc(h.title)}</a>`;
+      else newsHtml += `<span style="font-weight:500">${esc(h.title)}</span>`;
+      if (meta.length > 0) newsHtml += `<div style="margin-top:2px">${meta.join(' · ')}</div>`;
+      newsHtml += `</div>`;
+    }
+    newsHtml += `</div></div></div>`;
+    allHtml += newsHtml;
+  }
+
   // Article angles card
   if (angleIdeas) {
     let anglesHtml = `<div class="card">
@@ -5348,7 +5488,7 @@ function buildComparisonTable(topicStats, siteStats, topicLabel, includePosition
 }
 
 // ========== RENDER RESULTS ==========
-function renderResults(url, title, discoverChecks, contentChecks, aiResult, spellResult, qualityResult, discoverAuthority, errors, bodyText, anglesResult, searchAuthority) {
+function renderResults(url, title, discoverChecks, contentChecks, aiResult, spellResult, qualityResult, discoverAuthority, errors, bodyText, anglesResult, searchAuthority, newsHeadlines) {
   errors = errors || {};
   storeExportData(url, title, discoverChecks, contentChecks, aiResult, spellResult, qualityResult, discoverAuthority, bodyText, anglesResult, searchAuthority);
   document.getElementById('results').classList.add('active');
@@ -5408,6 +5548,8 @@ function renderResults(url, title, discoverChecks, contentChecks, aiResult, spel
     qualityCard.style.display = 'block';
     document.getElementById('qualityBody').innerHTML = `<div class="ai-unavailable">${t('ai_unavailable')}${errors.qualityError ? ' <span class="ai-unavailable-detail">(' + esc(errors.qualityError) + ')</span>' : ''}</div>`;
   }
+
+  renderLatestNews(newsHeadlines, 'newsCard');
 
   if (anglesResult) {
     document.getElementById('anglesCard').style.display = 'block';
