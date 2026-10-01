@@ -3818,6 +3818,33 @@ ENTITY EXAMPLES:
   return JSON.parse(tc.function.arguments);
 }
 
+async function fetchLatestNews(query) {
+  // Fetch latest news headlines via Google News RSS through the proxy
+  try {
+    const newsUrl = 'https://news.google.com/rss/search?q=' + encodeURIComponent(query) + '&hl=en&gl=US&ceid=US:en';
+    const xml = await fetchViaProxy(newsUrl);
+    if (!xml) return '';
+    // Parse RSS XML — extract <title> from <item> elements
+    const items = [];
+    const itemRegex = /<item>[\s\S]*?<\/item>/g;
+    let match;
+    while ((match = itemRegex.exec(xml)) !== null && items.length < 8) {
+      const titleMatch = match[0].match(/<title><!\[CDATA\[(.*?)\]\]><\/title>|<title>(.*?)<\/title>/);
+      const pubMatch = match[0].match(/<pubDate>(.*?)<\/pubDate>/);
+      if (titleMatch) {
+        const headline = (titleMatch[1] || titleMatch[2] || '').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&#39;/g, "'").replace(/&quot;/g, '"');
+        const pubDate = pubMatch ? pubMatch[1] : '';
+        items.push(headline + (pubDate ? ` (${pubDate})` : ''));
+      }
+    }
+    if (items.length === 0) return '';
+    return '\n\nLATEST NEWS HEADLINES (from Google News):\n' + items.map((h, i) => `${i + 1}. ${h}`).join('\n');
+  } catch (e) {
+    console.warn('[news] Failed to fetch latest news:', e.message);
+    return '';
+  }
+}
+
 async function generateArticleAngles(originalInput, entities, entityResults) {
   // Build context about what Discover data shows
   let discoverContext = '';
@@ -3830,18 +3857,32 @@ async function generateArticleAngles(originalInput, entities, entityResults) {
     if (topUrls.length > 0) discoverContext += ` Top URLs: ${topUrls.join(', ')}`;
   }
 
+  // Fetch latest news about the topic for grounded suggestions
+  const newsQuery = entities.map(e => e.name).join(' ');
+  const latestNews = await fetchLatestNews(newsQuery || originalInput);
+
   const data = await callOpenAI({
     model: OPENAI_MODEL,
     messages: [
-      { role: 'system', content: `You are a sports editorial strategist. The user wants article ideas based on topics they're exploring. You have Discover data context showing what's already performing.
+      { role: 'system', content: `You are a sports editorial strategist. The user wants article ideas based on topics they're exploring. You have Discover data context showing what's already performing, and LATEST NEWS HEADLINES showing what's happening RIGHT NOW about this topic.
+
+IMPORTANT: Use the latest news headlines to ground your suggestions in reality. Reference actual events, actual transfers, actual results, actual quotes from the news. Do NOT invent storylines that contradict what's actually happening.
 
 Generate 3 categories of article ideas:
 1. LONG TAIL SEO: Timeless articles targeting long-tail search queries. Think rankings, records, historical comparisons, ultimate guides, explainers, "best of" lists, rule breakdowns — content that ranks for months or years. Focus on specific queries real users search for.
-2. DISCOVER FOCUSED: Articles optimized for Google Discover. Think trending, timely, emotionally engaging, visually rich. Titles that create curiosity gaps. Topics with current momentum that would get high engagement in a feed-based environment. Use the Discover data context to identify what's already performing and double down.
-3. STORY THREADS: Cascade follow-up articles that naturally branch from the main story. Think cause-and-effect chains: if the topic is a transfer, what about the coach's reaction, the departing club's next move, key players' responses, tactical impact, replacement search? If it's a match result, what about standings impact, player ratings, injury updates, next fixture preview? Map the full story ecosystem — every story creates 3-5 natural follow-ups that readers want next. This applies to ALL content types: transfers, match reports, injuries, coaching changes, tournament draws, contract renewals, retirements, scandals, tactical shifts.
+2. DISCOVER FOCUSED: Articles with high Google Discover potential. To qualify, an angle MUST meet ALL of these criteria: (a) it is directly connected to the entities and topic the user is researching — never invent unrelated storylines, (b) it has a realistic news hook — something that is actually happening or could plausibly happen right now based on current context, (c) it triggers curiosity or emotional engagement — the kind of title a reader taps in their feed. Good Discover angles: a surprising stat about one of the entities, a "what happens if" scenario grounded in real stakes, a reaction or opinion piece tied to an actual event, a comparison that puts things in perspective. BAD Discover angles: fictional scenarios, made-up controversies, clickbait with no substance, stories about entities not related to the topic. Use the Discover data context to see what topics already perform — suggest angles in that space.
+3. STORY THREADS: Cascade follow-up articles that naturally branch from the main story. Map the full ecosystem of reactions and consequences this topic creates. Examples by content type:
+- FOOTBALL TRANSFER: coach reaction, departing club's plan B, player's stats comparison at new club, tactical fit analysis, fan reaction, financial impact on both clubs, replacement search
+- MATCH RESULT: standings impact, player ratings deep-dive, injury update, next fixture preview, tactical analysis, referee decisions breakdown, post-match quotes reaction
+- BASKETBALL (NBA/EuroLeague): trade impact on roster, playoff implications, coach rotation changes, salary cap consequences, rivalry narrative
+- UFC/MMA: next opponent matchup, ranking implications, weight class shakeup, training camp story, post-fight medical update, callout reactions
+- COACHING CHANGE: new coach's tactical philosophy, players who benefit/lose, previous club comparison, first transfer targets, fan expectations
+- INJURY: replacement options, timeline and comeback story, team's depth analysis, fantasy/betting impact, historical similar injuries
+- TOURNAMENT DRAW: group death analysis, travel logistics, historical head-to-heads, qualification scenarios, dark horse narratives
+Think beyond football. Every sport and every content type has its own cascade chain. The key question is: "what does the reader want to know NEXT after reading this story?"
 
 Each idea should be a specific, publishable article title. Give 3-5 ideas per category. Be creative and specific based on the actual topic.` },
-      { role: 'user', content: `User input: "${originalInput}"\n\nExtracted topics: ${entities.map(e => e.name).join(', ')}\n\nDiscover data context:${discoverContext || ' (no matching data found)'}` }
+      { role: 'user', content: `User input: "${originalInput}"\n\nExtracted topics: ${entities.map(e => e.name).join(', ')}\n\nDiscover data context:${discoverContext || ' (no matching data found)'}${latestNews}` }
     ],
     tools: [{
       type: 'function',
@@ -3898,22 +3939,36 @@ async function generateEditorialAngles(title, bodyText, aiResult, articleUrl) {
   const words = bodyText.split(/\s+/);
   const excerpt = words.slice(0, 1500).join(' ');
 
+  // Fetch latest news about the article's topic for grounded suggestions
+  const newsQuery = keyword || entities || title.split(/\s+/).slice(0, 6).join(' ');
+  const latestNews = await fetchLatestNews(newsQuery);
+
   const data = await callOpenAI({
     model: OPENAI_MODEL,
     messages: [
-      { role: 'system', content: `You are a senior sports editorial strategist. You just reviewed an article and need to suggest follow-up article angles the newsroom should consider.
+      { role: 'system', content: `You are a senior sports editorial strategist. You just reviewed an article and need to suggest follow-up article angles the newsroom should consider. You also have LATEST NEWS HEADLINES showing what's happening RIGHT NOW about this topic.
 
 Your suggestions must be EDITORIALLY GROUNDED:
+- Use the latest news headlines to ground your suggestions in reality. Reference actual events, actual transfers, actual results, actual quotes from the news.
 - Based on what's ACTUALLY at stake right now for the teams/players/topics in the article
 - Consider the current sports calendar: league standings, upcoming fixtures, transfer windows, international breaks, tournaments
 - Think about what readers who just read THIS article would want to read next
 - Avoid generic angles that could apply to any team/player — be specific to the entities and context
+- Do NOT invent storylines that contradict what's actually happening in the news
 - Each suggestion should be a concrete, publishable article title in the article's language
 
 Generate 3 categories of follow-up ideas:
 1. LONG TAIL SEO: Timeless articles targeting long-tail search queries around this topic. Think rankings, records, historical comparisons, ultimate guides, explainers, "best of" lists, rule breakdowns — content that ranks for months or years. Focus on specific queries real users search for after reading this article.
-2. DISCOVER FOCUSED: Articles optimized for Google Discover. Trending, timely, emotionally engaging, visually rich. Titles that create curiosity gaps. Topics with current momentum — what would get high engagement in a feed-based environment right now, connected to this article's topic.
-3. STORY THREADS: Cascade follow-up articles that naturally branch from this story. Think cause-and-effect chains: if this article covers a transfer, what about the coach's reaction, the departing club's next move, key players' responses, tactical impact, replacement search? If it covers a match result, what about standings impact, player ratings, injury updates, next fixture preview? Map the full story ecosystem — every story creates 3-5 natural follow-ups readers want next. This applies to ALL content types: transfers, match reports, injuries, coaching changes, tournament draws, contracts, retirements, tactical analysis.
+2. DISCOVER FOCUSED: Articles with high Google Discover potential. Every angle MUST meet ALL of these criteria: (a) it is directly connected to the entities and topic of the original article — never invent unrelated storylines, (b) it has a realistic news hook — something that is actually happening or could plausibly happen right now based on the article's context, (c) it triggers curiosity or emotional engagement — the kind of title a reader taps in their feed. Good Discover angles: a surprising stat about one of the article's entities, a "what happens if" scenario grounded in real stakes, a reaction or opinion piece tied to an actual event, a comparison that puts things in perspective. BAD Discover angles: fictional scenarios, made-up controversies, clickbait with no substance, stories about entities not mentioned in the article.
+3. STORY THREADS: Cascade follow-up articles that naturally branch from this story. Map the full ecosystem of reactions and consequences. Examples by content type:
+- FOOTBALL TRANSFER: coach reaction, departing club's plan B, stats comparison at new club, tactical fit, fan reaction, financial impact, replacement search
+- MATCH RESULT: standings impact, player ratings, injury update, next fixture preview, tactical analysis, referee decisions, post-match quotes
+- BASKETBALL (NBA/EuroLeague): trade impact on roster, playoff implications, rotation changes, salary cap, rivalry narrative
+- UFC/MMA: next opponent matchup, ranking implications, weight class shakeup, training camp story, post-fight medical, callout reactions
+- COACHING CHANGE: tactical philosophy, players who benefit/lose, previous club comparison, first transfer targets, fan expectations
+- INJURY: replacement options, comeback timeline, team depth, fantasy/betting impact, historical comparisons
+- TOURNAMENT DRAW: group analysis, historical head-to-heads, qualification scenarios, dark horse narratives
+Think beyond football. The key question is: "what does the reader want to know NEXT after reading this article?"
 
 Give 3-4 ideas per category. Each idea should include:
 - A specific article title (in the article's language)
@@ -3931,7 +3986,7 @@ STRENGTHS: ${strengths || 'n/a'}
 WEAKNESSES: ${weaknesses || 'n/a'}
 
 ARTICLE EXCERPT:
-${excerpt}` }
+${excerpt}${latestNews}` }
     ],
     tools: [{
       type: 'function',
