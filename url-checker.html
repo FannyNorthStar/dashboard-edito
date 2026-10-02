@@ -3258,21 +3258,22 @@ const DOMAIN_TAB_MAP = {
   'umdoisesportes.com.br': 'UMDOISESPORTES',
   'afrik-foot.com': 'AFRIKFOOTFR',
   'afrikfoot.com': 'AFRIKFOOTFR',
-  'za.afrik-foot.com': 'AFRIKFOOTZA',
-  'ng.afrik-foot.com': 'AFRIKFOOTNG',
+  'za.afrik-foot.com': 'AFRIKFOOTZA',  // legacy subdomain alias
+  'ng.afrik-foot.com': 'AFRIKFOOTNG',  // legacy subdomain alias
   'footballwhispers.com': 'FOOTBALLWHISPERS',
   'footballgroundguide.com': 'FOOTBALLGROUNDGUIDE',
   'mrfixitstips.co.uk': 'MRFIXITSTIPS',
   'solobasket.com': 'SOLOBASKET',
   'fotbalportal.cz': 'FOTBALPORTAL',
-  'vrfringe.com': 'VRINGE',
-  'alairelibrechile.cl': 'ALAIRELIBRE',
+  'vringe.com': 'VRINGE',
+  'alairelibre.cl': 'ALAIRELIBRE',
   'calciodangolo.com': 'CALCIODANGOLO',
   'soccernet.ng': 'SOCCERNET',
   'basketusa.com': 'BASKETUSA',
   'basketeurope.com': 'BASKETEUROPE',
-  'lubsport.com': 'LUBSPORT',
+  'lubsport.pl': 'LUBSPORT',
   'lakersbrasil.com': 'LAKERSBRASIL',
+  'futdados.com': 'FUTDADOS',
 };
 // Display labels for tab codes (used by SITE_OPTIONS and keyword checker)
 const TAB_LABELS = {
@@ -3286,7 +3287,28 @@ const TAB_LABELS = {
   'SOCCERNET': 'Soccernet', 'BASKETUSA': 'Basket USA',
   'BASKETEUROPE': 'Basket Europe', 'LUBSPORT': 'LubSport',
   'LAKERSBRASIL': 'Lakers Brasil',
+  'FUTDADOS': 'FutDados',
 };
+
+// Path-based overrides for sites sharing the same domain (e.g. afrik-foot.com/en-ng/)
+const PATH_TAB_OVERRIDES = [
+  { domain: 'afrik-foot.com', pathPrefix: '/en-ng/', tab: 'AFRIKFOOTNG' },
+  { domain: 'afrik-foot.com', pathPrefix: '/en-za/', tab: 'AFRIKFOOTZA' },
+];
+
+// Resolve URL to tab code: checks path overrides first, then domain map
+function resolveTab(url) {
+  try {
+    const u = new URL(url);
+    const host = u.hostname.replace(/^www\./, '');
+    const path = u.pathname;
+    // Check path-based overrides first (more specific wins)
+    for (const o of PATH_TAB_OVERRIDES) {
+      if (host === o.domain && path.startsWith(o.pathPrefix)) return o.tab;
+    }
+    return DOMAIN_TAB_MAP[u.hostname] || DOMAIN_TAB_MAP[host] || null;
+  } catch(e) { return null; }
+}
 
 // ========== MODE TABS ==========
 const SITE_OPTIONS = [
@@ -3534,6 +3556,10 @@ async function fetchSourceData(sheetUrl, tab) {
     if (domains.length === 0) return rows;
     return rows.filter(r => {
       try {
+        // Use resolveTab for path-aware matching (e.g. afrik-foot.com/en-ng/)
+        const resolved = resolveTab(r.url);
+        if (resolved === tab) return true;
+        // Fallback: plain domain match
         const h = new URL(r.url).hostname.replace(/^www\./, '');
         return domains.includes(h);
       } catch { return false; }
@@ -3645,8 +3671,11 @@ async function startKeywordAnalysis() {
       }
     }
 
+    // Even with no Discover/Search data, continue — angles + news still work
     if (Object.keys(sourceData).length === 0) {
-      throw new Error(t('kw_no_data'));
+      // Create an empty entry so the flow continues
+      sourceData[tabsToCheck[0]] = { d30: [], d10: [], search: [] };
+      console.warn(`[keyword] No source data found for ${tabsToCheck[0]}, proceeding with angles + news only`);
     }
 
     // Step 4: Match entities — broad first (GPT), then niche (set intersection, no GPT)
@@ -4865,9 +4894,7 @@ async function runDiscoverAuthority(url, title) {
   const sheetUrl = localStorage.getItem('media_dashboard_discover_sheet') || DEFAULT_DISCOVER_SHEET;
   if (!sheetUrl) return null;
 
-  let hostname;
-  try { hostname = new URL(url).hostname; } catch(e) { return null; }
-  const tab = DOMAIN_TAB_MAP[hostname] || DOMAIN_TAB_MAP[hostname.replace('www.', '')];
+  const tab = resolveTab(url);
   if (!tab) return null;
 
   // Use fetchSourceData for tab-name resilience across all sheets
@@ -5094,9 +5121,7 @@ async function runSearchAuthority(url, title) {
   const sheetUrl = localStorage.getItem('media_dashboard_search_sheet') || DEFAULT_SEARCH_SHEET;
   if (!sheetUrl) return null;
 
-  let hostname;
-  try { hostname = new URL(url).hostname; } catch(e) { return null; }
-  const tab = DOMAIN_TAB_MAP[hostname] || DOMAIN_TAB_MAP[hostname.replace('www.', '')];
+  const tab = resolveTab(url);
   if (!tab) return null;
 
   // Use fetchSourceData for tab-name resilience (handles mismatched tab names)
