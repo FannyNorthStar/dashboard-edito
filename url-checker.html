@@ -4147,9 +4147,68 @@ async function fetchLatestNews(query, maxAgeDays = 7) {
   }
 }
 
+async function scoreNewsRelevance(headlines, query) {
+  // Use gpt-4o-mini to score each headline 1-5 for relevance to the query.
+  // Returns only headlines scoring >= 3. Cheap and fast.
+  if (!headlines || headlines.length === 0) return [];
+  try {
+    const numbered = headlines.map((h, i) => `${i + 1}. ${h.title}`).join('\n');
+    const data = await callOpenAI({
+      model: 'gpt-4o-mini',
+      messages: [
+        { role: 'system', content: `You score news headlines for relevance to a specific sports topic. Score each headline 1-5:
+5 = Directly about the topic (exact team/player/event match)
+4 = Closely related (same league context, direct opponent, key transfer involving the entity)
+3 = Tangentially related (same sport/region, could be useful context)
+2 = Loosely connected (only shares a keyword but different subject)
+1 = Not relevant (different team/player/event, coincidental keyword match)
+
+Be strict. "Morocco" in a headline about Canada's roster for a tournament in Morocco = 2, not 4. Focus on whether the headline gives useful editorial context about the queried topic.` },
+        { role: 'user', content: `Topic query: "${query}"\n\nHeadlines to score:\n${numbered}` }
+      ],
+      tools: [{
+        type: 'function',
+        function: {
+          name: 'score_headlines',
+          description: 'Score each headline for relevance',
+          parameters: {
+            type: 'object',
+            properties: {
+              scores: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    index: { type: 'integer', description: '1-based headline number' },
+                    score: { type: 'integer', description: 'Relevance score 1-5' }
+                  },
+                  required: ['index', 'score']
+                }
+              }
+            },
+            required: ['scores']
+          }
+        }
+      }],
+      tool_choice: { type: 'function', function: { name: 'score_headlines' } },
+      temperature: 0
+    });
+    const tc = data.choices?.[0]?.message?.tool_calls?.[0];
+    if (!tc) return headlines;
+    const result = JSON.parse(tc.function.arguments);
+    const scoreMap = new Map();
+    for (const s of (result.scores || [])) scoreMap.set(s.index, s.score);
+    // Keep headlines with score >= 3
+    return headlines.filter((_, i) => (scoreMap.get(i + 1) || 0) >= 4);
+  } catch (e) {
+    console.warn('[news] Relevance scoring failed, returning unfiltered:', e.message);
+    return headlines;
+  }
+}
+
 async function fetchTieredNews(entities, fallbackQuery) {
   // Tier 1: all entities combined. Tier 2: per-entity individual fetches.
-  // Deduplicates across tiers (Tier 1 wins).
+  // Deduplicates across tiers, then AI-filters for relevance.
   const entityNames = Array.isArray(entities)
     ? entities.map(e => typeof e === 'string' ? e : e.name).filter(Boolean)
     : [];
@@ -4160,30 +4219,48 @@ async function fetchTieredNews(entities, fallbackQuery) {
   const tier1Titles = new Set(tier1Result.headlines.map(h => h.title.toLowerCase().trim()));
 
   // Tier 2 — per entity (only if >1 entity; skip if single entity = same as combined)
-  const tier2 = {};
+  const tier2Raw = {};
   if (entityNames.length > 1) {
     const perEntityPromises = entityNames.map(name => fetchLatestNews(name).then(r => ({ name, result: r })));
     const perEntityResults = await Promise.all(perEntityPromises);
     for (const { name, result } of perEntityResults) {
       // Deduplicate: remove headlines already in Tier 1
       const unique = result.headlines.filter(h => !tier1Titles.has(h.title.toLowerCase().trim()));
-      if (unique.length > 0) tier2[name] = unique;
+      if (unique.length > 0) tier2Raw[name] = unique;
     }
   }
 
+  // AI relevance filtering — single call for Tier 1, one per Tier 2 entity
+  const scoringPromises = [];
+  scoringPromises.push(scoreNewsRelevance(tier1Result.headlines, combinedQuery).then(filtered => ({ key: '__tier1__', filtered })));
+  for (const [name, headlines] of Object.entries(tier2Raw)) {
+    scoringPromises.push(scoreNewsRelevance(headlines, name).then(filtered => ({ key: name, filtered })));
+  }
+  const scoringResults = await Promise.all(scoringPromises);
+
+  let filteredTier1 = [];
+  const tier2 = {};
+  for (const { key, filtered } of scoringResults) {
+    if (key === '__tier1__') filteredTier1 = filtered;
+    else if (filtered.length > 0) tier2[key] = filtered;
+  }
+
   // Build combined text for AI prompt
-  let allText = tier1Result.text;
+  let allText = '';
+  if (filteredTier1.length > 0) {
+    allText = '\n\nLATEST NEWS HEADLINES (from Google News):\n' + filteredTier1.map((h, i) => `${i + 1}. ${h.title}${h.source ? ' — ' + h.source : ''}${h.date ? ' (' + h.date + ')' : ''}`).join('\n');
+  }
   for (const [name, headlines] of Object.entries(tier2)) {
     allText += '\n\nNEWS SPECIFIC TO ' + name.toUpperCase() + ':\n' +
       headlines.map((h, i) => `${i + 1}. ${h.title}${h.source ? ' — ' + h.source : ''}${h.date ? ' (' + h.date + ')' : ''}`).join('\n');
   }
 
   return {
-    tier1: tier1Result.headlines,
+    tier1: filteredTier1,
     tier2,
     text: allText,
     allHeadlines: [
-      ...tier1Result.headlines,
+      ...filteredTier1,
       ...Object.values(tier2).flat()
     ]
   };
