@@ -4106,12 +4106,12 @@ async function fetchLatestNews(query, maxAgeDays = 7) {
     const xml = await fetchViaProxy(newsUrl);
     if (!xml) return { text: '', headlines: [] };
     // Parse RSS XML — extract <title> and <link> from <item> elements
-    const headlines = [];
+    const allParsed = [];
     const now = new Date();
     const maxAgeMs = maxAgeDays * 24 * 3600000;
     const itemRegex = /<item>[\s\S]*?<\/item>/g;
     let match;
-    while ((match = itemRegex.exec(xml)) !== null && headlines.length < 10) {
+    while ((match = itemRegex.exec(xml)) !== null) {
       const titleMatch = match[0].match(/<title><!\[CDATA\[(.*?)\]\]><\/title>|<title>(.*?)<\/title>/);
       const pubMatch = match[0].match(/<pubDate>(.*?)<\/pubDate>/);
       const linkMatch = match[0].match(/<link>(.*?)<\/link>/);
@@ -4128,10 +4128,17 @@ async function fetchLatestNews(query, maxAgeDays = 7) {
             if (now - articleDate > maxAgeMs) continue;
           } catch(e) {}
         }
-        headlines.push({ title: headline, date: pubDate, link, source });
+        allParsed.push({ title: headline, date: pubDate, link, source });
       }
     }
-    if (headlines.length === 0) return { text: '', headlines: [] };
+    if (allParsed.length === 0) return { text: '', headlines: [] };
+    // Sort by most recent first, then cap at 15
+    allParsed.sort((a, b) => {
+      const da = a.date ? new Date(a.date).getTime() : 0;
+      const db = b.date ? new Date(b.date).getTime() : 0;
+      return db - da;
+    });
+    const headlines = allParsed.slice(0, 15);
     const text = '\n\nLATEST NEWS HEADLINES (from Google News):\n' + headlines.map((h, i) => `${i + 1}. ${h.title}${h.source ? ' — ' + h.source : ''}${h.date ? ' (' + h.date + ')' : ''}`).join('\n');
     return { text, headlines };
   } catch (e) {
