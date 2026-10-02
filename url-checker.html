@@ -4102,7 +4102,9 @@ async function fetchLatestNews(query, maxAgeDays = 7) {
   // Returns { text: string for AI prompt, headlines: array for UI display }
   // maxAgeDays: filter out articles older than this (default 7 days)
   try {
-    const newsUrl = 'https://news.google.com/rss/search?q=' + encodeURIComponent(query) + '&hl=en&gl=US&ceid=US:en';
+    // Append "sport" to bias Google News results toward sports content
+    const sportQuery = query + ' sport';
+    const newsUrl = 'https://news.google.com/rss/search?q=' + encodeURIComponent(sportQuery) + '&hl=en&gl=US&ceid=US:en';
     const xml = await fetchViaProxy(newsUrl);
     if (!xml) return { text: '', headlines: [] };
     // Parse RSS XML — extract <title> and <link> from <item> elements
@@ -4156,14 +4158,22 @@ async function scoreNewsRelevance(headlines, query) {
     const data = await callOpenAI({
       model: 'gpt-4o-mini',
       messages: [
-        { role: 'system', content: `You score news headlines for relevance to a specific sports topic. Score each headline 1-5:
-5 = Directly about the topic (exact team/player/event match)
+        { role: 'system', content: `You score news headlines for relevance to a specific sports topic. This tool is used by SPORTS PUBLISHERS ONLY — every query is about sport, never about politics, tourism, culture, or general city news.
+
+IMPORTANT CONTEXT RULE: When a query contains a city or country name, ALWAYS interpret it as the sports entity (team, national team, club). "Liverpool" = Liverpool FC. "Morocco" = Morocco national football team. "Paris" = PSG. "Milan" = AC Milan or Inter Milan. Never score city politics, tourism, economy, or non-sport news as relevant.
+
+Score each headline 1-5:
+5 = Directly about the sports topic (exact team/player/event match)
 4 = Closely related (same league context, direct opponent, key transfer involving the entity)
 3 = Tangentially related (same sport/region, could be useful context)
-2 = Loosely connected (only shares a keyword but different subject)
-1 = Not relevant (different team/player/event, coincidental keyword match)
+2 = Loosely connected (shares a keyword but different subject, OR same name but non-sport news)
+1 = Not relevant (different sport entity, non-sport news, coincidental keyword match)
 
-Be strict. "Morocco" in a headline about Canada's roster for a tournament in Morocco = 2, not 4. Focus on whether the headline gives useful editorial context about the queried topic.` },
+Be strict. Examples:
+- "Morocco" query + headline about Canada's roster for a tournament hosted in Morocco = 2
+- "Liverpool" query + headline about Liverpool city council = 1
+- "Liverpool" query + headline about Arne Slot's press conference = 5
+- "Morocco" query + headline about Morocco tourism revenue = 1` },
         { role: 'user', content: `Topic query: "${query}"\n\nHeadlines to score:\n${numbered}` }
       ],
       tools: [{
