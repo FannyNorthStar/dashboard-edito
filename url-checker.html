@@ -148,6 +148,27 @@ body {
 }
 .site-select:focus { border-color: var(--accent); }
 
+/* TICK CASES */
+.tick-row {
+  display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0;
+}
+.tick-chip {
+  display: flex; align-items: center; gap: 5px;
+  padding: 5px 10px; border-radius: 16px;
+  background: var(--surface-2); border: 1px solid var(--border);
+  cursor: pointer; font-size: 12px; user-select: none;
+  transition: all 0.2s;
+}
+.tick-chip:hover { border-color: var(--accent); }
+.tick-chip input[type="checkbox"] {
+  width: 14px; height: 14px; margin: 0; cursor: pointer;
+  accent-color: var(--accent);
+}
+.tick-chip span { color: var(--text-muted); transition: color 0.2s; }
+.tick-chip:has(input:checked) { background: var(--accent-glow, #eef); border-color: var(--accent); }
+.tick-chip:has(input:checked) span { color: var(--text); font-weight: 500; }
+
+
 /* DIVIDER */
 .input-divider {
   display: flex; align-items: center; gap: 12px;
@@ -735,6 +756,12 @@ body {
         <select class="site-select" id="kwSiteSelect"></select>
       </div>
       <textarea class="html-textarea" id="kwInput" data-t-placeholder="kw_placeholder" placeholder="Describe your article idea, keywords, or topic... e.g. 'Liverpool transfer Dutch midfielder' or 'I want to write about the best wonderkids in Eredivisie'" style="min-height:120px;font-family:inherit"></textarea>
+      <div class="tick-row" id="kwTicks">
+        <label class="tick-chip"><input type="checkbox" id="kwTickDiscoverAuth" checked> <span data-t="tick_topic_discover">Topic Authority Discover</span></label>
+        <label class="tick-chip"><input type="checkbox" id="kwTickSearchAuth" checked> <span data-t="tick_topic_search">Topic Authority Search</span></label>
+        <label class="tick-chip"><input type="checkbox" id="kwTickAngles" checked> <span data-t="tick_angles">Article Angles</span></label>
+        <label class="tick-chip"><input type="checkbox" id="kwTickNews" checked> <span data-t="tick_news">Latest News</span></label>
+      </div>
       <button class="btn" id="analyzeBtnKw" onclick="startAnalysis('keyword')" style="width:100%">
         <span id="btnTextKw" data-t="btn_check_kw">Check Keywords</span>
         <div class="spinner" id="btnSpinnerKw" style="display:none"></div>
@@ -745,6 +772,15 @@ body {
       <div class="input-row">
         <input type="text" id="urlInput" data-t-placeholder="input_placeholder" placeholder="https://www.example.com/my-article" autocomplete="url">
       </div>
+      <div class="tick-row" id="urlTicks">
+        <label class="tick-chip"><input type="checkbox" id="urlTickContent" checked> <span data-t="tick_content">Content Analysis</span></label>
+        <label class="tick-chip"><input type="checkbox" id="urlTickSpell" checked> <span data-t="tick_spell">Spell Check</span></label>
+        <label class="tick-chip"><input type="checkbox" id="urlTickQuality" checked> <span data-t="tick_quality">Google Quality Rater</span></label>
+        <label class="tick-chip"><input type="checkbox" id="urlTickDiscoverAuth" checked> <span data-t="tick_discover_auth">Discover Authority</span></label>
+        <label class="tick-chip"><input type="checkbox" id="urlTickSearchAuth" checked> <span data-t="tick_search_auth">Search Authority</span></label>
+        <label class="tick-chip"><input type="checkbox" id="urlTickAngles" checked> <span data-t="tick_angles">Article Angles</span></label>
+        <label class="tick-chip"><input type="checkbox" id="urlTickNews" checked> <span data-t="tick_news">Latest News</span></label>
+      </div>
       <button class="btn" id="analyzeBtnUrl" onclick="startAnalysis('url')" style="width:100%">
         <span id="btnTextUrl" data-t="btn_check_url">Check URL</span>
         <div class="spinner" id="btnSpinnerUrl" style="display:none"></div>
@@ -753,6 +789,13 @@ body {
 
     <div class="mode-panel" id="panelHtml">
       <textarea class="html-textarea" id="htmlInput" data-t-placeholder="html_placeholder" placeholder="Paste your HTML source code here..."></textarea>
+      <div class="tick-row" id="draftTicks">
+        <label class="tick-chip"><input type="checkbox" id="draftTickContent" checked> <span data-t="tick_content">Content Analysis</span></label>
+        <label class="tick-chip"><input type="checkbox" id="draftTickSpell" checked> <span data-t="tick_spell">Spell Check</span></label>
+        <label class="tick-chip"><input type="checkbox" id="draftTickQuality" checked> <span data-t="tick_quality">Google Quality Rater</span></label>
+        <label class="tick-chip"><input type="checkbox" id="draftTickAngles" checked> <span data-t="tick_angles">Article Angles</span></label>
+        <label class="tick-chip"><input type="checkbox" id="draftTickNews" checked> <span data-t="tick_news">Latest News</span></label>
+      </div>
       <button class="btn" id="analyzeBtnHtml" onclick="startAnalysis('html')" style="width:100%">
         <span id="btnTextHtml" data-t="btn_check_html">Check HTML</span>
         <div class="spinner" id="btnSpinnerHtml" style="display:none"></div>
@@ -1097,6 +1140,15 @@ const T = {
     news_hours_ago: "{n}h ago",
     news_1_day_ago: "1 day ago",
     news_days_ago: "{n} days ago",
+    tick_content: 'Content Analysis',
+    tick_spell: 'Spell Check',
+    tick_quality: 'Google Quality Rater',
+    tick_discover_auth: 'Discover Authority',
+    tick_search_auth: 'Search Authority',
+    tick_angles: 'Article Angles',
+    tick_news: 'Latest News',
+    tick_topic_discover: 'Topic Authority Discover',
+    tick_topic_search: 'Topic Authority Search',
     err_empty_html: "Paste HTML code to analyze.",
     kpi_spell: "Spelling",
     kpi_quality: "Quality",
@@ -1330,6 +1382,15 @@ const T = {
     news_hours_ago: "il y a {n}h",
     news_1_day_ago: "il y a 1 jour",
     news_days_ago: "il y a {n} jours",
+    tick_content: 'Analyse du contenu',
+    tick_spell: 'Orthographe',
+    tick_quality: 'Google Quality Rater',
+    tick_discover_auth: 'Autorite Discover',
+    tick_search_auth: 'Autorite Search',
+    tick_angles: 'Idees d\'articles',
+    tick_news: 'Dernieres actus',
+    tick_topic_discover: 'Autorite Discover',
+    tick_topic_search: 'Autorite Search',
     err_empty_html: "Collez du code HTML à analyser.",
     kpi_spell: "Orthographe",
     kpi_quality: "Qualité",
@@ -2711,6 +2772,15 @@ const T = {
     news_hours_ago: "{n}h temu",
     news_1_day_ago: "1 dzień temu",
     news_days_ago: "{n} dni temu",
+    tick_content: 'Analiza tresci',
+    tick_spell: 'Ortografia',
+    tick_quality: 'Google Quality Rater',
+    tick_discover_auth: 'Autorytet Discover',
+    tick_search_auth: 'Autorytet Search',
+    tick_angles: 'Pomysly na artykuly',
+    tick_news: 'Najnowsze wiadomosci',
+    tick_topic_discover: 'Autorytet Discover',
+    tick_topic_search: 'Autorytet Search',
     kpi_spell: "Ortografia",
     kpi_quality: "Jakość",
     discover_insights_title: "Discover AI Insights",
@@ -3428,36 +3498,43 @@ async function startAnalysis(mode) {
     let searchAuthority = null;
     let aiError = null, spellError = null, qualityError = null;
 
-    // Run AI calls in parallel — they are independent
-    setProgress(62, t('prog_ai'));
-    const aiPromises = [
-      runAIAnalysis(url, title, bodyText).catch(e => { aiError = e.message; console.warn('AI analysis failed:', e.message); return null; }),
-      runSpellcheck(bodyText, doc).catch(e => { spellError = e.message; console.warn('Spellcheck failed:', e.message); return null; }),
-      runQualityCheck(title, bodyText, url).catch(e => { qualityError = e.message; console.warn('Quality check failed:', e.message); return null; }),
-    ];
-    // Discover + Search authority run in parallel too (URL mode only)
-    if (mode === 'url') {
-      aiPromises.push(runDiscoverAuthority(url, title).catch(e => { console.warn('Discover authority failed:', e.message); return null; }));
-      aiPromises.push(runSearchAuthority(url, title).catch(e => { console.warn('Search authority failed:', e.message); return null; }));
-    }
+    // Read tick-case selections
+    const prefix = mode === 'url' ? 'urlTick' : 'draftTick';
+    const doContent = document.getElementById(prefix + 'Content')?.checked ?? true;
+    const doSpell = document.getElementById(prefix + 'Spell')?.checked ?? true;
+    const doQuality = document.getElementById(prefix + 'Quality')?.checked ?? true;
+    const doDiscoverAuth = mode === 'url' && (document.getElementById(prefix + 'DiscoverAuth')?.checked ?? true);
+    const doSearchAuth = mode === 'url' && (document.getElementById(prefix + 'SearchAuth')?.checked ?? true);
+    const doAngles = document.getElementById(prefix + 'Angles')?.checked ?? true;
+    const doNews = document.getElementById(prefix + 'News')?.checked ?? true;
 
-    const [aiRes, spellRes, qualityRes, discoverAuth, searchAuth] = await Promise.all(aiPromises);
-    aiResult = aiRes;
-    spellResult = spellRes;
-    qualityResult = qualityRes;
-    if (mode === 'url') {
-      discoverAuthority = discoverAuth || null;
-      searchAuthority = searchAuth || null;
-    }
+    // Run selected AI calls in parallel — they are independent
+    setProgress(62, t('prog_ai'));
+    const aiPromises = [];
+    const aiLabels = [];
+    if (doContent) { aiPromises.push(runAIAnalysis(url, title, bodyText).catch(e => { aiError = e.message; console.warn('AI analysis failed:', e.message); return null; })); aiLabels.push('content'); }
+    if (doSpell) { aiPromises.push(runSpellcheck(bodyText, doc).catch(e => { spellError = e.message; console.warn('Spellcheck failed:', e.message); return null; })); aiLabels.push('spell'); }
+    if (doQuality) { aiPromises.push(runQualityCheck(title, bodyText, url).catch(e => { qualityError = e.message; console.warn('Quality check failed:', e.message); return null; })); aiLabels.push('quality'); }
+    if (doDiscoverAuth) { aiPromises.push(runDiscoverAuthority(url, title).catch(e => { console.warn('Discover authority failed:', e.message); return null; })); aiLabels.push('discoverAuth'); }
+    if (doSearchAuth) { aiPromises.push(runSearchAuthority(url, title).catch(e => { console.warn('Search authority failed:', e.message); return null; })); aiLabels.push('searchAuth'); }
+
+    const aiResults = await Promise.all(aiPromises);
+    aiResult = aiLabels.includes('content') ? aiResults[aiLabels.indexOf('content')] : null;
+    spellResult = aiLabels.includes('spell') ? aiResults[aiLabels.indexOf('spell')] : null;
+    qualityResult = aiLabels.includes('quality') ? aiResults[aiLabels.indexOf('quality')] : null;
+    discoverAuthority = aiLabels.includes('discoverAuth') ? (aiResults[aiLabels.indexOf('discoverAuth')] || null) : null;
+    searchAuthority = aiLabels.includes('searchAuth') ? (aiResults[aiLabels.indexOf('searchAuth')] || null) : null;
 
     setProgress(88, t('prog_angles'));
     // Angles runs after AI so it can use aiResult for richer context
-    try {
-      const anglesData = await generateEditorialAngles(title, bodyText, aiResult, url);
-      anglesResult = anglesData.angles;
-      newsHeadlines = anglesData.newsHeadlines;
-    } catch(e) {
-      console.warn('Editorial angles failed:', e.message);
+    if (doAngles || doNews) {
+      try {
+        const anglesData = await generateEditorialAngles(title, bodyText, aiResult, url, doNews);
+        if (doAngles) anglesResult = anglesData.angles;
+        newsHeadlines = anglesData.newsHeadlines || [];
+      } catch(e) {
+        console.warn('Editorial angles failed:', e.message);
+      }
     }
 
     setProgress(100, t('prog_done'));
@@ -3652,20 +3729,30 @@ async function startKeywordAnalysis() {
     // Step 2: Site to check (single site only)
     const tabsToCheck = [selectedSite];
 
-    // Step 3: Fetch 3 sources per tab (D30 + D10 + Search)
+    // Read tick-case selections
+    const doDiscoverAuth = document.getElementById('kwTickDiscoverAuth')?.checked ?? true;
+    const doSearchAuth = document.getElementById('kwTickSearchAuth')?.checked ?? true;
+    const doAngles = document.getElementById('kwTickAngles')?.checked ?? true;
+    const doNews = document.getElementById('kwTickNews')?.checked ?? true;
+
+    // Step 3: Fetch sources per tab (only what's ticked)
     const sourceData = {}; // { tab: { d30, d10, search } }
     let fetchIdx = 0;
     const totalFetches = tabsToCheck.length;
 
     for (const tab of tabsToCheck) {
       fetchIdx++;
-      // Sequential fetches to avoid overwhelming the GAS proxy with concurrent calls
-      setProgress(5 + Math.round(8 * fetchIdx / totalFetches), `Fetching D30 for ${tab}...`);
-      const d30 = await fetchSourceData(sheetUrl30, tab);
-      setProgress(5 + Math.round(16 * fetchIdx / totalFetches), `Fetching D10 for ${tab}...`);
-      const d10 = await fetchSourceData(sheetUrl10, tab);
-      setProgress(5 + Math.round(25 * fetchIdx / totalFetches), `Fetching Search for ${tab}...`);
-      const search = await fetchSourceData(sheetUrlSearch, tab);
+      let d30 = [], d10 = [], search = [];
+      if (doDiscoverAuth) {
+        setProgress(5 + Math.round(8 * fetchIdx / totalFetches), `Fetching D30 for ${tab}...`);
+        d30 = await fetchSourceData(sheetUrl30, tab);
+        setProgress(5 + Math.round(16 * fetchIdx / totalFetches), `Fetching D10 for ${tab}...`);
+        d10 = await fetchSourceData(sheetUrl10, tab);
+      }
+      if (doSearchAuth) {
+        setProgress(5 + Math.round(25 * fetchIdx / totalFetches), `Fetching Search for ${tab}...`);
+        search = await fetchSourceData(sheetUrlSearch, tab);
+      }
       if (d30.length > 0 || d10.length > 0 || search.length > 0) {
         sourceData[tab] = { d30, d10, search };
       }
@@ -3779,16 +3866,18 @@ async function startKeywordAnalysis() {
       entityResults.push(entityData);
     }
 
-    // Step 5: Generate article ideas and angles
+    // Step 5: Generate article ideas and angles (if ticked)
     setProgress(80, t('prog_kw_angles'));
     let angleIdeas = null;
     let kwNewsHeadlines = [];
-    try {
-      const anglesData = await generateArticleAngles(kwText, parsed.entities, entityResults);
-      angleIdeas = anglesData.angles;
-      kwNewsHeadlines = anglesData.newsHeadlines;
-    } catch(e) {
-      console.warn('Angle generation failed:', e.message);
+    if (doAngles || doNews) {
+      try {
+        const anglesData = await generateArticleAngles(kwText, parsed.entities, entityResults, doNews);
+        if (doAngles) angleIdeas = anglesData.angles;
+        kwNewsHeadlines = anglesData.newsHeadlines || [];
+      } catch(e) {
+        console.warn('Angle generation failed:', e.message);
+      }
     }
 
     setProgress(100, t('prog_done'));
@@ -3939,7 +4028,7 @@ async function fetchLatestNews(query) {
   }
 }
 
-async function generateArticleAngles(originalInput, entities, entityResults) {
+async function generateArticleAngles(originalInput, entities, entityResults, doNews = true) {
   // Build context about what Discover data shows
   let discoverContext = '';
   for (const er of entityResults) {
@@ -3953,7 +4042,7 @@ async function generateArticleAngles(originalInput, entities, entityResults) {
 
   // Fetch latest news about the topic for grounded suggestions
   const newsQuery = entities.map(e => e.name).join(' ');
-  const newsResult = await fetchLatestNews(newsQuery || originalInput);
+  const newsResult = doNews ? await fetchLatestNews(newsQuery || originalInput) : { text: '', headlines: [] };
   const latestNews = newsResult.text;
 
   const data = await callOpenAI({
@@ -4017,7 +4106,7 @@ Each idea should be a specific, publishable article title. Give 3-5 ideas per ca
 }
 
 // ========== EDITORIAL ANGLES (URL/Draft) ==========
-async function generateEditorialAngles(title, bodyText, aiResult, articleUrl) {
+async function generateEditorialAngles(title, bodyText, aiResult, articleUrl, doNews = true) {
   // Build context from AI analysis
   const entities = (aiResult?.entites_principales || []).join(', ');
   const keyword = aiResult?.search?.mot_cle_principal || '';
@@ -4036,7 +4125,7 @@ async function generateEditorialAngles(title, bodyText, aiResult, articleUrl) {
 
   // Fetch latest news about the article's topic for grounded suggestions
   const newsQuery = keyword || entities || title.split(/\s+/).slice(0, 6).join(' ');
-  const newsResult = await fetchLatestNews(newsQuery);
+  const newsResult = doNews ? await fetchLatestNews(newsQuery) : { text: '', headlines: [] };
   const latestNews = newsResult.text;
 
   const data = await callOpenAI({
