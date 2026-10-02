@@ -167,6 +167,8 @@ body {
 .tick-chip span { color: var(--text-muted); transition: color 0.2s; }
 .tick-chip:has(input:checked) { background: var(--accent-glow, #eef); border-color: var(--accent); }
 .tick-chip:has(input:checked) span { color: var(--text); font-weight: 500; }
+.tick-chip.select-all { font-weight: 600; }
+.tick-chip.select-all span { font-weight: 600; }
 
 
 /* DIVIDER */
@@ -757,6 +759,7 @@ body {
       </div>
       <textarea class="html-textarea" id="kwInput" data-t-placeholder="kw_placeholder" placeholder="Describe your article idea, keywords, or topic... e.g. 'Liverpool transfer Dutch midfielder' or 'I want to write about the best wonderkids in Eredivisie'" style="min-height:120px;font-family:inherit"></textarea>
       <div class="tick-row" id="kwTicks">
+        <label class="tick-chip select-all"><input type="checkbox" id="kwTickAll" checked onchange="toggleSelectAll('kwTicks',this.checked)"> <span data-t="tick_select_all">Select All</span></label>
         <label class="tick-chip"><input type="checkbox" id="kwTickDiscoverAuth" checked> <span data-t="tick_topic_discover">Topic Authority Discover</span></label>
         <label class="tick-chip"><input type="checkbox" id="kwTickSearchAuth" checked> <span data-t="tick_topic_search">Topic Authority Search</span></label>
         <label class="tick-chip"><input type="checkbox" id="kwTickAngles" checked> <span data-t="tick_angles">Article Angles</span></label>
@@ -773,6 +776,7 @@ body {
         <input type="text" id="urlInput" data-t-placeholder="input_placeholder" placeholder="https://www.example.com/my-article" autocomplete="url">
       </div>
       <div class="tick-row" id="urlTicks">
+        <label class="tick-chip select-all"><input type="checkbox" id="urlTickAll" checked onchange="toggleSelectAll('urlTicks',this.checked)"> <span data-t="tick_select_all">Select All</span></label>
         <label class="tick-chip"><input type="checkbox" id="urlTickContent" checked> <span data-t="tick_content">Content Analysis</span></label>
         <label class="tick-chip"><input type="checkbox" id="urlTickSpell" checked> <span data-t="tick_spell">Spell Check</span></label>
         <label class="tick-chip"><input type="checkbox" id="urlTickQuality" checked> <span data-t="tick_quality">Google Quality Rater</span></label>
@@ -790,6 +794,7 @@ body {
     <div class="mode-panel" id="panelHtml">
       <textarea class="html-textarea" id="htmlInput" data-t-placeholder="html_placeholder" placeholder="Paste your HTML source code here..."></textarea>
       <div class="tick-row" id="draftTicks">
+        <label class="tick-chip select-all"><input type="checkbox" id="draftTickAll" checked onchange="toggleSelectAll('draftTicks',this.checked)"> <span data-t="tick_select_all">Select All</span></label>
         <label class="tick-chip"><input type="checkbox" id="draftTickContent" checked> <span data-t="tick_content">Content Analysis</span></label>
         <label class="tick-chip"><input type="checkbox" id="draftTickSpell" checked> <span data-t="tick_spell">Spell Check</span></label>
         <label class="tick-chip"><input type="checkbox" id="draftTickQuality" checked> <span data-t="tick_quality">Google Quality Rater</span></label>
@@ -1149,6 +1154,9 @@ const T = {
     tick_news: 'Latest News',
     tick_topic_discover: 'Topic Authority Discover',
     tick_topic_search: 'Topic Authority Search',
+    tick_select_all: 'Select All',
+    news_tier1: 'Combined',
+    news_tier2_label: 'Per Entity',
     err_empty_html: "Paste HTML code to analyze.",
     kpi_spell: "Spelling",
     kpi_quality: "Quality",
@@ -1391,6 +1399,9 @@ const T = {
     tick_news: 'Dernieres actus',
     tick_topic_discover: 'Autorite Discover',
     tick_topic_search: 'Autorite Search',
+    tick_select_all: 'Tout selectionner',
+    news_tier1: 'Combinee',
+    news_tier2_label: 'Par entite',
     err_empty_html: "Collez du code HTML à analyser.",
     kpi_spell: "Orthographe",
     kpi_quality: "Qualité",
@@ -1698,6 +1709,18 @@ const T = {
     kw_no_data: "Nenhum dado Discover encontrado para este site.",
     kw_no_match: "Nenhum artigo correspondente nos dados.",
     kw_summary: "{topics} topico(s) verificado(s) em {articles} artigos Discover em {site}.",
+    tick_content: 'Analise de Conteudo',
+    tick_spell: 'Verificacao Ortografica',
+    tick_quality: 'Google Quality Rater',
+    tick_discover_auth: 'Autoridade Discover',
+    tick_search_auth: 'Autoridade Search',
+    tick_angles: 'Angulos de Artigo',
+    tick_news: 'Ultimas Noticias',
+    tick_topic_discover: 'Autoridade Discover',
+    tick_topic_search: 'Autoridade Search',
+    tick_select_all: 'Selecionar Tudo',
+    news_tier1: 'Combinado',
+    news_tier2_label: 'Por entidade',
   },
   es: {
     input_title: "Analizar un artículo",
@@ -1928,6 +1951,18 @@ const T = {
     kw_no_data: "No se encontraron datos Discover para este sitio.",
     kw_no_match: "No se encontraron articulos coincidentes en los datos.",
     kw_summary: "{topics} tema(s) verificado(s) en {articles} articulos Discover en {site}.",
+    tick_content: 'Analisis de Contenido',
+    tick_spell: 'Revision Ortografica',
+    tick_quality: 'Google Quality Rater',
+    tick_discover_auth: 'Autoridad Discover',
+    tick_search_auth: 'Autoridad Search',
+    tick_angles: 'Angulos de Articulo',
+    tick_news: 'Ultimas Noticias',
+    tick_topic_discover: 'Autoridad Discover',
+    tick_topic_search: 'Autoridad Search',
+    tick_select_all: 'Seleccionar Todo',
+    news_tier1: 'Combinado',
+    news_tier2_label: 'Por entidad',
   },
   it: {
     input_title: "Analizza un articolo",
@@ -2158,6 +2193,18 @@ const T = {
     kw_no_data: "Nessun dato Discover trovato per questo sito.",
     kw_no_match: "Nessun articolo corrispondente nei dati.",
     kw_summary: "{topics} argomento/i verificato/i su {articles} articoli Discover su {site}.",
+    tick_content: 'Analisi Contenuto',
+    tick_spell: 'Controllo Ortografico',
+    tick_quality: 'Google Quality Rater',
+    tick_discover_auth: 'Autorita Discover',
+    tick_search_auth: 'Autorita Search',
+    tick_angles: 'Angoli Articolo',
+    tick_news: 'Ultime Notizie',
+    tick_topic_discover: 'Autorita Discover',
+    tick_topic_search: 'Autorita Search',
+    tick_select_all: 'Seleziona Tutto',
+    news_tier1: 'Combinato',
+    news_tier2_label: 'Per entita',
   },
   ru: {
     input_title: "Анализ статьи",
@@ -2388,6 +2435,18 @@ const T = {
     kw_no_data: "Данные Discover не найдены для этого сайта.",
     kw_no_match: "Совпадающих статей в данных не найдено.",
     kw_summary: "Проверено {topics} тем(ы) среди {articles} статей Discover на {site}.",
+    tick_content: 'Анализ контента',
+    tick_spell: 'Проверка орфографии',
+    tick_quality: 'Google Quality Rater',
+    tick_discover_auth: 'Авторитет Discover',
+    tick_search_auth: 'Авторитет Search',
+    tick_angles: 'Углы статьи',
+    tick_news: 'Последние новости',
+    tick_topic_discover: 'Авторитет Discover',
+    tick_topic_search: 'Авторитет Search',
+    tick_select_all: 'Выбрать все',
+    news_tier1: 'Общие',
+    news_tier2_label: 'По теме',
   },
   uk: {
     input_title: "Аналіз статті",
@@ -2618,6 +2677,18 @@ const T = {
     kw_no_data: "Даних Discover не знайдено для цього сайту.",
     kw_no_match: "Відповідних статей у даних не знайдено.",
     kw_summary: "Перевірено {topics} тем серед {articles} статей Discover на {site}.",
+    tick_content: 'Аналіз контенту',
+    tick_spell: 'Перевірка орфографії',
+    tick_quality: 'Google Quality Rater',
+    tick_discover_auth: 'Авторитет Discover',
+    tick_search_auth: 'Авторитет Search',
+    tick_angles: 'Кути статті',
+    tick_news: 'Останні новини',
+    tick_topic_discover: 'Авторитет Discover',
+    tick_topic_search: 'Авторитет Search',
+    tick_select_all: 'Вибрати все',
+    news_tier1: 'Загальні',
+    news_tier2_label: 'За темою',
   },
   pl: {
     input_title: "Analiza artykułu",
@@ -2781,6 +2852,9 @@ const T = {
     tick_news: 'Najnowsze wiadomosci',
     tick_topic_discover: 'Autorytet Discover',
     tick_topic_search: 'Autorytet Search',
+    tick_select_all: 'Zaznacz wszystko',
+    news_tier1: 'Lacznie',
+    news_tier2_label: 'Wg tematu',
     kpi_spell: "Ortografia",
     kpi_quality: "Jakość",
     discover_insights_title: "Discover AI Insights",
@@ -3087,6 +3161,18 @@ const T = {
     kw_no_data: "Pro tento web nebyla nalezena zadna data Discover.",
     kw_no_match: "V datech nebyly nalezeny zadne odpovidajici clanky.",
     kw_summary: "Zkontrolovano {topics} temat mezi {articles} clanky Discover na {site}.",
+    tick_content: 'Analyza obsahu',
+    tick_spell: 'Kontrola pravopisu',
+    tick_quality: 'Google Quality Rater',
+    tick_discover_auth: 'Autorita Discover',
+    tick_search_auth: 'Autorita Search',
+    tick_angles: 'Uhly clanku',
+    tick_news: 'Nejnovejsi zpravy',
+    tick_topic_discover: 'Autorita Discover',
+    tick_topic_search: 'Autorita Search',
+    tick_select_all: 'Vybrat vse',
+    news_tier1: 'Souhrnne',
+    news_tier2_label: 'Podle tematu',
   }
 };
 
@@ -3367,7 +3453,23 @@ const PATH_TAB_OVERRIDES = [
 ];
 
 // Resolve URL to tab code: checks path overrides first, then domain map
-function resolveTab(url) {
+function toggleSelectAll(rowId, checked) {
+      const row = document.getElementById(rowId);
+      if (!row) return;
+      row.querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.checked = checked; });
+    }
+    // When individual checkboxes change, sync the Select All state
+    document.addEventListener('change', function(e) {
+      if (e.target.type !== 'checkbox') return;
+      const row = e.target.closest('.tick-row');
+      if (!row) return;
+      const allCb = row.querySelector('.select-all input[type="checkbox"]');
+      if (!allCb || e.target === allCb) return;
+      const others = [...row.querySelectorAll('input[type="checkbox"]')].filter(cb => cb !== allCb);
+      allCb.checked = others.every(cb => cb.checked);
+    });
+
+    function resolveTab(url) {
   try {
     const u = new URL(url);
     const host = u.hostname.replace(/^www\./, '');
@@ -3531,7 +3633,7 @@ async function startAnalysis(mode) {
       try {
         const anglesData = await generateEditorialAngles(title, bodyText, aiResult, url, doNews);
         if (doAngles) anglesResult = anglesData.angles;
-        newsHeadlines = anglesData.newsHeadlines || [];
+        newsHeadlines = anglesData.tieredNews || [];
       } catch(e) {
         console.warn('Editorial angles failed:', e.message);
       }
@@ -3874,7 +3976,7 @@ async function startKeywordAnalysis() {
       try {
         const anglesData = await generateArticleAngles(kwText, parsed.entities, entityResults, doNews);
         if (doAngles) angleIdeas = anglesData.angles;
-        kwNewsHeadlines = anglesData.newsHeadlines || [];
+        kwNewsHeadlines = anglesData.tieredNews || { tier1: [], tier2: {} };
       } catch(e) {
         console.warn('Angle generation failed:', e.message);
       }
@@ -3995,15 +4097,18 @@ ENTITY EXAMPLES:
   return JSON.parse(tc.function.arguments);
 }
 
-async function fetchLatestNews(query) {
+async function fetchLatestNews(query, maxAgeDays = 7) {
   // Fetch latest news headlines via Google News RSS through the proxy
   // Returns { text: string for AI prompt, headlines: array for UI display }
+  // maxAgeDays: filter out articles older than this (default 7 days)
   try {
     const newsUrl = 'https://news.google.com/rss/search?q=' + encodeURIComponent(query) + '&hl=en&gl=US&ceid=US:en';
     const xml = await fetchViaProxy(newsUrl);
     if (!xml) return { text: '', headlines: [] };
     // Parse RSS XML — extract <title> and <link> from <item> elements
     const headlines = [];
+    const now = new Date();
+    const maxAgeMs = maxAgeDays * 24 * 3600000;
     const itemRegex = /<item>[\s\S]*?<\/item>/g;
     let match;
     while ((match = itemRegex.exec(xml)) !== null && headlines.length < 10) {
@@ -4016,6 +4121,13 @@ async function fetchLatestNews(query) {
         const pubDate = pubMatch ? pubMatch[1] : '';
         const link = linkMatch ? linkMatch[1] : '';
         const source = sourceMatch ? sourceMatch[1].replace(/&amp;/g, '&') : '';
+        // Filter by age
+        if (pubDate) {
+          try {
+            const articleDate = new Date(pubDate);
+            if (now - articleDate > maxAgeMs) continue;
+          } catch(e) {}
+        }
         headlines.push({ title: headline, date: pubDate, link, source });
       }
     }
@@ -4026,6 +4138,48 @@ async function fetchLatestNews(query) {
     console.warn('[news] Failed to fetch latest news:', e.message);
     return { text: '', headlines: [] };
   }
+}
+
+async function fetchTieredNews(entities, fallbackQuery) {
+  // Tier 1: all entities combined. Tier 2: per-entity individual fetches.
+  // Deduplicates across tiers (Tier 1 wins).
+  const entityNames = Array.isArray(entities)
+    ? entities.map(e => typeof e === 'string' ? e : e.name).filter(Boolean)
+    : [];
+  const combinedQuery = entityNames.join(' ') || fallbackQuery || '';
+
+  // Tier 1 — combined
+  const tier1Result = combinedQuery ? await fetchLatestNews(combinedQuery) : { text: '', headlines: [] };
+  const tier1Titles = new Set(tier1Result.headlines.map(h => h.title.toLowerCase().trim()));
+
+  // Tier 2 — per entity (only if >1 entity; skip if single entity = same as combined)
+  const tier2 = {};
+  if (entityNames.length > 1) {
+    const perEntityPromises = entityNames.map(name => fetchLatestNews(name).then(r => ({ name, result: r })));
+    const perEntityResults = await Promise.all(perEntityPromises);
+    for (const { name, result } of perEntityResults) {
+      // Deduplicate: remove headlines already in Tier 1
+      const unique = result.headlines.filter(h => !tier1Titles.has(h.title.toLowerCase().trim()));
+      if (unique.length > 0) tier2[name] = unique;
+    }
+  }
+
+  // Build combined text for AI prompt
+  let allText = tier1Result.text;
+  for (const [name, headlines] of Object.entries(tier2)) {
+    allText += '\n\nNEWS SPECIFIC TO ' + name.toUpperCase() + ':\n' +
+      headlines.map((h, i) => `${i + 1}. ${h.title}${h.source ? ' — ' + h.source : ''}${h.date ? ' (' + h.date + ')' : ''}`).join('\n');
+  }
+
+  return {
+    tier1: tier1Result.headlines,
+    tier2,
+    text: allText,
+    allHeadlines: [
+      ...tier1Result.headlines,
+      ...Object.values(tier2).flat()
+    ]
+  };
 }
 
 async function generateArticleAngles(originalInput, entities, entityResults, doNews = true) {
@@ -4040,10 +4194,9 @@ async function generateArticleAngles(originalInput, entities, entityResults, doN
     if (topUrls.length > 0) discoverContext += ` Top URLs: ${topUrls.join(', ')}`;
   }
 
-  // Fetch latest news about the topic for grounded suggestions
-  const newsQuery = entities.map(e => e.name).join(' ');
-  const newsResult = doNews ? await fetchLatestNews(newsQuery || originalInput) : { text: '', headlines: [] };
-  const latestNews = newsResult.text;
+  // Fetch latest news about the topic for grounded suggestions (tiered)
+  const tieredNews = doNews ? await fetchTieredNews(entities, originalInput) : { tier1: [], tier2: {}, text: '', allHeadlines: [] };
+  const latestNews = tieredNews.text;
 
   const data = await callOpenAI({
     model: OPENAI_MODEL,
@@ -4101,8 +4254,8 @@ Each idea should be a specific, publishable article title. Give 3-5 ideas per ca
   });
 
   const tc = data.choices?.[0]?.message?.tool_calls?.[0];
-  if (!tc) return { angles: null, newsHeadlines: newsResult.headlines };
-  return { angles: JSON.parse(tc.function.arguments), newsHeadlines: newsResult.headlines };
+  if (!tc) return { angles: null, tieredNews };
+  return { angles: JSON.parse(tc.function.arguments), tieredNews };
 }
 
 // ========== EDITORIAL ANGLES (URL/Draft) ==========
@@ -4123,10 +4276,11 @@ async function generateEditorialAngles(title, bodyText, aiResult, articleUrl, do
   const words = bodyText.split(/\s+/);
   const excerpt = words.slice(0, 1500).join(' ');
 
-  // Fetch latest news about the article's topic for grounded suggestions
+  // Fetch latest news about the article's topic for grounded suggestions (tiered)
+  const entityList = (aiResult?.entites_principales || []).map(e => ({ name: e }));
   const newsQuery = keyword || entities || title.split(/\s+/).slice(0, 6).join(' ');
-  const newsResult = doNews ? await fetchLatestNews(newsQuery) : { text: '', headlines: [] };
-  const latestNews = newsResult.text;
+  const tieredNews = doNews ? await fetchTieredNews(entityList.length > 1 ? entityList : [], newsQuery) : { tier1: [], tier2: {}, text: '', allHeadlines: [] };
+  const latestNews = tieredNews.text;
 
   const data = await callOpenAI({
     model: OPENAI_MODEL,
@@ -4227,14 +4381,19 @@ ${excerpt}${latestNews}` }
   });
 
   const tc = data.choices?.[0]?.message?.tool_calls?.[0];
-  if (!tc) return { angles: null, newsHeadlines: newsResult.headlines };
-  return { angles: JSON.parse(tc.function.arguments), newsHeadlines: newsResult.headlines };
+  if (!tc) return { angles: null, tieredNews };
+  return { angles: JSON.parse(tc.function.arguments), tieredNews };
 }
 
-function renderLatestNews(headlines, containerId) {
+function renderLatestNews(tieredNews, containerId) {
   const card = document.getElementById(containerId);
   if (!card) return;
-  if (!headlines || headlines.length === 0) { card.style.display = 'none'; return; }
+  // Support both old flat array and new tiered object
+  const isTiered = tieredNews && typeof tieredNews === 'object' && !Array.isArray(tieredNews);
+  const tier1 = isTiered ? (tieredNews.tier1 || []) : (tieredNews || []);
+  const tier2 = isTiered ? (tieredNews.tier2 || {}) : {};
+  const hasTier2 = Object.keys(tier2).length > 0;
+  if (tier1.length === 0 && !hasTier2) { card.style.display = 'none'; return; }
   card.style.display = 'block';
 
   // Format relative time
@@ -4253,21 +4412,45 @@ function renderLatestNews(headlines, containerId) {
     } catch(e) { return ''; }
   }
 
-  let html = `<div style="display:flex;flex-direction:column;gap:6px">`;
-  for (const h of headlines) {
-    const ago = timeAgo(h.date);
-    const sourceHtml = h.source ? `<span style="color:var(--text-muted);font-size:11px">${esc(h.source)}</span>` : '';
-    const agoHtml = ago ? `<span style="color:var(--text-muted);font-size:11px">${esc(ago)}</span>` : '';
-    const metaParts = [sourceHtml, agoHtml].filter(Boolean);
-    html += `<div style="padding:6px 10px;background:var(--surface-2);border-radius:var(--radius-sm);font-size:13px;line-height:1.5">`;
-    if (h.link) {
-      html += `<a href="${esc(h.link)}" target="_blank" rel="noopener" style="color:var(--text);text-decoration:none;font-weight:500">${esc(h.title)}</a>`;
-    } else {
-      html += `<span style="font-weight:500">${esc(h.title)}</span>`;
+  function renderHeadlineList(headlines) {
+    let h = '';
+    for (const item of headlines) {
+      const ago = timeAgo(item.date);
+      const sourceHtml = item.source ? `<span style="color:var(--text-muted);font-size:11px">${esc(item.source)}</span>` : '';
+      const agoHtml = ago ? `<span style="color:var(--text-muted);font-size:11px">${esc(ago)}</span>` : '';
+      const metaParts = [sourceHtml, agoHtml].filter(Boolean);
+      h += `<div style="padding:6px 10px;background:var(--surface-2);border-radius:var(--radius-sm);font-size:13px;line-height:1.5">`;
+      if (item.link) {
+        h += `<a href="${esc(item.link)}" target="_blank" rel="noopener" style="color:var(--text);text-decoration:none;font-weight:500">${esc(item.title)}</a>`;
+      } else {
+        h += `<span style="font-weight:500">${esc(item.title)}</span>`;
+      }
+      if (metaParts.length > 0) h += `<div style="margin-top:2px">${metaParts.join(' · ')}</div>`;
+      h += `</div>`;
     }
-    if (metaParts.length > 0) html += `<div style="margin-top:2px">${metaParts.join(' · ')}</div>`;
-    html += `</div>`;
+    return h;
   }
+
+  let html = `<div style="display:flex;flex-direction:column;gap:8px">`;
+
+  // Tier 1 — Combined
+  if (tier1.length > 0) {
+    if (hasTier2) {
+      html += `<div style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--accent);letter-spacing:0.5px;margin-bottom:2px">🔗 ${esc(t('news_tier1'))}</div>`;
+    }
+    html += `<div style="display:flex;flex-direction:column;gap:6px">${renderHeadlineList(tier1)}</div>`;
+  }
+
+  // Tier 2 — Per entity
+  if (hasTier2) {
+    for (const [entityName, headlines] of Object.entries(tier2)) {
+      html += `<div style="margin-top:8px">`;
+      html += `<div style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--accent);letter-spacing:0.5px;margin-bottom:4px">🏷️ ${esc(entityName)}</div>`;
+      html += `<div style="display:flex;flex-direction:column;gap:6px">${renderHeadlineList(headlines)}</div>`;
+      html += `</div>`;
+    }
+  }
+
   html += `</div>`;
   document.getElementById(containerId + 'Body').innerHTML = html;
 }
@@ -5488,33 +5671,53 @@ function renderKeywordResults(inputText, selectedSite, entityResults, angleIdeas
     allHtml += cardHtml;
   }
 
-  // Latest news card
-  if (newsHeadlines && newsHeadlines.length > 0) {
+  // Latest news card (tiered)
+  const isTieredKw = newsHeadlines && typeof newsHeadlines === 'object' && !Array.isArray(newsHeadlines);
+  const kwTier1 = isTieredKw ? (newsHeadlines.tier1 || []) : (newsHeadlines || []);
+  const kwTier2 = isTieredKw ? (newsHeadlines.tier2 || {}) : {};
+  const hasKwTier2 = Object.keys(kwTier2).length > 0;
+  if (kwTier1.length > 0 || hasKwTier2) {
+    function kwTimeAgo(dateStr) {
+      if (!dateStr) return '';
+      try {
+        const d = new Date(dateStr);
+        const diffH = Math.floor((new Date() - d) / 3600000);
+        if (diffH < 1) return t('news_just_now');
+        if (diffH < 24) return t('news_hours_ago', { n: diffH });
+        const diffD = Math.floor(diffH / 24);
+        return diffD === 1 ? t('news_1_day_ago') : t('news_days_ago', { n: diffD });
+      } catch(e) { return ''; }
+    }
+    function kwRenderItems(items) {
+      let out = '';
+      for (const h of items) {
+        const ago = kwTimeAgo(h.date);
+        const srcHtml = h.source ? `<span style="color:var(--text-muted);font-size:11px">${esc(h.source)}</span>` : '';
+        const agoHtml = ago ? `<span style="color:var(--text-muted);font-size:11px">${esc(ago)}</span>` : '';
+        const meta = [srcHtml, agoHtml].filter(Boolean);
+        out += `<div style="padding:6px 10px;background:var(--surface-2);border-radius:var(--radius-sm);font-size:13px;line-height:1.5">`;
+        if (h.link) out += `<a href="${esc(h.link)}" target="_blank" rel="noopener" style="color:var(--text);text-decoration:none;font-weight:500">${esc(h.title)}</a>`;
+        else out += `<span style="font-weight:500">${esc(h.title)}</span>`;
+        if (meta.length > 0) out += `<div style="margin-top:2px">${meta.join(' · ')}</div>`;
+        out += `</div>`;
+      }
+      return out;
+    }
     let newsHtml = `<div class="card">
       <div class="card-header" onclick="toggleCard(this)">
         <h3>📰 ${esc(t('news_title'))}</h3>
         <span class="chevron">▼</span>
       </div>
-      <div class="card-body"><div style="display:flex;flex-direction:column;gap:6px">`;
-    for (const h of newsHeadlines) {
-      let ago = '';
-      if (h.date) {
-        try {
-          const d = new Date(h.date);
-          const diffH = Math.floor((new Date() - d) / 3600000);
-          if (diffH < 1) ago = t('news_just_now');
-          else if (diffH < 24) ago = t('news_hours_ago', { n: diffH });
-          else { const diffD = Math.floor(diffH / 24); ago = diffD === 1 ? t('news_1_day_ago') : t('news_days_ago', { n: diffD }); }
-        } catch(e) {}
+      <div class="card-body"><div style="display:flex;flex-direction:column;gap:8px">`;
+    if (kwTier1.length > 0) {
+      if (hasKwTier2) newsHtml += `<div style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--accent);letter-spacing:0.5px;margin-bottom:2px">🔗 ${esc(t('news_tier1'))}</div>`;
+      newsHtml += `<div style="display:flex;flex-direction:column;gap:6px">${kwRenderItems(kwTier1)}</div>`;
+    }
+    if (hasKwTier2) {
+      for (const [entityName, items] of Object.entries(kwTier2)) {
+        newsHtml += `<div style="margin-top:8px"><div style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--accent);letter-spacing:0.5px;margin-bottom:4px">🏷️ ${esc(entityName)}</div>`;
+        newsHtml += `<div style="display:flex;flex-direction:column;gap:6px">${kwRenderItems(items)}</div></div>`;
       }
-      const srcHtml = h.source ? `<span style="color:var(--text-muted);font-size:11px">${esc(h.source)}</span>` : '';
-      const agoHtml = ago ? `<span style="color:var(--text-muted);font-size:11px">${esc(ago)}</span>` : '';
-      const meta = [srcHtml, agoHtml].filter(Boolean);
-      newsHtml += `<div style="padding:6px 10px;background:var(--surface-2);border-radius:var(--radius-sm);font-size:13px;line-height:1.5">`;
-      if (h.link) newsHtml += `<a href="${esc(h.link)}" target="_blank" rel="noopener" style="color:var(--text);text-decoration:none;font-weight:500">${esc(h.title)}</a>`;
-      else newsHtml += `<span style="font-weight:500">${esc(h.title)}</span>`;
-      if (meta.length > 0) newsHtml += `<div style="margin-top:2px">${meta.join(' · ')}</div>`;
-      newsHtml += `</div>`;
     }
     newsHtml += `</div></div></div>`;
     allHtml += newsHtml;
