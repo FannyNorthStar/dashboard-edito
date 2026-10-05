@@ -4976,6 +4976,7 @@ WHAT TO SKIP (these are all standard in sports journalism):
 - Sports conventions: score notation with hyphens (6-1), hyphen variants in club names (Paris Saint-Germain / Paris-Saint-Germain), English loanwords used in any language (coach, staff, match, penalty, corner, goal, pressing, offside, playoff, assist, fair play, manager, mister, ranking, leader, hat-trick, derby, clean sheet), transfer terms (free agent, loan deal, release clause), and all sports jargon in any language (tiki-taka, catenaccio, gegenpressing, libero, trequartista, etc.).
 - Stylistic choices: optional commas (before conjunctions, around adverbs like néanmoins/cependant/however — both with and without are correct), missing articles before country names ("England will face Czech Republic" is standard), uppercase letters without diacritics (L'Equipe, SERIE A, CESKE), regional/geographic adjectives in lowercase (nordiste, marseillaise, torinese, madrileño, paulista, pražský, warszawski).
 - Language-specific grammar: gender agreement on past participles or verbs when the subject is not visible in the excerpt. Slavic noun declension — in Czech, Polish, Russian and Ukrainian, proper nouns change endings by grammatical case (Messiho, Ronalda, Juventusu, Barcelony, Liverpoolu — these are correct declined forms, not typos). Czech/Polish/Russian/Ukrainian have no articles — never suggest adding one.
+- Grammatical gender of articles, pronouns and determiners: NEVER change the gender of words like l'une/l'un, une/un, la/le, celle/celui, cette/ce, sa/son, ma/mon, aucune/aucun, della/del, una/un, esta/este, essa/esse. The author chose the gender to match the noun. If you cannot see the noun in the excerpt, the gender is CORRECT as written. This is the #1 source of false positives — skip ALL gender-only corrections.
 
 CONFIDENCE THRESHOLD: if your confidence that something is a genuine error is below 90%, skip it. When in doubt, do NOT flag it.
 
@@ -5027,8 +5028,18 @@ Respond ONLY via the spellcheck_report tool.`;
   try {
     const result = JSON.parse(tc.function.arguments);
     if (result.errors) {
-      // Remove false positives where original === correction
-      result.errors = result.errors.filter(e => e.original.trim() !== e.correction.trim());
+      result.errors = result.errors.filter(e => {
+        const o = e.original.trim().toLowerCase().replace(/[’‘]/g, "'");
+        const c = e.correction.trim().toLowerCase().replace(/[’‘]/g, "'");
+        // Exact match after normalizing quotes = false positive
+        if (o === c) return false;
+        // Gender-marker swap: differ only by trailing 'e' (French feminine: une/un, l'une/l'un, certaine/certain, seule/seul...)
+        if (o === c + 'e' || c === o + 'e') return false;
+        // Explicit gender pairs that trailing-e rule does not catch
+        const genderPairs = [['la','le'],['le','la'],['cette','ce'],['ce','cette'],['celle','celui'],['celui','celle'],['sa','son'],['son','sa'],['ma','mon'],['mon','ma'],['du','de la'],['de la','du'],['au','a la'],['a la','au'],['il','elle'],['elle','il']];
+        if (genderPairs.some(([a,b]) => o === a && c === b)) return false;
+        return true;
+      });
       // Deduplicate by original+correction
       const seen = new Set();
       result.errors = result.errors.filter(e => {
@@ -6044,7 +6055,7 @@ function renderQuality(q, bodyText) {
   // Severity counts for header
   const highCount = fluff.filter(f => f.severity === 'high').length;
   const medCount = fluff.filter(f => f.severity === 'medium').length;
-  const lowCount = fluff.filter(f => f.severity === 'low').length;
+  const lowCount = (q.fluff || []).filter(f => f.severity === 'low').length;
   const totalIssues = (a.status !== 'aligned' ? 1 : 0) + (b.status !== 'balanced' ? 1 : 0) + fluff.length;
   const countColor = highCount > 0 ? 'red' : (medCount > 0 || totalIssues > 0) ? 'amber' : 'green';
   document.getElementById('qualityCount').innerHTML = `<span class="tl-dot ${countColor}" style="width:8px;height:8px"></span> ${totalIssues === 0 ? 'OK' : totalIssues + ' issue(s)'}`;
