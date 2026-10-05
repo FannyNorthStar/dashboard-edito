@@ -3446,30 +3446,6 @@ const TAB_LABELS = {
   'FUTDADOS': 'FutDados',
 };
 
-// Map each site tab to its Google News language code (hl param)
-// English sites omitted — 'en' is the default
-const TAB_LANG_MAP = {
-  'TOPMERCATO': 'fr', 'AFRIKFOOTFR': 'fr', 'BASKETUSA': 'fr', 'BASKETEUROPE': 'fr',
-  'TRIVELA': 'pt-BR', 'UMDOISESPORTES': 'pt-BR', 'LAKERSBRASIL': 'pt-BR', 'FUTDADOS': 'pt-BR',
-  'SOLOBASKET': 'es', 'ALAIRELIBRE': 'es',
-  'CALCIODANGOLO': 'it',
-  'FOTBALPORTAL': 'cs',
-  'VRINGE': 'ru',
-  'LUBSPORT': 'pl',
-};
-
-// Google News hl -> gl (country) and ceid mappings
-const LANG_NEWS_PARAMS = {
-  'en':    { gl: 'US', ceid: 'US:en' },
-  'fr':    { gl: 'FR', ceid: 'FR:fr' },
-  'pt-BR': { gl: 'BR', ceid: 'BR:pt-419' },
-  'es':    { gl: 'ES', ceid: 'ES:es' },
-  'it':    { gl: 'IT', ceid: 'IT:it' },
-  'cs':    { gl: 'CZ', ceid: 'CZ:cs' },
-  'ru':    { gl: 'RU', ceid: 'RU:ru' },
-  'pl':    { gl: 'PL', ceid: 'PL:pl' },
-};
-
 // Path-based overrides for sites sharing the same domain (e.g. afrik-foot.com/en-ng/)
 const PATH_TAB_OVERRIDES = [
   { domain: 'afrik-foot.com', pathPrefix: '/en-ng/', tab: 'AFRIKFOOTNG' },
@@ -3655,8 +3631,7 @@ async function startAnalysis(mode) {
     // Angles runs after AI so it can use aiResult for richer context
     if (doAngles || doNews) {
       try {
-        const urlSiteTab = (url && url !== '(pasted HTML)') ? resolveTab(url) : null;
-        const anglesData = await generateEditorialAngles(title, bodyText, aiResult, url, doNews, urlSiteTab);
+        const anglesData = await generateEditorialAngles(title, bodyText, aiResult, url, doNews);
         if (doAngles) anglesResult = anglesData.angles;
         newsHeadlines = anglesData.tieredNews || [];
       } catch(e) {
@@ -3999,7 +3974,7 @@ async function startKeywordAnalysis() {
     let kwNewsHeadlines = [];
     if (doAngles || doNews) {
       try {
-        const anglesData = await generateArticleAngles(kwText, parsed.entities, entityResults, doNews, selectedSite);
+        const anglesData = await generateArticleAngles(kwText, parsed.entities, entityResults, doNews);
         if (doAngles) angleIdeas = anglesData.angles;
         kwNewsHeadlines = anglesData.tieredNews || { tier1: [], tier2: {} };
       } catch(e) {
@@ -4122,17 +4097,14 @@ ENTITY EXAMPLES:
   return JSON.parse(tc.function.arguments);
 }
 
-async function fetchLatestNews(query, maxAgeDays = 7, lang = 'en') {
+async function fetchLatestNews(query, maxAgeDays = 7) {
   // Fetch latest news headlines via Google News RSS through the proxy
   // Returns { text: string for AI prompt, headlines: array for UI display }
   // maxAgeDays: filter out articles older than this (default 7 days)
-  // lang: Google News language code (en, fr, pt-BR, es, it, cs, ru, pl)
   try {
     // Append "sport" to bias Google News results toward sports content
     const sportQuery = query + ' sport';
-    const params = LANG_NEWS_PARAMS[lang] || LANG_NEWS_PARAMS['en'];
-    const hl = lang.split('-')[0]; // pt-BR -> pt for hl param
-    const newsUrl = 'https://news.google.com/rss/search?q=' + encodeURIComponent(sportQuery) + '&hl=' + hl + '&gl=' + params.gl + '&ceid=' + params.ceid;
+    const newsUrl = 'https://news.google.com/rss/search?q=' + encodeURIComponent(sportQuery) + '&hl=en&gl=US&ceid=US:en';
     const xml = await fetchViaProxy(newsUrl);
     if (!xml) return { text: '', headlines: [] };
     // Parse RSS XML — extract <title> and <link> from <item> elements
@@ -4244,73 +4216,33 @@ Be strict. Examples:
   }
 }
 
-async function fetchTieredNews(entities, fallbackQuery, siteTab) {
+async function fetchTieredNews(entities, fallbackQuery) {
   // Tier 1: all entities combined. Tier 2: per-entity individual fetches.
-  // Dual language: always English + site language (if different). Deduped + AI-filtered.
+  // Deduplicates across tiers, then AI-filters for relevance.
   const entityNames = Array.isArray(entities)
     ? entities.map(e => typeof e === 'string' ? e : e.name).filter(Boolean)
     : [];
   const combinedQuery = entityNames.join(' ') || fallbackQuery || '';
-  const siteLang = (siteTab && TAB_LANG_MAP[siteTab]) || 'en';
-  const isMultiLang = siteLang !== 'en';
 
-  // Helper: fetch in one language, tag each headline with its lang
-  async function fetchTagged(query, lang) {
-    const result = await fetchLatestNews(query, 7, lang);
-    return result.headlines.map(h => ({ ...h, lang }));
-  }
+  // Tier 1 — combined
+  const tier1Result = combinedQuery ? await fetchLatestNews(combinedQuery) : { text: '', headlines: [] };
+  const tier1Titles = new Set(tier1Result.headlines.map(h => h.title.toLowerCase().trim()));
 
-  // Tier 1 — combined query in both languages (parallel)
-  const tier1Promises = [fetchTagged(combinedQuery, 'en')];
-  if (isMultiLang) tier1Promises.push(fetchTagged(combinedQuery, siteLang));
-  const tier1Arrays = combinedQuery ? await Promise.all(tier1Promises) : [[]];
-  // Merge + deduplicate by title (case-insensitive)
-  const seenTitles = new Set();
-  const tier1All = [];
-  for (const arr of tier1Arrays) {
-    for (const h of arr) {
-      const key = h.title.toLowerCase().trim();
-      if (!seenTitles.has(key)) { seenTitles.add(key); tier1All.push(h); }
-    }
-  }
-  // Sort by most recent
-  tier1All.sort((a, b) => {
-    const da = a.date ? new Date(a.date).getTime() : 0;
-    const db = b.date ? new Date(b.date).getTime() : 0;
-    return db - da;
-  });
-
-  // Tier 2 — per entity in both languages (only if >1 entity)
+  // Tier 2 — per entity (only if >1 entity; skip if single entity = same as combined)
   const tier2Raw = {};
   if (entityNames.length > 1) {
-    const perEntityPromises = [];
-    for (const name of entityNames) {
-      perEntityPromises.push(fetchTagged(name, 'en').then(r => ({ name, headlines: r })));
-      if (isMultiLang) perEntityPromises.push(fetchTagged(name, siteLang).then(r => ({ name, headlines: r })));
-    }
+    const perEntityPromises = entityNames.map(name => fetchLatestNews(name).then(r => ({ name, result: r })));
     const perEntityResults = await Promise.all(perEntityPromises);
-    // Group by entity name, merge, dedup against Tier 1
-    const entityMap = {};
-    for (const { name, headlines } of perEntityResults) {
-      if (!entityMap[name]) entityMap[name] = [];
-      entityMap[name].push(...headlines);
-    }
-    for (const [name, headlines] of Object.entries(entityMap)) {
-      const unique = [];
-      const localSeen = new Set();
-      for (const h of headlines) {
-        const key = h.title.toLowerCase().trim();
-        if (!seenTitles.has(key) && !localSeen.has(key)) {
-          localSeen.add(key); unique.push(h);
-        }
-      }
+    for (const { name, result } of perEntityResults) {
+      // Deduplicate: remove headlines already in Tier 1
+      const unique = result.headlines.filter(h => !tier1Titles.has(h.title.toLowerCase().trim()));
       if (unique.length > 0) tier2Raw[name] = unique;
     }
   }
 
-  // AI relevance filtering — parallel for all groups
+  // AI relevance filtering — single call for Tier 1, one per Tier 2 entity
   const scoringPromises = [];
-  scoringPromises.push(scoreNewsRelevance(tier1All, combinedQuery).then(filtered => ({ key: '__tier1__', filtered })));
+  scoringPromises.push(scoreNewsRelevance(tier1Result.headlines, combinedQuery).then(filtered => ({ key: '__tier1__', filtered })));
   for (const [name, headlines] of Object.entries(tier2Raw)) {
     scoringPromises.push(scoreNewsRelevance(headlines, name).then(filtered => ({ key: name, filtered })));
   }
@@ -4344,7 +4276,7 @@ async function fetchTieredNews(entities, fallbackQuery, siteTab) {
   };
 }
 
-async function generateArticleAngles(originalInput, entities, entityResults, doNews = true, siteTab = null) {
+async function generateArticleAngles(originalInput, entities, entityResults, doNews = true) {
   // Build context about what Discover data shows
   let discoverContext = '';
   for (const er of entityResults) {
@@ -4357,7 +4289,7 @@ async function generateArticleAngles(originalInput, entities, entityResults, doN
   }
 
   // Fetch latest news about the topic for grounded suggestions (tiered)
-  const tieredNews = doNews ? await fetchTieredNews(entities, originalInput, siteTab) : { tier1: [], tier2: {}, text: '', allHeadlines: [] };
+  const tieredNews = doNews ? await fetchTieredNews(entities, originalInput) : { tier1: [], tier2: {}, text: '', allHeadlines: [] };
   const latestNews = tieredNews.text;
 
   const data = await callOpenAI({
@@ -4421,7 +4353,7 @@ Each idea should be a specific, publishable article title. Give 3-5 ideas per ca
 }
 
 // ========== EDITORIAL ANGLES (URL/Draft) ==========
-async function generateEditorialAngles(title, bodyText, aiResult, articleUrl, doNews = true, siteTab = null) {
+async function generateEditorialAngles(title, bodyText, aiResult, articleUrl, doNews = true) {
   // Build context from AI analysis
   const entities = (aiResult?.entites_principales || []).join(', ');
   const keyword = aiResult?.search?.mot_cle_principal || '';
@@ -4441,7 +4373,7 @@ async function generateEditorialAngles(title, bodyText, aiResult, articleUrl, do
   // Fetch latest news about the article's topic for grounded suggestions (tiered)
   const entityList = (aiResult?.entites_principales || []).map(e => ({ name: e }));
   const newsQuery = keyword || entities || title.split(/\s+/).slice(0, 6).join(' ');
-  const tieredNews = doNews ? await fetchTieredNews(entityList.length > 1 ? entityList : [], newsQuery, siteTab) : { tier1: [], tier2: {}, text: '', allHeadlines: [] };
+  const tieredNews = doNews ? await fetchTieredNews(entityList.length > 1 ? entityList : [], newsQuery) : { tier1: [], tier2: {}, text: '', allHeadlines: [] };
   const latestNews = tieredNews.text;
 
   const data = await callOpenAI({
@@ -6097,6 +6029,7 @@ function renderQuality(q, bodyText) {
   // Severity counts for header
   const highCount = fluff.filter(f => f.severity === 'high').length;
   const medCount = fluff.filter(f => f.severity === 'medium').length;
+  const lowCount = fluff.filter(f => f.severity === 'low').length;
   const totalIssues = (a.status !== 'aligned' ? 1 : 0) + (b.status !== 'balanced' ? 1 : 0) + fluff.length;
   const countColor = highCount > 0 ? 'red' : (medCount > 0 || totalIssues > 0) ? 'amber' : 'green';
   document.getElementById('qualityCount').innerHTML = `<span class="tl-dot ${countColor}" style="width:8px;height:8px"></span> ${totalIssues === 0 ? 'OK' : totalIssues + ' issue(s)'}`;
