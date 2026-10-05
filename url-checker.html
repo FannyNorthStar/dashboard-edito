@@ -5024,7 +5024,22 @@ Respond ONLY via the spellcheck_report tool.`;
   } catch(e) { return null; }
   const tc = data.choices?.[0]?.message?.tool_calls?.[0];
   if (!tc) return null;
-  try { return JSON.parse(tc.function.arguments); } catch(e) { return null; }
+  try {
+    const result = JSON.parse(tc.function.arguments);
+    if (result.errors) {
+      // Remove false positives where original === correction
+      result.errors = result.errors.filter(e => e.original.trim() !== e.correction.trim());
+      // Deduplicate by original+correction
+      const seen = new Set();
+      result.errors = result.errors.filter(e => {
+        const key = (e.original + '||' + e.correction).toLowerCase();
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+    }
+    return result;
+  } catch(e) { return null; }
 }
 
 // ========== CONTENT QUALITY CHECK (AI) ==========
