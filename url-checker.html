@@ -4998,7 +4998,7 @@ Respond ONLY via the spellcheck_report tool.`;
               properties: {
                 original: { type: "string" },
                 correction: { type: "string" },
-                context: { type: "string", description: "At least 120 chars of surrounding text to show full clause and subject" },
+                context: { type: "string", description: "Short excerpt: 30-50 chars before and after the error, just enough to see the sentence" },
                 type: { type: "string", enum: ["spelling", "grammar", "typo"] }
               },
               required: ["original", "correction", "context", "type"]
@@ -6019,7 +6019,7 @@ function renderSpellcheck(spell) {
         <span class="spell-arrow">→</span>
         <span class="spell-correction">${esc(e.correction)}</span>
       </div>
-      <div class="spell-context">"...${esc(e.context)}..."</div>
+      <div class="spell-context">"...${esc((e.context||'').length > 120 ? e.context.substring(0, 120) + '...' : e.context)}..."</div>
     </div>
   </div>`).join('');
   body.innerHTML = html;
