@@ -3640,7 +3640,7 @@ async function startAnalysis(mode) {
     }
 
     setProgress(100, t('prog_done'));
-    renderResults(url, title, discoverChecks, contentChecks, aiResult, spellResult, qualityResult, discoverAuthority, { aiError, spellError, qualityError }, bodyText, anglesResult, searchAuthority, newsHeadlines);
+    renderResults(url, title, discoverChecks, contentChecks, aiResult, spellResult, qualityResult, discoverAuthority, { aiError, spellError, qualityError }, bodyText, anglesResult, searchAuthority, newsHeadlines, { doContent, doSpell, doQuality, doAngles, doNews });
   } catch (err) {
     showError('Error: ' + err.message);
     document.getElementById('progressBar').classList.remove('active');
@@ -5926,7 +5926,8 @@ function buildComparisonTable(topicStats, siteStats, topicLabel, includePosition
 }
 
 // ========== RENDER RESULTS ==========
-function renderResults(url, title, discoverChecks, contentChecks, aiResult, spellResult, qualityResult, discoverAuthority, errors, bodyText, anglesResult, searchAuthority, newsHeadlines) {
+function renderResults(url, title, discoverChecks, contentChecks, aiResult, spellResult, qualityResult, discoverAuthority, errors, bodyText, anglesResult, searchAuthority, newsHeadlines, ticks) {
+  ticks = ticks || {};
   errors = errors || {};
   storeExportData(url, title, discoverChecks, contentChecks, aiResult, spellResult, qualityResult, discoverAuthority, bodyText, anglesResult, searchAuthority);
   document.getElementById('results').classList.add('active');
@@ -5967,29 +5968,34 @@ function renderResults(url, title, discoverChecks, contentChecks, aiResult, spel
   document.getElementById('contentBody').innerHTML = contentChecks.map(c => `<div class="check-row"><div class="status-dot ${c.status}"></div><div class="check-label">${c.label}</div><div class="check-detail">${c.detail}</div></div>`).join('');
 
   const aiSection = document.getElementById('aiSection');
-  if (aiResult) { aiSection.style.display = 'block'; renderAI(aiResult); }
+  if (ticks.doContent === false) { aiSection.style.display = 'none'; }
+  else if (aiResult) { aiSection.style.display = 'block'; renderAI(aiResult); }
   else {
     aiSection.style.display = 'block';
     document.getElementById('aiBody').innerHTML = `<div class="ai-unavailable">${t('ai_unavailable')}${errors.aiError ? ' <span class="ai-unavailable-detail">(' + esc(errors.aiError) + ')</span>' : ''}</div>`;
   }
 
   const spellBody = document.getElementById('spellBody');
-  if (spellResult) { spellBody.style.display = 'block'; renderSpellcheck(spellResult); }
+  if (ticks.doSpell === false) { spellBody.style.display = 'none'; }
+  else if (spellResult) { spellBody.style.display = 'block'; renderSpellcheck(spellResult); }
   else {
     spellBody.style.display = 'block';
     spellBody.innerHTML = `<div class="ai-unavailable">${t('ai_unavailable')}${errors.spellError ? ' <span class="ai-unavailable-detail">(' + esc(errors.spellError) + ')</span>' : ''}</div>`;
   }
 
   const qualityCard = document.getElementById('qualityCard');
-  if (qualityResult) { qualityCard.style.display = 'block'; renderQuality(qualityResult, bodyText); }
+  if (ticks.doQuality === false) { qualityCard.style.display = 'none'; }
+  else if (qualityResult) { qualityCard.style.display = 'block'; renderQuality(qualityResult, bodyText); }
   else {
     qualityCard.style.display = 'block';
     document.getElementById('qualityBody').innerHTML = `<div class="ai-unavailable">${t('ai_unavailable')}${errors.qualityError ? ' <span class="ai-unavailable-detail">(' + esc(errors.qualityError) + ')</span>' : ''}</div>`;
   }
 
-  renderLatestNews(newsHeadlines, 'newsCard');
+  if (ticks.doNews === false) { document.getElementById('newsCard').style.display = 'none'; }
+  else { renderLatestNews(newsHeadlines, 'newsCard'); }
 
-  if (anglesResult) {
+  if (ticks.doAngles === false) { document.getElementById('anglesCard').style.display = 'none'; }
+  else if (anglesResult) {
     document.getElementById('anglesCard').style.display = 'block';
     renderAngles(anglesResult);
   }
