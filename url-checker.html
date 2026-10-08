@@ -4811,6 +4811,7 @@ function checkJsonLd(doc) {
   return [{ label: t('jsonld_label'), status: 'warning', detail: t('jsonld_absent') }, []];
 }
 function checkAuthor(doc, jsonldItems) {
+  // 1. JSON-LD author
   for (const it of jsonldItems) {
     const a = it.author;
     if (a) {
@@ -4818,8 +4819,40 @@ function checkAuthor(doc, jsonldItems) {
       if (name.trim()) return { label: t('author_label'), status: 'ok', detail: t('author_ok', {name: name.trim().substring(0,80)}) };
     }
   }
+  // 2. <meta name="author">
   const ma = doc.querySelector('meta[name="author"]');
   if (ma && ma.getAttribute('content')) return { label: t('author_label'), status: 'ok', detail: t('author_meta', {name: ma.getAttribute('content').trim().substring(0,80)}) };
+  // 3. Schema.org itemprop="author" (microdata — used by Al Aire Libre, Arena sites, etc.)
+  const ipAuthor = doc.querySelector('[itemprop="author"]');
+  if (ipAuthor) {
+    const ipName = ipAuthor.querySelector('[itemprop="name"]');
+    const name = ipName ? (ipName.getAttribute('content') || ipName.textContent || '').trim() : ipAuthor.textContent.trim();
+    if (name) return { label: t('author_label'), status: 'ok', detail: t('author_ok', {name: name.substring(0,80)}) };
+  }
+  // 4. Open Graph article:author
+  const ogAuthor = doc.querySelector('meta[property="article:author"]');
+  if (ogAuthor && ogAuthor.getAttribute('content')) {
+    const val = ogAuthor.getAttribute('content').trim();
+    // Sometimes this is a URL (Facebook profile), skip those
+    if (val && !val.startsWith('http')) return { label: t('author_label'), status: 'ok', detail: t('author_ok', {name: val.substring(0,80)}) };
+  }
+  // 5. Common CSS class patterns (byline, author-name, post-author, entry-author)
+  const authorSelectors = ['.author-name', '.post-author', '.entry-author', '.byline', '[class*="author"] a', '.writer-name', '.article-author', '.autor', '.auteur'];
+  for (const sel of authorSelectors) {
+    try {
+      const el = doc.querySelector(sel);
+      if (el) {
+        const name = el.textContent.trim();
+        if (name && name.length > 1 && name.length < 100) return { label: t('author_label'), status: 'ok', detail: t('author_ok', {name: name.substring(0,80)}) };
+      }
+    } catch(e) { /* invalid selector, skip */ }
+  }
+  // 6. rel="author" link
+  const relAuthor = doc.querySelector('a[rel="author"]');
+  if (relAuthor) {
+    const name = relAuthor.textContent.trim();
+    if (name && name.length > 1 && name.length < 100) return { label: t('author_label'), status: 'ok', detail: t('author_ok', {name: name.substring(0,80)}) };
+  }
   return { label: t('author_label'), status: 'warning', detail: t('author_absent') };
 }
 function checkPublicationDate(doc, jsonldItems) {
