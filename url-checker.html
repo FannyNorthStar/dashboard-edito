@@ -830,9 +830,59 @@ body {
   background: var(--surface-2);
   border-radius: var(--radius-sm);
 }
+.ev-selectors-row {
+  display: flex; gap: 12px; align-items: end;
+}
+.ev-authority-banner {
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  background: var(--surface-2);
+  border-radius: var(--radius-sm);
+  border-left: 4px solid var(--amber);
+}
+.ev-authority-header {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 6px;
+  font-size: 13px;
+}
+.ev-authority-icon { font-size: 16px; }
+.ev-authority-score {
+  font-size: 11px; font-weight: 700;
+  color: #fff; padding: 2px 8px;
+  border-radius: 10px; margin-left: auto;
+}
+.ev-authority-reason {
+  font-size: 12px; color: var(--text-muted);
+  line-height: 1.5;
+}
+.ev-primary-kw {
+  font-size: 11px; color: var(--text-dim);
+  margin-top: 4px;
+}
+.ev-data-row {
+  display: flex; gap: 12px; margin-bottom: 14px;
+}
+.ev-data-chip {
+  display: flex; flex-direction: column; gap: 2px;
+  padding: 8px 14px;
+  background: var(--surface-2);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  min-width: 100px;
+}
+.ev-data-label {
+  font-size: 10px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.5px;
+  color: var(--text-dim);
+}
+.ev-data-value {
+  font-size: 15px; font-weight: 700;
+}
 @media (max-width: 600px) {
   .ev-meta-row { gap: 4px; }
   .ev-card-header { flex-wrap: wrap; gap: 8px; }
+  .ev-selectors-row { flex-direction: column; }
+  .ev-data-row { flex-direction: column; gap: 8px; }
 }
 </style>
 </head>
@@ -926,9 +976,19 @@ body {
     </div>
 
     <div class="mode-panel" id="panelEvergreen">
-      <div class="site-select-row">
-        <label data-t="ev_site_label">Site</label>
-        <select class="site-select" id="evSiteSelect"></select>
+      <div class="ev-selectors-row">
+        <div class="site-select-row" style="flex:1">
+          <label data-t="ev_site_label">Site</label>
+          <select class="site-select" id="evSiteSelect"></select>
+        </div>
+        <div class="site-select-row" style="flex:0 0 auto;min-width:140px">
+          <label data-t="ev_model_label">Model</label>
+          <select class="site-select" id="evModelSelect">
+            <option value="gpt-4o">GPT-4o</option>
+            <option value="gpt-4o-mini">GPT-4o mini (fast)</option>
+            <option value="o3-mini">o3-mini (reasoning)</option>
+          </select>
+        </div>
       </div>
       <textarea class="html-textarea" id="evInput" data-t-placeholder="ev_placeholder" placeholder="Enter a keyword or article idea... e.g. 'Champions League all-time top scorers' or 'How does the FIFA ranking work?'" style="min-height:120px;font-family:inherit"></textarea>
       <button class="btn" id="analyzeBtnEv" onclick="startAnalysis('evergreen')" style="width:100%">
@@ -1394,6 +1454,14 @@ const T = {
     ev_format_listicle: "Listicle",
     ev_format_comparison: "Comparison",
     ev_format_definition: "Definition",
+    ev_model_label: "Model",
+    ev_volume: "Est. volume",
+    ev_difficulty: "Difficulty",
+    ev_diff_low: "Low",
+    ev_diff_medium: "Medium",
+    ev_diff_high: "High",
+    ev_authority_title: "Site Authority Match",
+    ev_primary_kw: "Primary keyword",
   },
   fr: {
     input_title: "Analyser un article",
@@ -1660,6 +1728,14 @@ const T = {
     ev_format_listicle: "Listicle",
     ev_format_comparison: "Comparatif",
     ev_format_definition: "Definition",
+    ev_model_label: "Modele",
+    ev_volume: "Volume est.",
+    ev_difficulty: "Difficulte",
+    ev_diff_low: "Faible",
+    ev_diff_medium: "Moyen",
+    ev_diff_high: "Eleve",
+    ev_authority_title: "Compatibilite autorite du site",
+    ev_primary_kw: "Mot-cle principal",
   },
   "pt-br": {
     input_title: "Analisar um artigo",
@@ -1914,6 +1990,14 @@ const T = {
     ev_format_listicle: "Listicle",
     ev_format_comparison: "Comparativo",
     ev_format_definition: "Definicao",
+    ev_model_label: "Modelo",
+    ev_volume: "Volume est.",
+    ev_difficulty: "Dificuldade",
+    ev_diff_low: "Baixa",
+    ev_diff_medium: "Media",
+    ev_diff_high: "Alta",
+    ev_authority_title: "Compatibilidade com autoridade do site",
+    ev_primary_kw: "Palavra-chave principal",
     tick_content: 'Analise de Conteudo',
     tick_spell: 'Verificacao Ortografica',
     tick_quality: 'Google Quality Rater',
@@ -2180,6 +2264,14 @@ const T = {
     ev_format_listicle: "Listicle",
     ev_format_comparison: "Comparativa",
     ev_format_definition: "Definicion",
+    ev_model_label: "Modelo",
+    ev_volume: "Volumen est.",
+    ev_difficulty: "Dificultad",
+    ev_diff_low: "Baja",
+    ev_diff_medium: "Media",
+    ev_diff_high: "Alta",
+    ev_authority_title: "Compatibilidad con autoridad del sitio",
+    ev_primary_kw: "Palabra clave principal",
     tick_content: 'Analisis de Contenido',
     tick_spell: 'Revision Ortografica',
     tick_quality: 'Google Quality Rater',
@@ -2446,6 +2538,14 @@ const T = {
     ev_format_listicle: "Listicle",
     ev_format_comparison: "Confronto",
     ev_format_definition: "Definizione",
+    ev_model_label: "Modello",
+    ev_volume: "Volume stimato",
+    ev_difficulty: "Difficolta",
+    ev_diff_low: "Bassa",
+    ev_diff_medium: "Media",
+    ev_diff_high: "Alta",
+    ev_authority_title: "Compatibilita con autorita del sito",
+    ev_primary_kw: "Parola chiave principale",
     tick_content: 'Analisi Contenuto',
     tick_spell: 'Controllo Ortografico',
     tick_quality: 'Google Quality Rater',
@@ -2712,6 +2812,14 @@ const T = {
     ev_format_listicle: "Листикл",
     ev_format_comparison: "Сравнение",
     ev_format_definition: "Определение",
+    ev_model_label: "Модель",
+    ev_volume: "Объем (оц.)",
+    ev_difficulty: "Сложность",
+    ev_diff_low: "Низкая",
+    ev_diff_medium: "Средняя",
+    ev_diff_high: "Высокая",
+    ev_authority_title: "Соответствие авторитету сайта",
+    ev_primary_kw: "Основное ключевое слово",
     tick_content: 'Анализ контента',
     tick_spell: 'Проверка орфографии',
     tick_quality: 'Google Quality Rater',
@@ -2978,6 +3086,14 @@ const T = {
     ev_format_listicle: "Лістикл",
     ev_format_comparison: "Порівняння",
     ev_format_definition: "Визначення",
+    ev_model_label: "Модель",
+    ev_volume: "Обсяг (оц.)",
+    ev_difficulty: "Складнiсть",
+    ev_diff_low: "Низька",
+    ev_diff_medium: "Середня",
+    ev_diff_high: "Висока",
+    ev_authority_title: "Вiдповiднiсть авторитету сайту",
+    ev_primary_kw: "Основне ключове слово",
     tick_content: 'Аналіз контенту',
     tick_spell: 'Перевірка орфографії',
     tick_quality: 'Google Quality Rater',
@@ -3256,6 +3372,14 @@ const T = {
     ev_format_listicle: "Listicle",
     ev_format_comparison: "Porownanie",
     ev_format_definition: "Definicja",
+    ev_model_label: "Model",
+    ev_volume: "Szac. objętosc",
+    ev_difficulty: "Trudnosc",
+    ev_diff_low: "Niska",
+    ev_diff_medium: "Srednia",
+    ev_diff_high: "Wysoka",
+    ev_authority_title: "Zgodnosc z autorytetem strony",
+    ev_primary_kw: "Glowne slowo kluczowe",
   },
   cs: {
     input_title: "Analýza článku",
@@ -3510,6 +3634,14 @@ const T = {
     ev_format_listicle: "Listicle",
     ev_format_comparison: "Srovnani",
     ev_format_definition: "Definice",
+    ev_model_label: "Model",
+    ev_volume: "Odh. objem",
+    ev_difficulty: "Obtiznost",
+    ev_diff_low: "Nizka",
+    ev_diff_medium: "Stredni",
+    ev_diff_high: "Vysoka",
+    ev_authority_title: "Shoda s autoritou webu",
+    ev_primary_kw: "Hlavni klicove slovo",
     tick_content: 'Analyza obsahu',
     tick_spell: 'Kontrola pravopisu',
     tick_quality: 'Google Quality Rater',
@@ -3803,6 +3935,42 @@ const SITE_LANG_MAP = {
   'SOLOBASKET': 'es', 'FOTBALPORTAL': 'cs', 'VRINGE': 'ru', 'ALAIRELIBRE': 'es',
   'CALCIODANGOLO': 'it', 'SOCCERNET': 'en', 'BASKETUSA': 'fr', 'BASKETEUROPE': 'fr',
   'LUBSPORT': 'pl', 'LAKERSBRASIL': 'pt-BR', 'FUTDADOS': 'pt-BR',
+};
+
+const SITE_AUTHORITY = {
+  'TOPMERCATO': { desc: 'French football transfer news', topics: 'Ligue 1, transfer rumors, mercato, player signings, contract news, French football' },
+  'SPORTSMOLE': { desc: 'UK football match previews and predictions', topics: 'Premier League, Champions League, EFL, international football, match predictions, team news, rugby, tennis, F1, cricket' },
+  'TRIVELA': { desc: 'Brazilian football news and analysis', topics: 'Brasileirao, Copa do Brasil, Libertadores, Selecao Brasileira, European football, player analysis' },
+  'UMDOISESPORTES': { desc: 'Brazilian multi-sport news', topics: 'football, NBA, UFC, tennis, Olympic sports, Brasileirao, MMA' },
+  'AFRIKFOOTFR': { desc: 'African football news in French', topics: 'CAF Champions League, AFCON, African leagues, African players in Europe, CAN' },
+  'AFRIKFOOTZA': { desc: 'South African football news in English', topics: 'PSL, Bafana Bafana, South African football, African football, DStv Premiership' },
+  'AFRIKFOOTNG': { desc: 'Nigerian football news in English', topics: 'NPFL, Super Eagles, Nigerian football, African football, EPL coverage' },
+  'FOOTBALLWHISPERS': { desc: 'Football transfer rumors and tactical analysis', topics: 'transfer rumors, player performance data, Premier League, European football, tactical analysis' },
+  'FOOTBALLGROUNDGUIDE': { desc: 'UK football ground and stadium guides', topics: 'stadium guides, matchday travel, EFL grounds, Non-League, parking, pubs near grounds' },
+  'MRFIXITSTIPS': { desc: 'UK football betting tips', topics: 'betting tips, match predictions, accumulator tips, Premier League betting, odds analysis' },
+  'SOLOBASKET': { desc: 'Spanish-language basketball news', topics: 'ACB Liga Endesa, EuroLeague, NBA, Spanish national team, basketball transfers, FIBA' },
+  'FOTBALPORTAL': { desc: 'Czech football news', topics: 'Czech First League (Fortuna Liga), Czech national team, Champions League, European football' },
+  'VRINGE': { desc: 'Russian combat sports news', topics: 'MMA, boxing, UFC, Bellator, combat sports, kickboxing' },
+  'ALAIRELIBRE': { desc: 'Chilean football and sports news', topics: 'Chilean Primera Division, Copa Libertadores, La Roja, Chilean players abroad, Sudamericana' },
+  'CALCIODANGOLO': { desc: 'Italian football news and analysis', topics: 'Serie A, Coppa Italia, Champions League, calciomercato, fantacalcio, Italian national team' },
+  'SOCCERNET': { desc: 'Nigerian football and Premier League news', topics: 'NPFL, Super Eagles, EPL, African football, transfer news, La Liga' },
+  'BASKETUSA': { desc: 'NBA news in French', topics: 'NBA, French NBA players, draft, free agency, NBA history, WNBA' },
+  'BASKETEUROPE': { desc: 'European basketball news in French', topics: 'EuroLeague, EuroCup, Betclic Elite, European basketball, FIBA Europe' },
+  'LUBSPORT': { desc: 'Polish sports news', topics: 'Ekstraklasa, Polish national team, Champions League, European football, Polish sports' },
+  'LAKERSBRASIL': { desc: 'Los Angeles Lakers news in Portuguese', topics: 'Lakers, NBA, Lakers history, NBA draft, Lakers roster, purple and gold' },
+  'FUTDADOS': { desc: 'Brazilian football data and statistics', topics: 'Brasileirao statistics, player data, match analysis, football data, xG, advanced stats' },
+};
+
+const AUTOCOMPLETE_MODS = {
+  'en': ['', ' best', ' all time', ' record', ' history', ' list'],
+  'fr': ['', ' meilleur', ' tous les temps', ' record', ' histoire', ' liste'],
+  'pt-BR': ['', ' melhor', ' todos os tempos', ' recorde', ' historia', ' lista'],
+  'es': ['', ' mejor', ' todos los tiempos', ' record', ' historia', ' lista'],
+  'it': ['', ' migliore', ' di sempre', ' record', ' storia', ' lista'],
+  'ru': ['', ' лучший', ' за все время', ' рекорд', ' история', ' список'],
+  'cs': ['', ' nejlepsi', ' vsech dob', ' rekord', ' historie', ' seznam'],
+  'pl': ['', ' najlepszy', ' wszech czasow', ' rekord', ' historia', ' lista'],
+  'uk': ['', ' найкращий', ' за весь час', ' рекорд', ' iсторiя', ' список'],
 };
 
 // Path-based overrides for sites sharing the same domain (e.g. afrik-foot.com/en-ng/)
@@ -7255,30 +7423,29 @@ async function testSite(site, url) {
 
 // ========== EVERGREEN TAB ==========
 async function fetchAutocompleteSuggestions(keyword, lang) {
-  const url = `https://suggestqueries.google.com/complete/search?client=firefox&q=${encodeURIComponent(keyword)}&hl=${lang}`;
-  // Try direct fetch (client=firefox returns JSON, CORS varies)
-  try {
-    const resp = await fetchWithTimeout(url, { mode: 'cors' }, 5000);
-    if (resp.ok) {
-      const data = await resp.json();
-      return data[1] || [];
-    }
-  } catch(e) { /* CORS blocked, try proxy */ }
-  // Fallback: GAS proxy as GET
-  try {
-    const proxy = localStorage.getItem('media_dashboard_cors_proxy') || DEFAULT_GAS_PROXY;
-    const sep = proxy.includes('?') ? '&' : '?';
-    const proxyUrl = proxy + sep + 'url=' + encodeURIComponent(url);
-    const resp = await fetchWithTimeout(proxyUrl, { redirect: 'follow' }, 8000);
-    if (resp.ok) {
-      const text = await resp.text();
-      const data = JSON.parse(text);
-      return data[1] || [];
-    }
-  } catch(e) {
-    console.warn('Autocomplete fetch failed:', e.message);
+  const mods = AUTOCOMPLETE_MODS[lang] || AUTOCOMPLETE_MODS['en'];
+  const queries = mods.map(m => keyword + m);
+
+  async function fetchOne(q) {
+    const url = `https://suggestqueries.google.com/complete/search?client=firefox&q=${encodeURIComponent(q)}&hl=${lang}`;
+    try {
+      const resp = await fetchWithTimeout(url, { mode: 'cors' }, 5000);
+      if (resp.ok) { const data = await resp.json(); return data[1] || []; }
+    } catch(e) { /* CORS blocked */ }
+    try {
+      const proxy = localStorage.getItem('media_dashboard_cors_proxy') || DEFAULT_GAS_PROXY;
+      const sep = proxy.includes('?') ? '&' : '?';
+      const proxyUrl = proxy + sep + 'url=' + encodeURIComponent(url);
+      const resp = await fetchWithTimeout(proxyUrl, { redirect: 'follow' }, 8000);
+      if (resp.ok) { const text = await resp.text(); return JSON.parse(text)[1] || []; }
+    } catch(e) { console.warn('Autocomplete fetch failed:', e.message); }
+    return [];
   }
-  return [];
+
+  const results = await Promise.allSettled(queries.map(q => fetchOne(q)));
+  const all = new Set();
+  results.forEach(r => { if (r.status === 'fulfilled') r.value.forEach(s => all.add(s)); });
+  return [...all].sort();
 }
 
 async function startEvergreenAnalysis() {
@@ -7288,8 +7455,9 @@ async function startEvergreenAnalysis() {
   const selectedSite = document.getElementById('evSiteSelect').value;
   const siteLang = SITE_LANG_MAP[selectedSite] || 'en';
   const siteLabel = TAB_LABELS[selectedSite] || selectedSite;
+  const siteAuth = SITE_AUTHORITY[selectedSite] || { desc: 'Sports news site', topics: 'sports, football' };
+  const selectedModel = document.getElementById('evModelSelect').value;
 
-  // Show spinner
   const spinnerEl = document.getElementById('btnSpinnerEv');
   spinnerEl.id = 'btnSpinner_active';
   const restoreSpinner = () => { spinnerEl.id = 'btnSpinnerEv'; };
@@ -7302,12 +7470,12 @@ async function startEvergreenAnalysis() {
   document.getElementById('progressBar').classList.remove('active');
 
   try {
-    // Step 1: Fetch Google Autocomplete suggestions
+    // Step 1: Fetch Google Autocomplete suggestions (multiple variants in parallel)
     setProgress(10, t('prog_ev_autocomplete'));
     const suggestions = await fetchAutocompleteSuggestions(evText, siteLang);
-    console.log('[evergreen] Autocomplete suggestions:', suggestions);
+    console.log('[evergreen] Autocomplete suggestions:', suggestions.length, suggestions);
 
-    // Step 2: Send to OpenAI
+    // Step 2: Send to AI
     setProgress(30, t('prog_ev_ai'));
 
     const langNames = {
@@ -7317,30 +7485,50 @@ async function startEvergreenAnalysis() {
     };
     const langName = langNames[siteLang] || siteLang;
 
-    const systemPrompt = `You are an SEO editorial strategist for sports media sites. You help plan evergreen articles that generate sustained organic traffic.
+    const systemPrompt = `You are an expert SEO editorial strategist specializing in sports media. You help plan evergreen articles that generate sustained organic traffic over months and years.
 
-Your task: Given a keyword or article idea, evaluate it and propose 3 article concepts optimized for long-term search traffic.
+SITE CONTEXT:
+- Site: "${siteLabel}"
+- Description: ${siteAuth.desc}
+- Core topics: ${siteAuth.topics}
+- Content language: ${langName}
 
-The target site is "${siteLabel}" and all output (titles, H2s, briefs, meta descriptions, satellite ideas) must be in ${langName}.
+AUTHORITY CHECK (critical):
+Before proposing articles, evaluate whether the keyword/idea fits within this site's natural topical authority. A football transfer site should NOT write about basketball history. A Nigerian football site should NOT write about Czech league records. If the topic is outside the site's authority, say so clearly and explain what the site COULD cover instead. Rate the authority match 1-10.
 
-Evaluate using this checklist:
-- Search intent: informational, transactional, or navigational
-- Format: guide, listicle, comparison, FAQ, how-to, or definition
-- Long-tail potential: year-round vs seasonal (score 1-10)
-- Freshness/update cycle: never, annual, seasonal, or monthly
-- Cluster potential: what satellite articles could support this
-- Feasibility: is this realistic for a sports media site
+SEARCH VOLUME ESTIMATION:
+Based on your knowledge of search patterns in ${langName}-speaking markets, estimate the monthly search volume range for each proposal's primary keyword. Use these brackets:
+- "0-100": very niche, low volume
+- "100-1K": niche but viable for long-tail
+- "1K-10K": solid evergreen potential
+- "10K-100K": high-traffic evergreen
+- "100K+": massive volume (rare for sports evergreen)
 
-Return 3 distinct article proposals. Each should take a different angle or format on the topic. Make titles SEO-optimized with natural keyword placement. H2s should form a complete article skeleton.`;
+Also estimate keyword difficulty (how hard it is to rank):
+- "low": few quality results exist, easy to rank
+- "medium": some competition but achievable
+- "high": very competitive, hard to rank without strong domain authority
+
+PROPOSAL QUALITY CHECKLIST:
+1. Each title must contain the primary keyword naturally (not forced)
+2. H2s must form a complete, logical article skeleton that a writer can follow
+3. Each H2 should target a related sub-query or answer a specific question
+4. Meta descriptions must be compelling AND under 155 characters
+5. Proposals should cover DIFFERENT angles (don't repeat the same format 3 times)
+6. Word count must be realistic for the depth required
+7. Cluster satellites should be genuinely publishable companion articles
+
+All output (titles, H2s, briefs, meta descriptions, satellite ideas) MUST be in ${langName}.`;
 
     const userPrompt = `Keyword/idea: "${evText}"
-Site: ${siteLabel} (language: ${langName})
-${suggestions.length > 0 ? `\nGoogle Autocomplete suggestions for context:\n${suggestions.map(s => '- ' + s).join('\n')}` : ''}
+Site: ${siteLabel} (${siteAuth.desc})
+Language: ${langName}
+${suggestions.length > 0 ? `\nGoogle Autocomplete suggestions (${suggestions.length} found):\n${suggestions.map(s => '- ' + s).join('\n')}` : '\nNo autocomplete suggestions found (very niche topic).'}
 
-Generate 3 evergreen article proposals.`;
+First assess authority match, then generate 3 evergreen article proposals with different angles/formats.`;
 
     const body = {
-      model: 'gpt-4o',
+      model: selectedModel,
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt }
@@ -7349,33 +7537,45 @@ Generate 3 evergreen article proposals.`;
         type: 'function',
         function: {
           name: 'submit_evergreen_proposals',
-          description: 'Submit 3 evergreen article proposals',
+          description: 'Submit authority assessment and 3 evergreen article proposals',
           parameters: {
             type: 'object',
             properties: {
+              authority_assessment: {
+                type: 'object',
+                properties: {
+                  score: { type: 'number', description: 'Authority match score 1-10 (10 = perfect fit)' },
+                  fits: { type: 'boolean', description: 'true if topic fits within site authority' },
+                  reason: { type: 'string', description: 'Brief explanation of authority match. If poor fit, suggest what the site COULD cover instead.' }
+                },
+                required: ['score', 'fits', 'reason']
+              },
               proposals: {
                 type: 'array',
                 items: {
                   type: 'object',
                   properties: {
                     title: { type: 'string', description: 'SEO-optimized article title in site language' },
+                    primary_keyword: { type: 'string', description: 'The main keyword this article targets' },
                     h2s: { type: 'array', items: { type: 'string' }, description: 'Array of H2 headings forming the article skeleton' },
-                    briefs: { type: 'array', items: { type: 'string' }, description: 'Array matching h2s, 2-3 line description each' },
+                    briefs: { type: 'array', items: { type: 'string' }, description: 'Array matching h2s, 2-3 sentence description each' },
                     meta_description: { type: 'string', description: 'Meta description, max 155 chars' },
                     word_count_estimate: { type: 'number', description: 'Estimated word count' },
                     update_cycle: { type: 'string', enum: ['never', 'annual', 'seasonal', 'monthly'] },
                     search_intent: { type: 'string', enum: ['informational', 'transactional', 'navigational'] },
                     format: { type: 'string', enum: ['guide', 'listicle', 'comparison', 'FAQ', 'how-to', 'definition'] },
                     long_tail_score: { type: 'number', description: 'Long-tail potential 1-10' },
+                    estimated_volume: { type: 'string', enum: ['0-100', '100-1K', '1K-10K', '10K-100K', '100K+'], description: 'Estimated monthly search volume range' },
+                    difficulty: { type: 'string', enum: ['low', 'medium', 'high'], description: 'Keyword difficulty to rank' },
                     cluster_satellites: { type: 'array', items: { type: 'string' }, description: '3-5 satellite article ideas' }
                   },
-                  required: ['title', 'h2s', 'briefs', 'meta_description', 'word_count_estimate', 'update_cycle', 'search_intent', 'format', 'long_tail_score', 'cluster_satellites']
+                  required: ['title', 'primary_keyword', 'h2s', 'briefs', 'meta_description', 'word_count_estimate', 'update_cycle', 'search_intent', 'format', 'long_tail_score', 'estimated_volume', 'difficulty', 'cluster_satellites']
                 },
                 minItems: 3,
                 maxItems: 3
               }
             },
-            required: ['proposals']
+            required: ['authority_assessment', 'proposals']
           }
         }
       }],
@@ -7385,18 +7585,17 @@ Generate 3 evergreen article proposals.`;
     const response = await callOpenAI(body);
     setProgress(80, t('prog_ev_render'));
 
-    // Parse response
     const toolCall = response.choices?.[0]?.message?.tool_calls?.[0];
     if (!toolCall) throw new Error(t('err_no_tool'));
 
     const result = JSON.parse(toolCall.function.arguments);
     const proposals = result.proposals;
+    const authority = result.authority_assessment;
 
     if (!proposals || proposals.length === 0) throw new Error('No proposals returned.');
 
-    // Step 3: Render
     setProgress(95, t('prog_done'));
-    renderEvergreenResults(proposals, siteLabel, suggestions);
+    renderEvergreenResults(proposals, siteLabel, suggestions, authority, selectedModel);
 
   } catch(e) {
     showError(e.message || 'Evergreen analysis failed.');
@@ -7408,31 +7607,54 @@ Generate 3 evergreen article proposals.`;
   }
 }
 
-function renderEvergreenResults(proposals, siteLabel, suggestions) {
+function renderEvergreenResults(proposals, siteLabel, suggestions, authority, modelUsed) {
   const container = document.getElementById('evResults');
 
   const cycleLabels = { never: t('ev_cycle_never'), annual: t('ev_cycle_annual'), seasonal: t('ev_cycle_seasonal'), monthly: t('ev_cycle_monthly') };
   const intentLabels = { informational: t('ev_intent_info'), transactional: t('ev_intent_transact'), navigational: t('ev_intent_nav') };
   const formatLabels = { guide: t('ev_format_guide'), listicle: t('ev_format_listicle'), comparison: t('ev_format_comparison'), FAQ: 'FAQ', 'how-to': 'How-to', definition: t('ev_format_definition') };
+  const diffLabels = { low: t('ev_diff_low'), medium: t('ev_diff_medium'), high: t('ev_diff_high') };
+  const diffColors = { low: 'var(--green)', medium: 'var(--amber)', high: 'var(--red)' };
+  const volColors = { '0-100': 'var(--text-dim)', '100-1K': 'var(--amber)', '1K-10K': 'var(--green)', '10K-100K': 'var(--blue)', '100K+': 'var(--accent)' };
 
   let html = `<div class="ev-results-header">
     <h2>${t('ev_results_title')}</h2>
-    <span class="ai-badge">GPT-4o</span>
+    <span class="ai-badge">${escapeHtml(modelUsed || 'GPT-4o')}</span>
   </div>`;
 
+  // Authority assessment banner
+  if (authority) {
+    const authColor = authority.score >= 7 ? 'var(--green)' : authority.score >= 4 ? 'var(--amber)' : 'var(--red)';
+    const authIcon = authority.fits ? '✓' : '⚠';
+    html += `<div class="ev-authority-banner" style="border-left-color:${authColor}">
+      <div class="ev-authority-header">
+        <span class="ev-authority-icon" style="color:${authColor}">${authIcon}</span>
+        <strong>${t('ev_authority_title')}</strong>
+        <span class="ev-authority-score" style="background:${authColor}">${authority.score}/10</span>
+      </div>
+      <div class="ev-authority-reason">${escapeHtml(authority.reason)}</div>
+    </div>`;
+  }
+
   if (suggestions.length > 0) {
-    html += `<div class="ev-autocomplete-note">${t('ev_autocomplete_used')}: ${suggestions.slice(0, 8).map(s => '<strong>' + escapeHtml(s) + '</strong>').join(', ')}</div>`;
+    html += `<div class="ev-autocomplete-note">${t('ev_autocomplete_used')} (${suggestions.length}): ${suggestions.slice(0, 10).map(s => '<strong>' + escapeHtml(s) + '</strong>').join(', ')}${suggestions.length > 10 ? ` <span style="opacity:0.6">+${suggestions.length - 10} more</span>` : ''}</div>`;
   }
 
   html += '<div class="ev-proposals">';
 
   proposals.forEach((p, i) => {
     const scoreColor = p.long_tail_score >= 7 ? 'var(--green)' : p.long_tail_score >= 4 ? 'var(--amber)' : 'var(--red)';
+    const volColor = volColors[p.estimated_volume] || 'var(--text-dim)';
+    const diffColor = diffColors[p.difficulty] || 'var(--amber)';
+
     html += `<div class="ev-card">
       <div class="ev-card-header">
         <div style="display:flex;align-items:center;gap:10px;min-width:0">
           <span class="ev-number">${i + 1}</span>
-          <h3 style="white-space:normal">${escapeHtml(p.title)}</h3>
+          <div>
+            <h3 style="white-space:normal">${escapeHtml(p.title)}</h3>
+            <div class="ev-primary-kw">${t('ev_primary_kw')}: <strong>${escapeHtml(p.primary_keyword)}</strong></div>
+          </div>
         </div>
       </div>
       <div class="ev-card-body">
@@ -7442,6 +7664,16 @@ function renderEvergreenResults(proposals, siteLabel, suggestions) {
           <span class="ev-meta-tag cycle">${cycleLabels[p.update_cycle] || p.update_cycle}</span>
           <span class="ev-meta-tag words">${p.word_count_estimate} ${t('ev_words')}</span>
           <span class="ev-meta-tag score" style="background:${scoreColor}">Long-tail: ${p.long_tail_score}/10</span>
+        </div>
+        <div class="ev-data-row">
+          <div class="ev-data-chip">
+            <span class="ev-data-label">${t('ev_volume')}</span>
+            <span class="ev-data-value" style="color:${volColor}">${p.estimated_volume || '?'} /mo</span>
+          </div>
+          <div class="ev-data-chip">
+            <span class="ev-data-label">${t('ev_difficulty')}</span>
+            <span class="ev-data-value" style="color:${diffColor}">${diffLabels[p.difficulty] || p.difficulty}</span>
+          </div>
         </div>
         <div class="ev-meta-description">${escapeHtml(p.meta_description)}</div>
         <div class="ev-section-label">${t('ev_structure')}</div>
