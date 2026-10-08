@@ -5039,8 +5039,9 @@ WHAT TO SKIP (these are all standard in sports journalism):
 - Stylistic choices: optional commas (before conjunctions, around adverbs like néanmoins/cependant/however — both with and without are correct), missing articles before country names ("England will face Czech Republic" is standard), uppercase letters without diacritics (L'Equipe, SERIE A, CESKE), regional/geographic adjectives in lowercase (nordiste, marseillaise, torinese, madrileño, paulista, pražský, warszawski).
 - Language-specific grammar: gender agreement on past participles or verbs when the subject is not visible in the excerpt. Slavic noun declension — in Czech, Polish, Russian and Ukrainian, proper nouns change endings by grammatical case (Messiho, Ronalda, Juventusu, Barcelony, Liverpoolu — these are correct declined forms, not typos). Czech/Polish/Russian/Ukrainian have no articles — never suggest adding one.
 - Grammatical gender of articles, pronouns and determiners: NEVER change the gender of words like l'une/l'un, une/un, la/le, celle/celui, cette/ce, sa/son, ma/mon, aucune/aucun, della/del, una/un, esta/este, essa/esse. The author chose the gender to match the noun. If you cannot see the noun in the excerpt, the gender is CORRECT as written. This is the #1 source of false positives — skip ALL gender-only corrections.
+- Verb conjugation with distant or ambiguous subjects: NEVER flag subject-verb agreement when the real subject of the verb may not be the nearest noun. Example: "los jóvenes que viene probando Nicolás Córdova" — "viene" agrees with "Nicolás Córdova" (singular), NOT with "los jóvenes". In relative clauses, the verb often agrees with a subject that is far away or after the verb. If the correct subject is ambiguous or debatable in the excerpt, the conjugation is CORRECT as written. This applies to ALL languages. Skip ALL conjugation corrections where the subject is not 100% clear.
 
-CONFIDENCE THRESHOLD: if your confidence that something is a genuine error is below 90%, skip it. When in doubt, do NOT flag it.
+CONFIDENCE THRESHOLD: if your confidence that something is a genuine error is below 95%, skip it. When in doubt, do NOT flag it. A false positive damages trust in the tool far more than a missed error.
 
 Respond ONLY via the spellcheck_report tool.`;
 
@@ -5100,6 +5101,15 @@ Respond ONLY via the spellcheck_report tool.`;
         // Explicit gender pairs that trailing-e rule does not catch
         const genderPairs = [['la','le'],['le','la'],['cette','ce'],['ce','cette'],['celle','celui'],['celui','celle'],['sa','son'],['son','sa'],['ma','mon'],['mon','ma'],['du','de la'],['de la','du'],['au','a la'],['a la','au'],['il','elle'],['elle','il']];
         if (genderPairs.some(([a,b]) => o === a && c === b)) return false;
+        // Verb conjugation: same root, only the ending differs (viene/vienen, tiene/tienen, hace/hacen, etc.)
+        // These are almost always false positives about subject-verb agreement with distant subjects
+        if (o.length >= 4 && c.length >= 4) {
+          const shorter = o.length <= c.length ? o : c;
+          const longer = o.length <= c.length ? c : o;
+          if (longer.startsWith(shorter) && /^[ns]?$/.test(longer.slice(shorter.length))) return false;
+          // Also catch: viene/vienen, sale/salen, pone/ponen (root+n), va/van, est/sont type patterns
+          if (shorter.length >= 3 && longer === shorter + 'n') return false;
+        }
         return true;
       });
       // Deduplicate by original+correction
@@ -5144,7 +5154,12 @@ FLAG ONLY content that Google would classify as:
 - Spam patterns (circular repetition of the same point 3+ times, keyword stuffing disguised as sentences)
 - Copy-paste boilerplate (identical phrasing reused across articles)
 
+CRITICAL RULE — DO NOT INVENT PROBLEMS:
+If the article reads naturally and a human editor would not mark anything, return an EMPTY fluff array. Most professional sports articles have ZERO fluff. Your default output should be an empty array. Only add items when you are absolutely certain a Google quality rater would penalize that specific sentence.
+
 DO NOT FLAG (this is normal sports journalism, not fluff):
+- The chapô / lead paragraph (the first paragraph of the article): it ALWAYS summarizes or restates the title and headline. That is its editorial purpose. A lead paragraph is NEVER "repetition" — it is the standard journalistic structure (inverted pyramid). NEVER flag the first 1-2 paragraphs as repetition of the title.
+- The first paragraph after any heading (h2, h3): it introduces the section and may naturally echo the heading. This is structure, not repetition.
 - Author bios / about-the-author blocks — these are E-E-A-T signals (Experience, Expertise, Authoritativeness, Trustworthiness) required by Google Quality Rater Guidelines. Sentences like "Born into the world of sports...", "Passionate about football since...", "Journalist since 20XX..." are author credentials, NOT article content. NEVER flag them.
 - Context sentences explaining who a player is, their form, their contract situation, their age
 - Transitions, scene-setting, background paragraphs
@@ -5153,6 +5168,7 @@ DO NOT FLAG (this is normal sports journalism, not fluff):
 - Sentences that state consequences, hopes, or objectives — these are standard in previews and transfer articles
 - Brief obvious statements that serve as transitions between substantive paragraphs
 - Any sentence that contains at least one specific fact (a name, a date, a stat, a place)
+- Player ratings and brief assessments (e.g. "Good performance", "Invisible on the pitch") — these are editorial judgments, not padding
 
 THRESHOLD: Flag a sentence ONLY if a Google quality rater would specifically highlight it as evidence of low-quality or auto-generated content. If you are unsure whether something is fluff, DO NOT flag it. Err heavily on the side of NOT flagging. A typical well-written sports article should have 0-2 flags, not 5-10.
 
@@ -5221,7 +5237,7 @@ For each padding instance: the exact quote, a category (delete-test, any-team, c
         }
       }],
       tool_choice: { type: 'function', function: { name: 'quality_report' } },
-      temperature: 0.2
+      temperature: 0.1
     });
   } catch(e) { return null; }
   const tc = data.choices?.[0]?.message?.tool_calls?.[0];
