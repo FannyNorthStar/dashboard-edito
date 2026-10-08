@@ -4872,18 +4872,21 @@ function checkViewport(doc) {
 function runContentChecks(doc, url) {
   const checks = [];
   const EXCLUDE_KW = ['related','sidebar','widget','nav','footer','header','comment','newsletter','social','share','author-bio','breadcrumb','menu','advertisement','publicite','pub','cookie','popup','modal','notification','banner','alert','search','tags','meta','pagination','pager','next','prev','similar','recommended','also-read','a-lire','sur-le-meme','plus-sur'];
-  const CONTENT_KW = ['entry-content','post-content','article-content','article-body','post-body','td-post-content','single-content','content-single'];
+  const CONTENT_KW = ['entry-content','post-content','article-content','article-body','post-body','td-post-content','single-content','content-single','the-content','main-content','story-body','c-article__body','post_content','article__content','nota-content','nota__content','contenido','news-content','field-body','text-content'];
   let body = null;
-  for (const el of doc.querySelectorAll('div, section')) {
-    if (CONTENT_KW.some(k => (el.className||'').toLowerCase().includes(k))) { body = el; break; }
+  for (const el of doc.querySelectorAll('div, section, main')) {
+    const cls = (el.className || '').toLowerCase();
+    const id = (el.id || '').toLowerCase();
+    if (CONTENT_KW.some(k => cls.includes(k) || id.includes(k))) { body = el; break; }
   }
   if (!body) body = doc.querySelector('article');
+  if (!body) body = doc.querySelector('main');
   if (!body) body = doc.body || doc.documentElement;
 
-  const coreP = [];
-  for (const p of body.querySelectorAll('p')) { if (!isExcluded(p, body, EXCLUDE_KW)) coreP.push(p); }
+  const coreEls = [];
+  for (const el of body.querySelectorAll('p, li, h2, h3, h4')) { if (!isExcluded(el, body, EXCLUDE_KW) && !isInsideEmbed(el, body)) coreEls.push(el); }
 
-  const bodyText = coreP.map(p => p.textContent.trim()).join(' ');
+  const bodyText = coreEls.map(el => el.textContent.trim()).filter(t => t.length > 5).join(' ');
   const words = bodyText.split(/\s+/).filter(w => w.length > 0).length;
   let wcS = 'ok', wcD = t('wc_ok', {n:words});
   if (words === 0) { wcS = 'fail'; wcD = t('wc_empty'); }
@@ -4894,7 +4897,7 @@ function runContentChecks(doc, url) {
   checks.push({ key: 'https', label: t('https_label'), status: isHttps?'ok':'fail', detail: isHttps?t('https_ok'):t('https_fail') });
 
   const links = [];
-  for (const p of coreP) for (const a of p.querySelectorAll('a[href]')) links.push(a);
+  for (const el of coreEls) for (const a of el.querySelectorAll('a[href]')) links.push(a);
   let ld = t('links_ok', {n:links.length});
   if (links.length === 0) ld += t('links_zero');
   checks.push({ key: 'hyperlinks', label: t('links_label'), status: links.length>0?'ok':'warning', detail: ld, value: links.length });
