@@ -4658,21 +4658,50 @@ function extractTitle(doc) {
 
 // ========== BODY TEXT EXTRACTION ==========
 function extractBodyText(doc) {
-  const CONTENT_KW = ['entry-content','post-content','article-content','article-body','post-body','td-post-content','single-content','content-single'];
+  const CONTENT_KW = ['entry-content','post-content','article-content','article-body','post-body','td-post-content','single-content','content-single','the-content','main-content','story-body','c-article__body','post_content','article__content','nota-content','nota__content','contenido','news-content','field-body','text-content'];
   const EXCLUDE_KW = ['related','sidebar','widget','nav','footer','header','comment','newsletter','social','share','author-bio','breadcrumb','menu','advertisement','publicite','pub','cookie','popup','modal','notification','banner','alert','search','tags','meta','pagination','pager','next','prev','similar','recommended','also-read','a-lire','sur-le-meme','plus-sur'];
   let body = null;
-  for (const el of doc.querySelectorAll('div, section')) {
+  let bodySource = 'fallback:body';
+  for (const el of doc.querySelectorAll('div, section, main')) {
     const cls = (el.className || '').toLowerCase();
-    if (CONTENT_KW.some(k => cls.includes(k))) { body = el; break; }
+    const id = (el.id || '').toLowerCase();
+    if (CONTENT_KW.some(k => cls.includes(k) || id.includes(k))) { body = el; bodySource = 'class/id:' + (cls || id).substring(0, 60); break; }
   }
-  if (!body) body = doc.querySelector('article');
-  if (!body) body = doc.body || doc.documentElement;
+  if (!body) { body = doc.querySelector('article'); if (body) bodySource = 'tag:article'; }
+  if (!body) { body = doc.querySelector('main'); if (body) bodySource = 'tag:main'; }
+  if (!body) { body = doc.body || doc.documentElement; }
 
   const texts = [];
-  for (const p of body.querySelectorAll('p')) {
-    if (!isExcluded(p, body, EXCLUDE_KW) && !isInsideEmbed(p, body)) texts.push(p.textContent.trim());
+  for (const el of body.querySelectorAll('p, li, h2, h3, h4')) {
+    if (!isExcluded(el, body, EXCLUDE_KW) && !isInsideEmbed(el, body)) {
+      const t = el.textContent.trim();
+      if (t.length > 5) texts.push(t);
+    }
   }
-  return texts.join('\n');
+  const result = texts.join('\n');
+  // Diagnostic log for debugging extraction issues
+  const wordCount = result.split(/\s+/).filter(w => w.length > 0).length;
+  console.log(`[extractBodyText] source=${bodySource} | paragraphs=${texts.length} | words=${wordCount}`);
+  if (wordCount < 100) {
+    // Low word count — log alternative containers for debugging
+    const allEls = doc.querySelectorAll('p, li, h2, h3, h4');
+    const allElText = [...allEls].map(e => e.textContent.trim()).filter(t => t.length > 20);
+    console.warn(`[extractBodyText] LOW WORD COUNT (${wordCount}). Total <p/li/h> in page: ${allEls.length} (${allElText.length} with >20 chars). Container used: ${bodySource}`);
+    // Try finding largest text container as hint
+    const candidates = doc.querySelectorAll('div, section, main, article');
+    let best = null, bestWords = 0;
+    for (const c of candidates) {
+      const ps = c.querySelectorAll('p, li, h2, h3, h4');
+      const w = [...ps].map(p => p.textContent).join(' ').split(/\s+/).length;
+      if (w > bestWords) { bestWords = w; best = c; }
+    }
+    if (best && bestWords > wordCount * 1.5) {
+      const cls = (best.className || '').substring(0, 80);
+      const id = best.id || '';
+      console.warn(`[extractBodyText] HINT: largest container has ${bestWords} words → tag=${best.tagName} class="${cls}" id="${id}"`);
+    }
+  }
+  return result;
 }
 
 function isInsideEmbed(el, boundary) {
@@ -6656,6 +6685,82 @@ function generatePdf() {
 
 function esc(str) { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
 function decodeEntities(s) { const el = document.createElement('textarea'); el.innerHTML = s; return el.value; }
+
+// ========== CROSS-SITE EXTRACTION TEST ==========
+// Run from browser console: testAllSites()
+const TEST_URLS = {
+  TOPMERCATO: 'https://www.topmercato.com/transferts/olise-s-enflamme-au-bayern-l-essentiel-du-mercato-1093069',
+  SPORTSMOLE: 'https://www.sportsmole.co.uk/football/man-utd/preview/preview-manchester-united-vs-tottenham-hotspur-prediction-team-news-lineups_584893.html',
+  TRIVELA: 'https://trivela.com.br/futebol-internacional/barcelona-enfrenta-bayern-de-munique-pela-champions-league/',
+  UMDOISESPORTES: 'https://www.umdoisesportes.com.br/coritiba/coritiba-anuncia-contratacao-nicolas-fonseca/',
+  AFRIKFOOTFR: 'https://www.afrik-foot.com/le-mercato-record-du-maroc-tous-les-transferts-des-joueurs-marocains-de-lete-2026',
+  AFRIKFOOTZA: 'https://www.afrik-foot.com/en-za/',  // Replace with a real /en-za/ article URL
+  AFRIKFOOTNG: 'https://www.afrik-foot.com/en-ng/',  // Replace with a real /en-ng/ article URL
+  FOOTBALLWHISPERS: 'https://footballwhispers.com/blog/tottenham-transfer-targets/',
+  FOOTBALLGROUNDGUIDE: 'https://footballgroundguide.com/news/premier-league-best-away-days-the-top-10-grounds-to-visit-in-englands-elite-division.html',
+  SOLOBASKET: 'https://solobasket.com/liga-endesa/equipo-estrella-liga-endesa-acb-igualada',
+  FOTBALPORTAL: 'https://www.fotbalportal.cz/anglie/premier-league/81220-arsenal-si-muze-oddechnout-degaardovo-zraneni-neni-vazne-a-kapitan-se-zlepsuje/',
+  ALAIRELIBRE: 'https://www.alairelibre.cl/futbol/revisa-una-seleccion-de-los-mejores-chistes-futboleros/',
+  CALCIODANGOLO: 'https://calciodangolo.com/fantacalcio-come-giocherebbero-oggi-formazioni-tipo-serie-a-2026-2027/',
+  SOCCERNET: 'https://soccernet.ng/2026/07/wafcon-super-falcons-fatima-oloko-niger.html',
+  BASKETUSA: 'https://www.basketusa.com/news/946557/apres-lechec-des-negociations-avec-leuroleague-la-nba-europe-sera-t-elle-repoussee/',
+  BASKETEUROPE: 'https://www.basketeurope.com/euroleague-le-partizan-vient-gacher-la-fete-pour-la-premiere-de-paris-a-domicile/',
+  LUBSPORT: 'https://lubsport.pl/aktualnosci/polska-liga-koszykowki-zasady-druzyny-gdzie-ogladac/',
+  LAKERSBRASIL: 'https://lakersbrasil.com/jj-redick/lakers-formacoes-sem-doncic-e-sem-reaves-rotacao/',
+  FUTDADOS: 'https://futdados.com/arg/argentina-vs-brasil-historial',
+  VRINGE: 'https://vringe.com/news/204024-nursultanov-vozvrashchaetsya-stat-chempionom-mira.htm',
+  MRFIXITSTIPS: 'https://mrfixitstips.co.uk/previews/arsenal-vs-leeds-prediction-and-betting-tips-2026-10-10/',
+};
+
+async function testAllSites(customUrls) {
+  const urls = customUrls || TEST_URLS;
+  const results = [];
+  console.log('%c=== CROSS-SITE EXTRACTION TEST ===', 'font-size:14px;font-weight:bold;color:#2563EB');
+  console.log(`Testing ${Object.keys(urls).length} sites...\n`);
+
+  for (const [site, url] of Object.entries(urls)) {
+    try {
+      console.log(`%c[${site}] Fetching...`, 'color:#6B7280', url);
+      const html = await fetchViaProxy(url);
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      const title = extractTitle(doc);
+      const bodyText = extractBodyText(doc);
+      const words = bodyText.split(/\s+/).filter(w => w.length > 0).length;
+      const paragraphs = bodyText.split('\n').filter(p => p.trim().length > 0).length;
+
+      const status = words < 100 ? '❌ LOW' : words < 200 ? '⚠️ WARN' : '✅ OK';
+      results.push({ site, url, title: title.substring(0, 60), words, paragraphs, status, error: null });
+      const color = words < 100 ? 'color:red;font-weight:bold' : words < 200 ? 'color:#D97706' : 'color:green';
+      console.log(`%c  ${status} ${words} words | ${paragraphs} paragraphs | "${title.substring(0, 50)}"`, color);
+    } catch(e) {
+      results.push({ site, url, title: '', words: 0, paragraphs: 0, status: '💥 ERROR', error: e.message });
+      console.log(`%c  💥 ERROR: ${e.message}`, 'color:red');
+    }
+  }
+
+  // Summary
+  console.log('\n%c=== SUMMARY ===', 'font-size:14px;font-weight:bold;color:#2563EB');
+  const ok = results.filter(r => r.status.includes('OK')).length;
+  const warn = results.filter(r => r.status.includes('WARN')).length;
+  const low = results.filter(r => r.status.includes('LOW')).length;
+  const err = results.filter(r => r.status.includes('ERROR')).length;
+  console.log(`✅ OK: ${ok} | ⚠️ WARN: ${warn} | ❌ LOW: ${low} | 💥 ERROR: ${err}`);
+
+  if (low > 0 || err > 0) {
+    console.log('\n%cPROBLEM SITES:', 'font-weight:bold;color:red');
+    results.filter(r => r.status.includes('LOW') || r.status.includes('ERROR'))
+      .forEach(r => console.log(`  ${r.site}: ${r.error || r.words + ' words'} — ${r.url}`));
+  }
+
+  console.table(results.map(r => ({ Site: r.site, Words: r.words, Paras: r.paragraphs, Status: r.status, Title: r.title, Error: r.error || '' })));
+  return results;
+}
+
+// Quick test: testSite('ALAIRELIBRE', 'https://www.alairelibre.cl/futbol/chile-vs-mexico-uno-a-uno-la-roja/')
+async function testSite(site, url) {
+  return testAllSites({ [site]: url });
+}
 </script>
 </body>
 </html>
