@@ -5148,11 +5148,28 @@ async function runQualityCheck(title, bodyText, articleUrl) {
       messages: [
         { role: 'system', content: `You are a Google Search quality rater. Your ONLY job is to flag content that would directly damage the article in a Google Discover update, Search update, or spam update. You are NOT an editorial coach. Standard sports journalism writing is fine — even if it is not perfect prose.
 
+STEP 1 — ARTICLE IDENTITY (do this BEFORE any evaluation):
+Before evaluating anything, read the TITLE carefully and determine:
+- article_topic: What is this article actually about? Derive the real topic from the title. Examples: "Biggest football attendances in Europe yesterday" → topic is "attendance figures roundup", NOT a match report. "Revisa una selección de los mejores chistes futboleros" → topic is "football jokes compilation". "Preview: Man Utd vs Tottenham" → topic is "match preview". The title defines the topic. Do NOT let the first event or name mentioned in the body redefine the topic.
+- article_type: What kind of article is it? One of: match-report, preview, transfer-news, rankings/list, roundup/compilation, analysis, interview, player-profile, opinion, news, other.
+- key_facts: List the 3-5 most important specific facts in the article (numbers, scores, names+actions, stats). You will use these to check for cross-paragraph repetition.
+
+ALL your evaluation (title alignment, fluff detection, repetition) must be through the lens of this identified topic. If the title says "biggest attendances" and the article mentions Portugal vs Norway, the article topic is attendances — Portugal vs Norway is just one data point.
+
+STEP 2 — CROSS-PARAGRAPH FACT REPETITION:
+After identifying key_facts, scan the article for the same specific fact (same number, same stat, same score, same name+action) appearing in 2+ SEPARATE paragraphs or in BOTH prose text AND a table/list. This is the most damaging form of thin content: it inflates word count by restating data the reader already has.
+Rules:
+- The chapô/lead paragraph is EXEMPT — it is allowed to state facts that appear later.
+- A table or list that organizes data is NOT repetition of itself — but if the prose ALSO states the same numbers from the table, that IS repetition.
+- If the same specific number or stat appears in 3+ separate locations (excluding chapô), flag it as "high" severity repetition.
+- If a paragraph restates the core point of a previous paragraph with different words but adds nothing new, flag it.
+
 FLAG ONLY content that Google would classify as:
 - Auto-generated or AI-generated filler (template sentences that could appear in any article with names swapped)
 - Thin content signals (paragraphs that exist only to inflate word count with no information)
 - Spam patterns (circular repetition of the same point 3+ times, keyword stuffing disguised as sentences)
 - Copy-paste boilerplate (identical phrasing reused across articles)
+- Cross-paragraph fact repetition (same specific data point stated in multiple paragraphs — see STEP 2)
 
 CRITICAL RULE — DO NOT INVENT PROBLEMS:
 If the article reads naturally and a human editor would not mark anything, return an EMPTY fluff array. Most professional sports articles have ZERO fluff. Your default output should be an empty array. Only add items when you are absolutely certain a Google quality rater would penalize that specific sentence.
@@ -5173,22 +5190,24 @@ DO NOT FLAG (this is normal sports journalism, not fluff):
 THRESHOLD: Flag a sentence ONLY if a Google quality rater would specifically highlight it as evidence of low-quality or auto-generated content. If you are unsure whether something is fluff, DO NOT flag it. Err heavily on the side of NOT flagging. A typical well-written sports article should have 0-2 flags, not 5-10.
 
 You must:
-1. Check if the title accurately reflects the chapô and article content. Rate as "aligned", "partial", or "misaligned".
-2. Check TITLE BALANCE:
+1. Identify the ARTICLE IDENTITY first (Step 1 above). This determines how you interpret everything.
+2. Check if the title accurately reflects the chapô and article content — evaluated against the article_topic you identified, not against one sub-event. Rate as "aligned", "partial", or "misaligned".
+3. Check TITLE BALANCE:
    - "clickbait": Title overpromises or uses sensational language but the article is ordinary.
    - "bland": Title is flat and generic, gives no reason to click.
    - "balanced": Title triggers curiosity while honestly reflecting the article content.
-3. Detect DAMAGING PADDING only — content that would hurt Google ranking.
+4. Detect CROSS-PARAGRAPH FACT REPETITION (Step 2 above) — same data restated across paragraphs.
+5. Detect DAMAGING PADDING only — content that would hurt Google ranking.
 
 SEVERITY (use only "high" or "medium" — there is no "low"):
-- "high": Would directly trigger Google spam signals or make Google classify the article as auto-generated. Examples: blatant filler paragraphs with zero information, word-for-word repetition of the same point, template sentences.
-- "medium": A Google quality rater would mark this as evidence of thin content if they saw several like it. Examples: a paragraph that restates the previous paragraph in different words with nothing new added.
+- "high": Would directly trigger Google spam signals or make Google classify the article as auto-generated. Examples: blatant filler paragraphs with zero information, word-for-word repetition of the same point, same specific fact/number stated in 3+ locations, template sentences.
+- "medium": A Google quality rater would mark this as evidence of thin content if they saw several like it. Examples: a paragraph that restates the previous paragraph in different words with nothing new added, same fact in 2 locations (beyond chapô).
 
 Apply these tests. A sentence must fail at least 2 tests AND be the kind of content Google penalizes:
 - DELETE TEST: If you delete this sentence, does the reader lose any fact, argument, evidence or insight?
 - ANY-TEAM TEST: Could the exact same sentence appear in any article by swapping names?
 - CONTEXT-FREE TEST: Could the writer have produced this sentence without reading anything about the topic?
-- REPETITION TEST: Does it repeat the same point already made, just with different words?
+- REPETITION TEST: Does it repeat a specific fact (number, stat, score) already stated in a different paragraph? Or does it restate the same point already made, just with different words?
 - EVIDENCE-FREE TEST: Does it make a judgment without giving any evidence?
 
 For each padding instance: the exact quote, a category (delete-test, any-team, context-free, repetition, evidence-free), the severity (high/medium), which tests it fails, and a suggested rewrite in the same language. If the sentence should just be deleted, say "delete".` + calibration },
@@ -5202,6 +5221,16 @@ For each padding instance: the exact quote, a category (delete-test, any-team, c
           parameters: {
             type: 'object',
             properties: {
+              article_identity: {
+                type: 'object',
+                description: 'Article identity analysis — MUST be determined before any evaluation',
+                properties: {
+                  topic: { type: 'string', description: 'The real topic derived from the title. E.g. "attendance figures roundup", "transfer news", "match preview Man Utd vs Tottenham"' },
+                  type: { type: 'string', enum: ['match-report','preview','transfer-news','rankings-list','roundup-compilation','analysis','interview','player-profile','opinion','news','other'], description: 'Article type category' },
+                  key_facts: { type: 'array', items: { type: 'string' }, description: 'The 3-5 most important specific facts (numbers, scores, stats) used to check for cross-paragraph repetition' },
+                  repeated_facts: { type: 'array', items: { type: 'object', properties: { fact: { type: 'string', description: 'The specific fact/number that is repeated' }, locations: { type: 'integer', description: 'Number of separate locations where this fact appears (excluding chapô)' } }, required: ['fact', 'locations'] }, description: 'Facts that appear in 2+ separate paragraphs (excluding chapô). Empty array if no repetition found.' }
+                }, required: ['topic', 'type', 'key_facts', 'repeated_facts']
+              },
               title_alignment: {
                 type: 'object',
                 properties: {
@@ -5232,7 +5261,7 @@ For each padding instance: the exact quote, a category (delete-test, any-team, c
                   }, required: ['quote', 'category', 'severity', 'tests_failed', 'reason', 'suggestion']
                 }
               }
-            }, required: ['title_alignment', 'title_balance', 'fluff']
+            }, required: ['article_identity', 'title_alignment', 'title_balance', 'fluff']
           }
         }
       }],
@@ -6146,6 +6175,16 @@ function renderQuality(q, bodyText) {
   document.getElementById('qualityCount').innerHTML = `<span class="tl-dot ${countColor}" style="width:8px;height:8px"></span> ${totalIssues === 0 ? 'OK' : totalIssues + ' issue(s)'}`;
 
   let html = '';
+  // Article identity (topic detected by AI)
+  const ai = q.article_identity;
+  if (ai && ai.topic) {
+    html += `<div style="padding:8px 16px 6px 16px;font-size:12px;color:var(--text-dim);display:flex;flex-wrap:wrap;gap:6px;align-items:center"><span style="font-weight:600">Topic:</span> <span style="color:var(--text-muted)">${esc(ai.topic)}</span>`;
+    if (ai.type) html += ` <span style="background:var(--bg-alt);padding:1px 8px;border-radius:10px;font-size:11px">${esc(ai.type)}</span>`;
+    if (ai.repeated_facts && ai.repeated_facts.length > 0) {
+      html += ` <span style="color:var(--severity-high,#ef4444);font-weight:600;margin-left:8px">⚠ ${ai.repeated_facts.length} repeated fact(s)</span>`;
+    }
+    html += `</div>`;
+  }
   // Title alignment
   html += `<div class="check-row"><div class="status-dot ${a.status==='aligned'?'ok':'fail'}"></div><div class="check-label" style="font-weight:600">${t('quality_title_align')}</div><div class="check-detail"><span class="tl-dot ${alignColor}" style="width:8px;height:8px"></span> ${alignLabel}</div></div>`;
   if (a.comment) html += `<div style="padding:0 16px 12px 32px;color:var(--text-muted);font-size:13px">${esc(a.comment)}</div>`;
@@ -6501,6 +6540,7 @@ function getQualityData() {
   if (!d || !d.qualityResult) return null;
   const q = d.qualityResult;
   const rows = [];
+  if (q.article_identity) rows.push({ check: 'Article topic', status: q.article_identity.type || '', comment: q.article_identity.topic || '', repeated_facts: (q.article_identity.repeated_facts||[]).map(r => `${r.fact} (${r.locations}x)`).join('; ') });
   if (q.title_alignment) rows.push({ check: 'Title alignment', status: q.title_alignment.status, comment: q.title_alignment.comment || '' });
   if (q.title_balance) rows.push({ check: 'Title balance', status: q.title_balance.status, comment: q.title_balance.comment || '', suggestion: q.title_balance.suggestion || '' });
   (q.fluff || []).forEach(f => {
