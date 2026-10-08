@@ -5042,6 +5042,7 @@ WHAT TO SKIP (these are all standard in sports journalism):
 - Stylistic choices: optional commas (before conjunctions, around adverbs like néanmoins/cependant/however — both with and without are correct), missing articles before country names ("England will face Czech Republic" is standard), uppercase letters without diacritics (L'Equipe, SERIE A, CESKE), regional/geographic adjectives in lowercase (nordiste, marseillaise, torinese, madrileño, paulista, pražský, warszawski).
 - Language-specific grammar: gender agreement on past participles or verbs when the subject is not visible in the excerpt. Slavic noun declension — in Czech, Polish, Russian and Ukrainian, proper nouns change endings by grammatical case (Messiho, Ronalda, Juventusu, Barcelony, Liverpoolu — these are correct declined forms, not typos). Czech/Polish/Russian/Ukrainian have no articles — never suggest adding one.
 - Grammatical gender of articles, pronouns and determiners: NEVER change the gender of words like l'une/l'un, une/un, la/le, celle/celui, cette/ce, sa/son, ma/mon, aucune/aucun, della/del, una/un, esta/este, essa/esse. The author chose the gender to match the noun. If you cannot see the noun in the excerpt, the gender is CORRECT as written. This is the #1 source of false positives — skip ALL gender-only corrections.
+- Adjective used as adverb or preposition: In many languages, adjectives can function as adverbs or prepositions WITHOUT the adverb suffix. This is correct and standard. Examples: ES "independiente de" (= regardless of, NOT "independientemente de"), "claro" (= of course), "junto a" (= next to), "conforme a" (= in accordance with); FR "fort" (= strongly), "direct" (= directly in speech); PT "junto a", "independente de"; IT "indipendente da". NEVER suggest adding -mente/-ment/-ly to create the adverb form — the adjective form is intentional and grammatically valid.
 - Verb conjugation with distant or ambiguous subjects: NEVER flag subject-verb agreement when the real subject of the verb may not be the nearest noun. Example: "los jóvenes que viene probando Nicolás Córdova" — "viene" agrees with "Nicolás Córdova" (singular), NOT with "los jóvenes". In relative clauses, the verb often agrees with a subject that is far away or after the verb. If the correct subject is ambiguous or debatable in the excerpt, the conjugation is CORRECT as written. This applies to ALL languages. Skip ALL conjugation corrections where the subject is not 100% clear.
 
 CONFIDENCE THRESHOLD: if your confidence that something is a genuine error is below 95%, skip it. When in doubt, do NOT flag it. A false positive damages trust in the tool far more than a missed error.
@@ -5112,6 +5113,22 @@ Respond ONLY via the spellcheck_report tool.`;
           if (longer.startsWith(shorter) && /^[ns]?$/.test(longer.slice(shorter.length))) return false;
           // Also catch: viene/vienen, sale/salen, pone/ponen (root+n), va/van, est/sont type patterns
           if (shorter.length >= 3 && longer === shorter + 'n') return false;
+        }
+        // Adjective ↔ adverb suffix swap (cross-language false positives)
+        // ES/IT/PT: -mente (independiente→independientemente, claro→claramente)
+        // FR: -ment (certain→certainement, indépendant→indépendamment)
+        // EN: -ly (independent→independently, clear→clearly)
+        // These are always context-dependent — either form can be correct
+        {
+          const [long, short] = o.length >= c.length ? [o, c] : [c, o];
+          const advSuffixes = ['mente', 'ment', 'ly'];
+          for (const suf of advSuffixes) {
+            if (long.endsWith(suf) && long.length > suf.length + 2) {
+              const stem = long.slice(0, -suf.length);
+              const minShared = Math.min(stem.length, short.length) - 1;
+              if (minShared >= 3 && stem.slice(0, minShared) === short.slice(0, minShared)) return false;
+            }
+          }
         }
         return true;
       });
@@ -6169,17 +6186,19 @@ function renderQuality(q, bodyText) {
   const alignLabel = a.status === 'aligned' ? t('quality_align_ok') : a.status === 'partial' ? t('quality_align_partial') : t('quality_align_misaligned');
   const balanceColor = b.status === 'balanced' ? 'green' : 'red';
   const balanceLabel = b.status === 'clickbait' ? t('quality_balance_clickbait') : b.status === 'bland' ? t('quality_balance_bland') : t('quality_balance_ok');
+  // Article identity — declared early so repeatedCount can use it
+  const ai = q.article_identity;
   // Severity counts for header
   const highCount = fluff.filter(f => f.severity === 'high').length;
   const medCount = fluff.filter(f => f.severity === 'medium').length;
   const lowCount = (q.fluff || []).filter(f => f.severity === 'low').length;
-  const totalIssues = (a.status !== 'aligned' ? 1 : 0) + (b.status !== 'balanced' ? 1 : 0) + fluff.length;
-  const countColor = highCount > 0 ? 'red' : (medCount > 0 || totalIssues > 0) ? 'amber' : 'green';
+  const repeatedCount = (ai && ai.repeated_facts) ? ai.repeated_facts.length : 0;
+  const totalIssues = (a.status !== 'aligned' ? 1 : 0) + (b.status !== 'balanced' ? 1 : 0) + fluff.length + repeatedCount;
+  const countColor = highCount > 0 || repeatedCount > 0 ? 'red' : (medCount > 0 || totalIssues > 0) ? 'amber' : 'green';
   document.getElementById('qualityCount').innerHTML = `<span class="tl-dot ${countColor}" style="width:8px;height:8px"></span> ${totalIssues === 0 ? 'OK' : totalIssues + ' issue(s)'}`;
 
   let html = '';
   // Article identity (topic detected by AI)
-  const ai = q.article_identity;
   if (ai && ai.topic) {
     html += `<div style="padding:8px 16px 6px 16px;font-size:12px;color:var(--text-dim);display:flex;flex-wrap:wrap;gap:6px;align-items:center"><span style="font-weight:600">Topic:</span> <span style="color:var(--text-muted)">${esc(ai.topic)}</span>`;
     if (ai.type) html += ` <span style="background:var(--bg-alt);padding:1px 8px;border-radius:10px;font-size:11px">${esc(ai.type)}</span>`;
@@ -6187,6 +6206,14 @@ function renderQuality(q, bodyText) {
       html += ` <span style="color:var(--severity-high,#ef4444);font-weight:600;margin-left:8px">⚠ ${ai.repeated_facts.length} repeated fact(s)</span>`;
     }
     html += `</div>`;
+    // List each repeated fact with detail
+    if (ai.repeated_facts && ai.repeated_facts.length > 0) {
+      html += `<div style="padding:2px 16px 8px 32px">`;
+      ai.repeated_facts.forEach(rf => {
+        html += `<div style="font-size:12px;color:var(--text-muted);line-height:1.8;display:flex;gap:6px;align-items:baseline"><span style="color:var(--severity-high,#ef4444)">•</span> <span>${esc(rf.fact)}</span> <span style="font-size:11px;opacity:0.6;white-space:nowrap">(${rf.locations}x)</span></div>`;
+      });
+      html += `</div>`;
+    }
   }
   // Title alignment
   html += `<div class="check-row"><div class="status-dot ${a.status==='aligned'?'ok':'fail'}"></div><div class="check-label" style="font-weight:600">${t('quality_title_align')}</div><div class="check-detail"><span class="tl-dot ${alignColor}" style="width:8px;height:8px"></span> ${alignLabel}</div></div>`;
@@ -6199,10 +6226,11 @@ function renderQuality(q, bodyText) {
     if (b.suggestion && b.status !== 'balanced') html += `<div style="padding:0 16px 12px 32px;font-size:13px;display:flex;align-items:center;gap:6px"><span class="spell-arrow">→</span><span style="font-weight:600">${t('quality_balance_suggestion')}:</span> <span class="spell-correction">${esc(b.suggestion)}</span></div>`;
   }
 
-  // Fluff header row
-  const fluffColor = fluff.length === 0 ? 'green' : highCount > 0 ? 'red' : 'amber';
-  const fluffLabel = fluff.length === 0 ? t('quality_fluff_ok') : t('quality_fluff_found', {n: fluff.length});
-  html += `<div class="check-row"><div class="status-dot ${fluff.length===0?'ok':'fail'}"></div><div class="check-label" style="font-weight:600">${t('quality_fluff')}</div><div class="check-detail"><span class="tl-dot ${fluffColor}" style="width:8px;height:8px"></span> ${fluffLabel}</div></div>`;
+  // Fluff header row — factor in repeated facts too
+  const hasRepeated = repeatedCount > 0;
+  const fluffColor = (fluff.length === 0 && !hasRepeated) ? 'green' : (highCount > 0 || hasRepeated) ? 'red' : 'amber';
+  const fluffLabel = (fluff.length === 0 && !hasRepeated) ? t('quality_fluff_ok') : fluff.length > 0 ? t('quality_fluff_found', {n: fluff.length}) : repeatedCount + ' repeated fact(s)';
+  html += `<div class="check-row"><div class="status-dot ${(fluff.length===0 && !hasRepeated)?'ok':'fail'}"></div><div class="check-label" style="font-weight:600">${t('quality_fluff')}</div><div class="check-detail"><span class="tl-dot ${fluffColor}" style="width:8px;height:8px"></span> ${fluffLabel}</div></div>`;
 
   // Reviewer selector
   const savedRev = localStorage.getItem('media_dashboard_reviewer') || '';
