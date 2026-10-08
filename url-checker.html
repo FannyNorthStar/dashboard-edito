@@ -717,6 +717,123 @@ body {
   .container { padding: 20px 16px 40px; }
   .spell-error-row { flex-wrap: wrap; }
 }
+
+/* EVERGREEN RESULTS */
+.ev-proposals { display: flex; flex-direction: column; gap: 20px; }
+.ev-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.ev-card-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.ev-card-header h3 {
+  font-size: 15px; font-weight: 700; color: var(--text);
+  margin: 0; line-height: 1.3;
+}
+.ev-card-header .ev-number {
+  flex-shrink: 0;
+  width: 28px; height: 28px;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700;
+  margin-right: 12px;
+}
+.ev-card-body { padding: 16px 20px; }
+.ev-meta-row {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  margin-bottom: 14px;
+}
+.ev-meta-tag {
+  font-size: 11px; font-weight: 600;
+  padding: 3px 10px; border-radius: 20px;
+  text-transform: uppercase; letter-spacing: 0.3px;
+}
+.ev-meta-tag.format { background: var(--accent-glow); color: var(--accent); }
+.ev-meta-tag.intent { background: var(--blue-bg); color: var(--blue); }
+.ev-meta-tag.cycle { background: var(--amber-bg); color: var(--amber); }
+.ev-meta-tag.words { background: var(--green-bg); color: var(--green); }
+.ev-meta-tag.score {
+  background: var(--purple);
+  color: #fff;
+  opacity: 0.9;
+}
+.ev-meta-description {
+  background: var(--surface-2);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  font-size: 13px; color: var(--text-muted);
+  margin-bottom: 14px;
+  line-height: 1.5;
+  font-style: italic;
+}
+.ev-section-label {
+  font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.5px;
+  color: var(--text-dim);
+  margin-bottom: 8px; margin-top: 16px;
+}
+.ev-section-label:first-child { margin-top: 0; }
+.ev-h2-list { list-style: none; padding: 0; margin: 0; }
+.ev-h2-item {
+  padding: 10px 14px;
+  border-left: 3px solid var(--accent);
+  margin-bottom: 8px;
+  background: var(--surface-2);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+}
+.ev-h2-title {
+  font-size: 13px; font-weight: 600; color: var(--text);
+  margin-bottom: 4px;
+}
+.ev-h2-brief {
+  font-size: 12px; color: var(--text-muted); line-height: 1.4;
+}
+.ev-satellites {
+  display: flex; flex-wrap: wrap; gap: 6px;
+  margin-top: 8px;
+}
+.ev-satellite-chip {
+  font-size: 11px; font-weight: 500;
+  padding: 4px 10px;
+  background: var(--surface-3);
+  color: var(--text);
+  border-radius: 16px;
+  border: 1px solid var(--border);
+}
+.ev-results-header {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 16px;
+}
+.ev-results-header h2 {
+  font-size: 18px; font-weight: 700; color: var(--text);
+  margin: 0;
+}
+.ev-results-header .ai-badge {
+  font-size: 10px; font-weight: 700;
+  background: linear-gradient(135deg, #6366F1, #8B5CF6);
+  color: #fff;
+  padding: 2px 8px; border-radius: 10px;
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+.ev-autocomplete-note {
+  font-size: 12px; color: var(--text-dim);
+  margin-bottom: 16px;
+  padding: 8px 12px;
+  background: var(--surface-2);
+  border-radius: var(--radius-sm);
+}
+@media (max-width: 600px) {
+  .ev-meta-row { gap: 4px; }
+  .ev-card-header { flex-wrap: wrap; gap: 8px; }
+}
 </style>
 </head>
 <body>
@@ -750,6 +867,7 @@ body {
       <button class="mode-tab active" onclick="switchMode('keyword')" data-mode="keyword" data-t="tab_keyword">Keyword Checker</button>
       <button class="mode-tab" onclick="switchMode('url')" data-mode="url" data-t="tab_url">Check URL</button>
       <button class="mode-tab" onclick="switchMode('html')" data-mode="html" data-t="tab_draft">Check Draft</button>
+      <button class="mode-tab" onclick="switchMode('evergreen')" data-mode="evergreen" data-t="tab_evergreen">Evergreen</button>
     </div>
 
     <div class="mode-panel active" id="panelKeyword">
@@ -804,6 +922,18 @@ body {
       <button class="btn" id="analyzeBtnHtml" onclick="startAnalysis('html')" style="width:100%">
         <span id="btnTextHtml" data-t="btn_check_html">Check HTML</span>
         <div class="spinner" id="btnSpinnerHtml" style="display:none"></div>
+      </button>
+    </div>
+
+    <div class="mode-panel" id="panelEvergreen">
+      <div class="site-select-row">
+        <label data-t="ev_site_label">Site</label>
+        <select class="site-select" id="evSiteSelect"></select>
+      </div>
+      <textarea class="html-textarea" id="evInput" data-t-placeholder="ev_placeholder" placeholder="Enter a keyword or article idea... e.g. 'Champions League all-time top scorers' or 'How does the FIFA ranking work?'" style="min-height:120px;font-family:inherit"></textarea>
+      <button class="btn" id="analyzeBtnEv" onclick="startAnalysis('evergreen')" style="width:100%">
+        <span id="btnTextEv" data-t="btn_check_ev">Generate Evergreen Proposals</span>
+        <div class="spinner" id="btnSpinnerEv" style="display:none"></div>
       </button>
     </div>
   </div>
@@ -895,6 +1025,8 @@ body {
   </div>
 
   <div class="results" id="kwResults" style="display:none"></div>
+
+  <div class="results" id="evResults" style="display:none"></div>
 
 </div>
 
@@ -1237,6 +1369,31 @@ const T = {
     kw_no_data: "No Discover data found for this site.",
     kw_no_match: "No matching articles found in data.",
     kw_summary: "Checked {topics} topic(s) across {articles} Discover articles on {site}.",
+    // Evergreen tab
+    tab_evergreen: "Evergreen",
+    ev_site_label: "Site",
+    ev_placeholder: "Enter a keyword or article idea... e.g. 'Champions League all-time top scorers' or 'How does the FIFA ranking work?'",
+    btn_check_ev: "Generate Evergreen Proposals",
+    err_empty_ev: "Enter a keyword or article idea to generate proposals.",
+    prog_ev_autocomplete: "Fetching search suggestions...",
+    prog_ev_ai: "Generating evergreen proposals (GPT-4o)...",
+    prog_ev_render: "Rendering proposals...",
+    ev_results_title: "Evergreen Proposals",
+    ev_autocomplete_used: "Autocomplete suggestions used",
+    ev_structure: "Article structure",
+    ev_cluster: "Cluster satellites",
+    ev_words: "words",
+    ev_cycle_never: "No updates needed",
+    ev_cycle_annual: "Annual update",
+    ev_cycle_seasonal: "Seasonal update",
+    ev_cycle_monthly: "Monthly update",
+    ev_intent_info: "Informational",
+    ev_intent_transact: "Transactional",
+    ev_intent_nav: "Navigational",
+    ev_format_guide: "Guide",
+    ev_format_listicle: "Listicle",
+    ev_format_comparison: "Comparison",
+    ev_format_definition: "Definition",
   },
   fr: {
     input_title: "Analyser un article",
@@ -1479,6 +1636,30 @@ const T = {
     kw_no_data: "Aucune donnee Discover trouvee pour ce site.",
     kw_no_match: "Aucun article correspondant dans les donnees.",
     kw_summary: "{topics} sujet(s) verifies parmi {articles} articles Discover sur {site}.",
+    tab_evergreen: "Evergreen",
+    ev_site_label: "Site",
+    ev_placeholder: "Entrez un mot-cle ou une idee d'article... ex. 'meilleurs buteurs de tous les temps en Ligue des Champions'",
+    btn_check_ev: "Generer des propositions evergreen",
+    err_empty_ev: "Entrez un mot-cle ou une idee d'article.",
+    prog_ev_autocomplete: "Recuperation des suggestions de recherche...",
+    prog_ev_ai: "Generation des propositions evergreen (GPT-4o)...",
+    prog_ev_render: "Affichage des propositions...",
+    ev_results_title: "Propositions Evergreen",
+    ev_autocomplete_used: "Suggestions autocomplete utilisees",
+    ev_structure: "Structure de l'article",
+    ev_cluster: "Articles satellites",
+    ev_words: "mots",
+    ev_cycle_never: "Pas de mise a jour",
+    ev_cycle_annual: "Mise a jour annuelle",
+    ev_cycle_seasonal: "Mise a jour saisonniere",
+    ev_cycle_monthly: "Mise a jour mensuelle",
+    ev_intent_info: "Informationnel",
+    ev_intent_transact: "Transactionnel",
+    ev_intent_nav: "Navigationnel",
+    ev_format_guide: "Guide",
+    ev_format_listicle: "Listicle",
+    ev_format_comparison: "Comparatif",
+    ev_format_definition: "Definition",
   },
   "pt-br": {
     input_title: "Analisar um artigo",
@@ -1709,6 +1890,30 @@ const T = {
     kw_no_data: "Nenhum dado Discover encontrado para este site.",
     kw_no_match: "Nenhum artigo correspondente nos dados.",
     kw_summary: "{topics} topico(s) verificado(s) em {articles} artigos Discover em {site}.",
+    tab_evergreen: "Evergreen",
+    ev_site_label: "Site",
+    ev_placeholder: "Digite uma palavra-chave ou ideia de artigo... ex. 'maiores artilheiros da Champions League' ou 'Como funciona o ranking FIFA?'",
+    btn_check_ev: "Gerar propostas evergreen",
+    err_empty_ev: "Digite uma palavra-chave ou ideia de artigo.",
+    prog_ev_autocomplete: "Buscando sugestoes de pesquisa...",
+    prog_ev_ai: "Gerando propostas evergreen (GPT-4o)...",
+    prog_ev_render: "Renderizando propostas...",
+    ev_results_title: "Propostas Evergreen",
+    ev_autocomplete_used: "Sugestoes de autocomplete utilizadas",
+    ev_structure: "Estrutura do artigo",
+    ev_cluster: "Artigos satelites",
+    ev_words: "palavras",
+    ev_cycle_never: "Sem atualizacao",
+    ev_cycle_annual: "Atualizacao anual",
+    ev_cycle_seasonal: "Atualizacao sazonal",
+    ev_cycle_monthly: "Atualizacao mensal",
+    ev_intent_info: "Informacional",
+    ev_intent_transact: "Transacional",
+    ev_intent_nav: "Navegacional",
+    ev_format_guide: "Guia",
+    ev_format_listicle: "Listicle",
+    ev_format_comparison: "Comparativo",
+    ev_format_definition: "Definicao",
     tick_content: 'Analise de Conteudo',
     tick_spell: 'Verificacao Ortografica',
     tick_quality: 'Google Quality Rater',
@@ -1951,6 +2156,30 @@ const T = {
     kw_no_data: "No se encontraron datos Discover para este sitio.",
     kw_no_match: "No se encontraron articulos coincidentes en los datos.",
     kw_summary: "{topics} tema(s) verificado(s) en {articles} articulos Discover en {site}.",
+    tab_evergreen: "Evergreen",
+    ev_site_label: "Sitio",
+    ev_placeholder: "Introduce una palabra clave o idea de articulo... ej. 'maximos goleadores historicos de la Champions League'",
+    btn_check_ev: "Generar propuestas evergreen",
+    err_empty_ev: "Introduce una palabra clave o idea de articulo.",
+    prog_ev_autocomplete: "Obteniendo sugerencias de busqueda...",
+    prog_ev_ai: "Generando propuestas evergreen (GPT-4o)...",
+    prog_ev_render: "Mostrando propuestas...",
+    ev_results_title: "Propuestas Evergreen",
+    ev_autocomplete_used: "Sugerencias de autocompletado utilizadas",
+    ev_structure: "Estructura del articulo",
+    ev_cluster: "Articulos satelite",
+    ev_words: "palabras",
+    ev_cycle_never: "Sin actualizacion",
+    ev_cycle_annual: "Actualizacion anual",
+    ev_cycle_seasonal: "Actualizacion estacional",
+    ev_cycle_monthly: "Actualizacion mensual",
+    ev_intent_info: "Informacional",
+    ev_intent_transact: "Transaccional",
+    ev_intent_nav: "Navegacional",
+    ev_format_guide: "Guia",
+    ev_format_listicle: "Listicle",
+    ev_format_comparison: "Comparativa",
+    ev_format_definition: "Definicion",
     tick_content: 'Analisis de Contenido',
     tick_spell: 'Revision Ortografica',
     tick_quality: 'Google Quality Rater',
@@ -2193,6 +2422,30 @@ const T = {
     kw_no_data: "Nessun dato Discover trovato per questo sito.",
     kw_no_match: "Nessun articolo corrispondente nei dati.",
     kw_summary: "{topics} argomento/i verificato/i su {articles} articoli Discover su {site}.",
+    tab_evergreen: "Evergreen",
+    ev_site_label: "Sito",
+    ev_placeholder: "Inserisci una parola chiave o idea di articolo... es. 'migliori marcatori di sempre in Champions League'",
+    btn_check_ev: "Genera proposte evergreen",
+    err_empty_ev: "Inserisci una parola chiave o idea di articolo.",
+    prog_ev_autocomplete: "Recupero suggerimenti di ricerca...",
+    prog_ev_ai: "Generazione proposte evergreen (GPT-4o)...",
+    prog_ev_render: "Visualizzazione proposte...",
+    ev_results_title: "Proposte Evergreen",
+    ev_autocomplete_used: "Suggerimenti autocomplete utilizzati",
+    ev_structure: "Struttura dell'articolo",
+    ev_cluster: "Articoli satellite",
+    ev_words: "parole",
+    ev_cycle_never: "Nessun aggiornamento",
+    ev_cycle_annual: "Aggiornamento annuale",
+    ev_cycle_seasonal: "Aggiornamento stagionale",
+    ev_cycle_monthly: "Aggiornamento mensile",
+    ev_intent_info: "Informazionale",
+    ev_intent_transact: "Transazionale",
+    ev_intent_nav: "Navigazionale",
+    ev_format_guide: "Guida",
+    ev_format_listicle: "Listicle",
+    ev_format_comparison: "Confronto",
+    ev_format_definition: "Definizione",
     tick_content: 'Analisi Contenuto',
     tick_spell: 'Controllo Ortografico',
     tick_quality: 'Google Quality Rater',
@@ -2435,6 +2688,30 @@ const T = {
     kw_no_data: "Данные Discover не найдены для этого сайта.",
     kw_no_match: "Совпадающих статей в данных не найдено.",
     kw_summary: "Проверено {topics} тем(ы) среди {articles} статей Discover на {site}.",
+    tab_evergreen: "Evergreen",
+    ev_site_label: "Сайт",
+    ev_placeholder: "Введите ключевое слово или идею статьи... напр. 'лучшие бомбардиры Лиги чемпионов за всю историю'",
+    btn_check_ev: "Сгенерировать evergreen-предложения",
+    err_empty_ev: "Введите ключевое слово или идею статьи.",
+    prog_ev_autocomplete: "Получение поисковых подсказок...",
+    prog_ev_ai: "Генерация evergreen-предложений (GPT-4o)...",
+    prog_ev_render: "Отображение предложений...",
+    ev_results_title: "Предложения Evergreen",
+    ev_autocomplete_used: "Использованные подсказки автозаполнения",
+    ev_structure: "Структура статьи",
+    ev_cluster: "Сателлитные статьи",
+    ev_words: "слов",
+    ev_cycle_never: "Обновление не требуется",
+    ev_cycle_annual: "Ежегодное обновление",
+    ev_cycle_seasonal: "Сезонное обновление",
+    ev_cycle_monthly: "Ежемесячное обновление",
+    ev_intent_info: "Информационный",
+    ev_intent_transact: "Транзакционный",
+    ev_intent_nav: "Навигационный",
+    ev_format_guide: "Гайд",
+    ev_format_listicle: "Листикл",
+    ev_format_comparison: "Сравнение",
+    ev_format_definition: "Определение",
     tick_content: 'Анализ контента',
     tick_spell: 'Проверка орфографии',
     tick_quality: 'Google Quality Rater',
@@ -2677,6 +2954,30 @@ const T = {
     kw_no_data: "Даних Discover не знайдено для цього сайту.",
     kw_no_match: "Відповідних статей у даних не знайдено.",
     kw_summary: "Перевірено {topics} тем серед {articles} статей Discover на {site}.",
+    tab_evergreen: "Evergreen",
+    ev_site_label: "Сайт",
+    ev_placeholder: "Введіть ключове слово або ідею статті... напр. 'найкращі бомбардири Ліги чемпіонів за всю історію'",
+    btn_check_ev: "Згенерувати evergreen-пропозиції",
+    err_empty_ev: "Введіть ключове слово або ідею статті.",
+    prog_ev_autocomplete: "Отримання пошукових підказок...",
+    prog_ev_ai: "Генерація evergreen-пропозицій (GPT-4o)...",
+    prog_ev_render: "Відображення пропозицій...",
+    ev_results_title: "Пропозиції Evergreen",
+    ev_autocomplete_used: "Використані підказки автозаповнення",
+    ev_structure: "Структура статті",
+    ev_cluster: "Сателітні статті",
+    ev_words: "слів",
+    ev_cycle_never: "Оновлення не потрібне",
+    ev_cycle_annual: "Щорічне оновлення",
+    ev_cycle_seasonal: "Сезонне оновлення",
+    ev_cycle_monthly: "Щомісячне оновлення",
+    ev_intent_info: "Інформаційний",
+    ev_intent_transact: "Транзакційний",
+    ev_intent_nav: "Навігаційний",
+    ev_format_guide: "Гайд",
+    ev_format_listicle: "Лістикл",
+    ev_format_comparison: "Порівняння",
+    ev_format_definition: "Визначення",
     tick_content: 'Аналіз контенту',
     tick_spell: 'Перевірка орфографії',
     tick_quality: 'Google Quality Rater',
@@ -2931,6 +3232,30 @@ const T = {
     kw_no_data: "Nie znaleziono danych Discover dla tej strony.",
     kw_no_match: "Nie znaleziono pasujacych artykulow w danych.",
     kw_summary: "Sprawdzono {topics} temat(ow) wsrod {articles} artykulow Discover na {site}.",
+    tab_evergreen: "Evergreen",
+    ev_site_label: "Strona",
+    ev_placeholder: "Wpisz slowo kluczowe lub pomysl na artykul... np. 'najlepsi strzelcy Ligi Mistrzow w historii'",
+    btn_check_ev: "Wygeneruj propozycje evergreen",
+    err_empty_ev: "Wpisz slowo kluczowe lub pomysl na artykul.",
+    prog_ev_autocomplete: "Pobieranie sugestii wyszukiwania...",
+    prog_ev_ai: "Generowanie propozycji evergreen (GPT-4o)...",
+    prog_ev_render: "Wyswietlanie propozycji...",
+    ev_results_title: "Propozycje Evergreen",
+    ev_autocomplete_used: "Wykorzystane sugestie autouzupelniania",
+    ev_structure: "Struktura artykulu",
+    ev_cluster: "Artykuly satelitarne",
+    ev_words: "slow",
+    ev_cycle_never: "Bez aktualizacji",
+    ev_cycle_annual: "Aktualizacja roczna",
+    ev_cycle_seasonal: "Aktualizacja sezonowa",
+    ev_cycle_monthly: "Aktualizacja miesieczna",
+    ev_intent_info: "Informacyjny",
+    ev_intent_transact: "Transakcyjny",
+    ev_intent_nav: "Nawigacyjny",
+    ev_format_guide: "Poradnik",
+    ev_format_listicle: "Listicle",
+    ev_format_comparison: "Porownanie",
+    ev_format_definition: "Definicja",
   },
   cs: {
     input_title: "Analýza článku",
@@ -3161,6 +3486,30 @@ const T = {
     kw_no_data: "Pro tento web nebyla nalezena zadna data Discover.",
     kw_no_match: "V datech nebyly nalezeny zadne odpovidajici clanky.",
     kw_summary: "Zkontrolovano {topics} temat mezi {articles} clanky Discover na {site}.",
+    tab_evergreen: "Evergreen",
+    ev_site_label: "Web",
+    ev_placeholder: "Zadejte klicove slovo nebo napad na clanek... napr. 'nejlepsi strelci Ligy mistru vsech dob'",
+    btn_check_ev: "Vygenerovat evergreen navrhy",
+    err_empty_ev: "Zadejte klicove slovo nebo napad na clanek.",
+    prog_ev_autocomplete: "Nacitani navrhu vyhledavani...",
+    prog_ev_ai: "Generovani evergreen navrhu (GPT-4o)...",
+    prog_ev_render: "Zobrazovani navrhu...",
+    ev_results_title: "Evergreen navrhy",
+    ev_autocomplete_used: "Pouzite navrhy automatickeho doplnovani",
+    ev_structure: "Struktura clanku",
+    ev_cluster: "Satelitni clanky",
+    ev_words: "slov",
+    ev_cycle_never: "Bez aktualizace",
+    ev_cycle_annual: "Rocni aktualizace",
+    ev_cycle_seasonal: "Sezonni aktualizace",
+    ev_cycle_monthly: "Mesicni aktualizace",
+    ev_intent_info: "Informacni",
+    ev_intent_transact: "Transakcni",
+    ev_intent_nav: "Navigacni",
+    ev_format_guide: "Pruvodce",
+    ev_format_listicle: "Listicle",
+    ev_format_comparison: "Srovnani",
+    ev_format_definition: "Definice",
     tick_content: 'Analyza obsahu',
     tick_spell: 'Kontrola pravopisu',
     tick_quality: 'Google Quality Rater',
@@ -3446,6 +3795,16 @@ const TAB_LABELS = {
   'FUTDADOS': 'FutDados',
 };
 
+// Language mapping for Evergreen autocomplete
+const SITE_LANG_MAP = {
+  'TOPMERCATO': 'fr', 'SPORTSMOLE': 'en', 'TRIVELA': 'pt-BR', 'UMDOISESPORTES': 'pt-BR',
+  'AFRIKFOOTFR': 'fr', 'AFRIKFOOTZA': 'en', 'AFRIKFOOTNG': 'en',
+  'FOOTBALLWHISPERS': 'en', 'FOOTBALLGROUNDGUIDE': 'en', 'MRFIXITSTIPS': 'en',
+  'SOLOBASKET': 'es', 'FOTBALPORTAL': 'cs', 'VRINGE': 'ru', 'ALAIRELIBRE': 'es',
+  'CALCIODANGOLO': 'it', 'SOCCERNET': 'en', 'BASKETUSA': 'fr', 'BASKETEUROPE': 'fr',
+  'LUBSPORT': 'pl', 'LAKERSBRASIL': 'pt-BR', 'FUTDADOS': 'pt-BR',
+};
+
 // Path-based overrides for sites sharing the same domain (e.g. afrik-foot.com/en-ng/)
 const PATH_TAB_OVERRIDES = [
   { domain: 'afrik-foot.com', pathPrefix: '/en-ng/', tab: 'AFRIKFOOTNG' },
@@ -3488,14 +3847,17 @@ const SITE_OPTIONS = [
 ];
 
 function populateSiteSelect() {
-  const sel = document.getElementById('kwSiteSelect');
-  sel.innerHTML = '';
-  for (const s of SITE_OPTIONS) {
-    const opt = document.createElement('option');
-    opt.value = s.value;
-    opt.textContent = s.label;
-    sel.appendChild(opt);
-  }
+  ['kwSiteSelect', 'evSiteSelect'].forEach(selId => {
+    const sel = document.getElementById(selId);
+    if (!sel) return;
+    sel.innerHTML = '';
+    for (const s of SITE_OPTIONS) {
+      const opt = document.createElement('option');
+      opt.value = s.value;
+      opt.textContent = s.label;
+      sel.appendChild(opt);
+    }
+  });
 }
 
 function switchMode(mode) {
@@ -3505,6 +3867,7 @@ function switchMode(mode) {
   document.getElementById('panelUrl').classList.toggle('active', mode === 'url');
   document.getElementById('panelHtml').classList.toggle('active', mode === 'html');
   document.getElementById('panelKeyword').classList.toggle('active', mode === 'keyword');
+  document.getElementById('panelEvergreen').classList.toggle('active', mode === 'evergreen');
 }
 
 // ========== UI HELPERS ==========
@@ -3527,9 +3890,11 @@ function setLoading(on) {
   document.getElementById('analyzeBtnUrl').disabled = on;
   document.getElementById('analyzeBtnHtml').disabled = on;
   document.getElementById('analyzeBtnKw').disabled = on;
+  document.getElementById('analyzeBtnEv').disabled = on;
   document.getElementById('btnTextUrl').textContent = on ? t('btn_analyzing') : t('btn_check_url');
   document.getElementById('btnTextHtml').textContent = on ? t('btn_analyzing') : t('btn_check_html');
   document.getElementById('btnTextKw').textContent = on ? t('btn_analyzing') : t('btn_check_kw');
+  document.getElementById('btnTextEv').textContent = on ? t('btn_analyzing') : t('btn_check_ev');
   const activeSpinner = document.getElementById('btnSpinner_active');
   if (activeSpinner) activeSpinner.style.display = on ? 'block' : 'none';
 }
@@ -3539,6 +3904,10 @@ async function startAnalysis(mode) {
   // Keyword mode has its own flow
   if (mode === 'keyword') {
     return startKeywordAnalysis();
+  }
+  // Evergreen mode has its own flow
+  if (mode === 'evergreen') {
+    return startEvergreenAnalysis();
   }
 
   let url = document.getElementById('urlInput').value.trim();
@@ -3563,6 +3932,7 @@ async function startAnalysis(mode) {
   setLoading(true);
   document.getElementById('results').classList.remove('active');
   document.getElementById('kwResults').style.display = 'none';
+  document.getElementById('evResults').style.display = 'none';
   document.getElementById('progressBar').classList.remove('active');
   document.getElementById('spellBody').style.display = 'none';
   document.getElementById('qualityCard').style.display = 'none';
@@ -3817,6 +4187,7 @@ async function startKeywordAnalysis() {
   setLoading(true);
   document.getElementById('results').classList.remove('active');
   document.getElementById('kwResults').style.display = 'none';
+  document.getElementById('evResults').style.display = 'none';
   document.getElementById('progressBar').classList.remove('active');
 
   try {
@@ -6880,6 +7251,230 @@ async function testAllSites(customUrls) {
 // Quick test: testSite('ALAIRELIBRE', 'https://www.alairelibre.cl/futbol/chile-vs-mexico-uno-a-uno-la-roja/')
 async function testSite(site, url) {
   return testAllSites({ [site]: url });
+}
+
+// ========== EVERGREEN TAB ==========
+async function fetchAutocompleteSuggestions(keyword, lang) {
+  const url = `https://suggestqueries.google.com/complete/search?client=firefox&q=${encodeURIComponent(keyword)}&hl=${lang}`;
+  // Try direct fetch (client=firefox returns JSON, CORS varies)
+  try {
+    const resp = await fetchWithTimeout(url, { mode: 'cors' }, 5000);
+    if (resp.ok) {
+      const data = await resp.json();
+      return data[1] || [];
+    }
+  } catch(e) { /* CORS blocked, try proxy */ }
+  // Fallback: GAS proxy as GET
+  try {
+    const proxy = localStorage.getItem('media_dashboard_cors_proxy') || DEFAULT_GAS_PROXY;
+    const sep = proxy.includes('?') ? '&' : '?';
+    const proxyUrl = proxy + sep + 'url=' + encodeURIComponent(url);
+    const resp = await fetchWithTimeout(proxyUrl, { redirect: 'follow' }, 8000);
+    if (resp.ok) {
+      const text = await resp.text();
+      const data = JSON.parse(text);
+      return data[1] || [];
+    }
+  } catch(e) {
+    console.warn('Autocomplete fetch failed:', e.message);
+  }
+  return [];
+}
+
+async function startEvergreenAnalysis() {
+  const evText = document.getElementById('evInput').value.trim();
+  if (!evText) { showError(t('err_empty_ev')); return; }
+
+  const selectedSite = document.getElementById('evSiteSelect').value;
+  const siteLang = SITE_LANG_MAP[selectedSite] || 'en';
+  const siteLabel = TAB_LABELS[selectedSite] || selectedSite;
+
+  // Show spinner
+  const spinnerEl = document.getElementById('btnSpinnerEv');
+  spinnerEl.id = 'btnSpinner_active';
+  const restoreSpinner = () => { spinnerEl.id = 'btnSpinnerEv'; };
+
+  clearError();
+  setLoading(true);
+  document.getElementById('results').classList.remove('active');
+  document.getElementById('kwResults').style.display = 'none';
+  document.getElementById('evResults').style.display = 'none';
+  document.getElementById('progressBar').classList.remove('active');
+
+  try {
+    // Step 1: Fetch Google Autocomplete suggestions
+    setProgress(10, t('prog_ev_autocomplete'));
+    const suggestions = await fetchAutocompleteSuggestions(evText, siteLang);
+    console.log('[evergreen] Autocomplete suggestions:', suggestions);
+
+    // Step 2: Send to OpenAI
+    setProgress(30, t('prog_ev_ai'));
+
+    const langNames = {
+      'en': 'English', 'fr': 'French', 'pt-BR': 'Brazilian Portuguese',
+      'es': 'Spanish', 'it': 'Italian', 'ru': 'Russian', 'cs': 'Czech',
+      'pl': 'Polish', 'uk': 'Ukrainian', 'nl': 'Dutch'
+    };
+    const langName = langNames[siteLang] || siteLang;
+
+    const systemPrompt = `You are an SEO editorial strategist for sports media sites. You help plan evergreen articles that generate sustained organic traffic.
+
+Your task: Given a keyword or article idea, evaluate it and propose 3 article concepts optimized for long-term search traffic.
+
+The target site is "${siteLabel}" and all output (titles, H2s, briefs, meta descriptions, satellite ideas) must be in ${langName}.
+
+Evaluate using this checklist:
+- Search intent: informational, transactional, or navigational
+- Format: guide, listicle, comparison, FAQ, how-to, or definition
+- Long-tail potential: year-round vs seasonal (score 1-10)
+- Freshness/update cycle: never, annual, seasonal, or monthly
+- Cluster potential: what satellite articles could support this
+- Feasibility: is this realistic for a sports media site
+
+Return 3 distinct article proposals. Each should take a different angle or format on the topic. Make titles SEO-optimized with natural keyword placement. H2s should form a complete article skeleton.`;
+
+    const userPrompt = `Keyword/idea: "${evText}"
+Site: ${siteLabel} (language: ${langName})
+${suggestions.length > 0 ? `\nGoogle Autocomplete suggestions for context:\n${suggestions.map(s => '- ' + s).join('\n')}` : ''}
+
+Generate 3 evergreen article proposals.`;
+
+    const body = {
+      model: 'gpt-4o',
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt }
+      ],
+      tools: [{
+        type: 'function',
+        function: {
+          name: 'submit_evergreen_proposals',
+          description: 'Submit 3 evergreen article proposals',
+          parameters: {
+            type: 'object',
+            properties: {
+              proposals: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    title: { type: 'string', description: 'SEO-optimized article title in site language' },
+                    h2s: { type: 'array', items: { type: 'string' }, description: 'Array of H2 headings forming the article skeleton' },
+                    briefs: { type: 'array', items: { type: 'string' }, description: 'Array matching h2s, 2-3 line description each' },
+                    meta_description: { type: 'string', description: 'Meta description, max 155 chars' },
+                    word_count_estimate: { type: 'number', description: 'Estimated word count' },
+                    update_cycle: { type: 'string', enum: ['never', 'annual', 'seasonal', 'monthly'] },
+                    search_intent: { type: 'string', enum: ['informational', 'transactional', 'navigational'] },
+                    format: { type: 'string', enum: ['guide', 'listicle', 'comparison', 'FAQ', 'how-to', 'definition'] },
+                    long_tail_score: { type: 'number', description: 'Long-tail potential 1-10' },
+                    cluster_satellites: { type: 'array', items: { type: 'string' }, description: '3-5 satellite article ideas' }
+                  },
+                  required: ['title', 'h2s', 'briefs', 'meta_description', 'word_count_estimate', 'update_cycle', 'search_intent', 'format', 'long_tail_score', 'cluster_satellites']
+                },
+                minItems: 3,
+                maxItems: 3
+              }
+            },
+            required: ['proposals']
+          }
+        }
+      }],
+      tool_choice: { type: 'function', function: { name: 'submit_evergreen_proposals' } }
+    };
+
+    const response = await callOpenAI(body);
+    setProgress(80, t('prog_ev_render'));
+
+    // Parse response
+    const toolCall = response.choices?.[0]?.message?.tool_calls?.[0];
+    if (!toolCall) throw new Error(t('err_no_tool'));
+
+    const result = JSON.parse(toolCall.function.arguments);
+    const proposals = result.proposals;
+
+    if (!proposals || proposals.length === 0) throw new Error('No proposals returned.');
+
+    // Step 3: Render
+    setProgress(95, t('prog_done'));
+    renderEvergreenResults(proposals, siteLabel, suggestions);
+
+  } catch(e) {
+    showError(e.message || 'Evergreen analysis failed.');
+    console.error('[evergreen]', e);
+  } finally {
+    restoreSpinner();
+    setLoading(false);
+    document.getElementById('progressBar').classList.remove('active');
+  }
+}
+
+function renderEvergreenResults(proposals, siteLabel, suggestions) {
+  const container = document.getElementById('evResults');
+
+  const cycleLabels = { never: t('ev_cycle_never'), annual: t('ev_cycle_annual'), seasonal: t('ev_cycle_seasonal'), monthly: t('ev_cycle_monthly') };
+  const intentLabels = { informational: t('ev_intent_info'), transactional: t('ev_intent_transact'), navigational: t('ev_intent_nav') };
+  const formatLabels = { guide: t('ev_format_guide'), listicle: t('ev_format_listicle'), comparison: t('ev_format_comparison'), FAQ: 'FAQ', 'how-to': 'How-to', definition: t('ev_format_definition') };
+
+  let html = `<div class="ev-results-header">
+    <h2>${t('ev_results_title')}</h2>
+    <span class="ai-badge">GPT-4o</span>
+  </div>`;
+
+  if (suggestions.length > 0) {
+    html += `<div class="ev-autocomplete-note">${t('ev_autocomplete_used')}: ${suggestions.slice(0, 8).map(s => '<strong>' + escapeHtml(s) + '</strong>').join(', ')}</div>`;
+  }
+
+  html += '<div class="ev-proposals">';
+
+  proposals.forEach((p, i) => {
+    const scoreColor = p.long_tail_score >= 7 ? 'var(--green)' : p.long_tail_score >= 4 ? 'var(--amber)' : 'var(--red)';
+    html += `<div class="ev-card">
+      <div class="ev-card-header">
+        <div style="display:flex;align-items:center;gap:10px;min-width:0">
+          <span class="ev-number">${i + 1}</span>
+          <h3 style="white-space:normal">${escapeHtml(p.title)}</h3>
+        </div>
+      </div>
+      <div class="ev-card-body">
+        <div class="ev-meta-row">
+          <span class="ev-meta-tag format">${formatLabels[p.format] || p.format}</span>
+          <span class="ev-meta-tag intent">${intentLabels[p.search_intent] || p.search_intent}</span>
+          <span class="ev-meta-tag cycle">${cycleLabels[p.update_cycle] || p.update_cycle}</span>
+          <span class="ev-meta-tag words">${p.word_count_estimate} ${t('ev_words')}</span>
+          <span class="ev-meta-tag score" style="background:${scoreColor}">Long-tail: ${p.long_tail_score}/10</span>
+        </div>
+        <div class="ev-meta-description">${escapeHtml(p.meta_description)}</div>
+        <div class="ev-section-label">${t('ev_structure')}</div>
+        <ul class="ev-h2-list">`;
+
+    p.h2s.forEach((h2, j) => {
+      html += `<li class="ev-h2-item">
+        <div class="ev-h2-title">${escapeHtml(h2)}</div>
+        ${p.briefs[j] ? `<div class="ev-h2-brief">${escapeHtml(p.briefs[j])}</div>` : ''}
+      </li>`;
+    });
+
+    html += `</ul>
+        <div class="ev-section-label">${t('ev_cluster')}</div>
+        <div class="ev-satellites">`;
+
+    (p.cluster_satellites || []).forEach(sat => {
+      html += `<span class="ev-satellite-chip">${escapeHtml(sat)}</span>`;
+    });
+
+    html += `</div>
+      </div>
+    </div>`;
+  });
+
+  html += '</div>';
+  container.innerHTML = html;
+  container.style.display = 'block';
+}
+
+function escapeHtml(str) {
+  if (typeof str !== 'string') return '';
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 </script>
 </body>
