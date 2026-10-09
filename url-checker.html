@@ -1461,6 +1461,9 @@ const T = {
     ev_diff_medium: "Medium",
     ev_diff_high: "High",
     ev_authority_title: "Site Authority Match",
+    ev_auth_green: "Good fit",
+    ev_auth_orange: "Adjacent",
+    ev_auth_red: "Poor fit",
     ev_primary_kw: "Primary keyword",
   },
   fr: {
@@ -1735,6 +1738,9 @@ const T = {
     ev_diff_medium: "Moyen",
     ev_diff_high: "Eleve",
     ev_authority_title: "Compatibilite autorite du site",
+    ev_auth_green: "Compatible",
+    ev_auth_orange: "Adjacent",
+    ev_auth_red: "Hors sujet",
     ev_primary_kw: "Mot-cle principal",
   },
   "pt-br": {
@@ -1997,6 +2003,9 @@ const T = {
     ev_diff_medium: "Media",
     ev_diff_high: "Alta",
     ev_authority_title: "Compatibilidade com autoridade do site",
+    ev_auth_green: "Compativel",
+    ev_auth_orange: "Adjacente",
+    ev_auth_red: "Fora do escopo",
     ev_primary_kw: "Palavra-chave principal",
     tick_content: 'Analise de Conteudo',
     tick_spell: 'Verificacao Ortografica',
@@ -2271,6 +2280,9 @@ const T = {
     ev_diff_medium: "Media",
     ev_diff_high: "Alta",
     ev_authority_title: "Compatibilidad con autoridad del sitio",
+    ev_auth_green: "Compatible",
+    ev_auth_orange: "Adyacente",
+    ev_auth_red: "Fuera de tema",
     ev_primary_kw: "Palabra clave principal",
     tick_content: 'Analisis de Contenido',
     tick_spell: 'Revision Ortografica',
@@ -2545,6 +2557,9 @@ const T = {
     ev_diff_medium: "Media",
     ev_diff_high: "Alta",
     ev_authority_title: "Compatibilita con autorita del sito",
+    ev_auth_green: "Compatibile",
+    ev_auth_orange: "Adiacente",
+    ev_auth_red: "Fuori tema",
     ev_primary_kw: "Parola chiave principale",
     tick_content: 'Analisi Contenuto',
     tick_spell: 'Controllo Ortografico',
@@ -2819,6 +2834,9 @@ const T = {
     ev_diff_medium: "Средняя",
     ev_diff_high: "Высокая",
     ev_authority_title: "Соответствие авторитету сайта",
+    ev_auth_green: "Подходит",
+    ev_auth_orange: "Смежная тема",
+    ev_auth_red: "Не по теме",
     ev_primary_kw: "Основное ключевое слово",
     tick_content: 'Анализ контента',
     tick_spell: 'Проверка орфографии',
@@ -3093,6 +3111,9 @@ const T = {
     ev_diff_medium: "Середня",
     ev_diff_high: "Висока",
     ev_authority_title: "Вiдповiднiсть авторитету сайту",
+    ev_auth_green: "Пiдходить",
+    ev_auth_orange: "Сумiжна тема",
+    ev_auth_red: "Не по темi",
     ev_primary_kw: "Основне ключове слово",
     tick_content: 'Аналіз контенту',
     tick_spell: 'Перевірка орфографії',
@@ -3379,6 +3400,9 @@ const T = {
     ev_diff_medium: "Srednia",
     ev_diff_high: "Wysoka",
     ev_authority_title: "Zgodnosc z autorytetem strony",
+    ev_auth_green: "Pasuje",
+    ev_auth_orange: "Pokrewny temat",
+    ev_auth_red: "Poza tematem",
     ev_primary_kw: "Glowne slowo kluczowe",
   },
   cs: {
@@ -3641,6 +3665,9 @@ const T = {
     ev_diff_medium: "Stredni",
     ev_diff_high: "Vysoka",
     ev_authority_title: "Shoda s autoritou webu",
+    ev_auth_green: "Sedne",
+    ev_auth_orange: "Priblizne",
+    ev_auth_red: "Mimo tema",
     ev_primary_kw: "Hlavni klicove slovo",
     tick_content: 'Analyza obsahu',
     tick_spell: 'Kontrola pravopisu',
@@ -7494,7 +7521,11 @@ SITE CONTEXT:
 - Content language: ${langName}
 
 AUTHORITY CHECK (critical):
-Before proposing articles, evaluate whether the keyword/idea fits within this site's natural topical authority. A football transfer site should NOT write about basketball history. A Nigerian football site should NOT write about Czech league records. If the topic is outside the site's authority, say so clearly and explain what the site COULD cover instead. Rate the authority match 1-10.
+Before proposing articles, evaluate whether the keyword/idea fits within this site's natural topical authority. A football transfer site should NOT write about basketball history. A Nigerian football site should NOT write about Czech league records.
+Rate using a simple traffic light:
+- "green": topic fits naturally within the site's authority. Go ahead.
+- "orange": topic is adjacent but not ideal. Explain what's not ideal and what angle would fit better.
+- "red": topic is clearly outside the site's domain. Explain why and suggest what the site COULD cover instead.
 
 SEARCH VOLUME ESTIMATION:
 Based on your knowledge of search patterns in ${langName}-speaking markets, estimate the monthly search volume range for each proposal's primary keyword. Use these brackets:
@@ -7544,11 +7575,10 @@ First assess authority match, then generate 3 evergreen article proposals with d
               authority_assessment: {
                 type: 'object',
                 properties: {
-                  score: { type: 'number', description: 'Authority match score 1-10 (10 = perfect fit)' },
-                  fits: { type: 'boolean', description: 'true if topic fits within site authority' },
-                  reason: { type: 'string', description: 'Brief explanation of authority match. If poor fit, suggest what the site COULD cover instead.' }
+                  signal: { type: 'string', enum: ['green', 'orange', 'red'], description: 'green = fits naturally, orange = adjacent but not ideal, red = outside authority' },
+                  reason: { type: 'string', description: 'Brief explanation. For orange: what is not ideal and what angle fits better. For red: why it does not fit and what the site COULD cover instead.' }
                 },
-                required: ['score', 'fits', 'reason']
+                required: ['signal', 'reason']
               },
               proposals: {
                 type: 'array',
@@ -7624,13 +7654,16 @@ function renderEvergreenResults(proposals, siteLabel, suggestions, authority, mo
 
   // Authority assessment banner
   if (authority) {
-    const authColor = authority.score >= 7 ? 'var(--green)' : authority.score >= 4 ? 'var(--amber)' : 'var(--red)';
-    const authIcon = authority.fits ? '✓' : '⚠';
+    const sigColors = { green: 'var(--green)', orange: 'var(--amber)', red: 'var(--red)' };
+    const sigIcons = { green: '✓', orange: '⚠', red: '✗' };
+    const sigLabels = { green: t('ev_auth_green'), orange: t('ev_auth_orange'), red: t('ev_auth_red') };
+    const sig = authority.signal || 'green';
+    const authColor = sigColors[sig] || 'var(--green)';
     html += `<div class="ev-authority-banner" style="border-left-color:${authColor}">
       <div class="ev-authority-header">
-        <span class="ev-authority-icon" style="color:${authColor}">${authIcon}</span>
+        <span class="ev-authority-icon" style="color:${authColor}">${sigIcons[sig] || '✓'}</span>
         <strong>${t('ev_authority_title')}</strong>
-        <span class="ev-authority-score" style="background:${authColor}">${authority.score}/10</span>
+        <span class="ev-authority-score" style="background:${authColor}">${sigLabels[sig] || sig}</span>
       </div>
       <div class="ev-authority-reason">${escapeHtml(authority.reason)}</div>
     </div>`;
