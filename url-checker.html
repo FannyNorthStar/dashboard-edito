@@ -5777,13 +5777,16 @@ Before evaluating anything, read the TITLE carefully and determine:
 ALL your evaluation (title alignment, fluff detection, repetition) must be through the lens of this identified topic. If the title says "biggest attendances" and the article mentions Portugal vs Norway, the article topic is attendances — Portugal vs Norway is just one data point.
 
 STEP 2 — CROSS-PARAGRAPH FACT REPETITION:
-After identifying key_facts, scan the article for the same specific fact (same number, same stat, same score, same name+action) appearing in 2+ SEPARATE paragraphs or in BOTH prose text AND a table/list. This is the most damaging form of thin content: it inflates word count by restating data the reader already has.
-For each repeated fact, report WHERE it appears using the "positions" array: use "intro" for the first 2 paragraphs after the chapô, "conclusion" for the last 2 paragraphs, "middle" for everything between, or "paragraph N" for a specific paragraph number. This helps editors judge whether the repetition is normal (e.g. intro + conclusion recap) or problematic (same data 3x in the middle).
+After identifying key_facts, scan the article for the same specific fact (same number, same stat, same score, same name+action) appearing in 2+ SEPARATE paragraphs.
+CRITICAL DISTINCTION: A fact mentioned again WITH new context, analysis, or additional details is NOT repetition — that is normal progressive elaboration. Only flag when the EXACT same information is restated with NO added value (pure redundancy, padding word count).
+Example NOT repetition: "Chile won 2-0" in intro, then later "Chile's 2-0 victory was sealed by goals from Gutiérrez and Pizarro in the second half" — the second adds new information.
+Example IS repetition: "Chile won 2-0" in paragraph 3, then "Chile defeated Mexico by a 2-0 scoreline" in paragraph 8 with nothing new added.
+For each repeated fact, report WHERE it appears using the "positions" array with SPECIFIC paragraph numbers: "§3", "§7", "§12". Count paragraphs from 1 (after the chapô). This lets editors jump directly to the right spot.
 Rules:
 - The chapô/lead paragraph is EXEMPT — it is allowed to state facts that appear later.
-- A table or list that organizes data is NOT repetition of itself — but if the prose ALSO states the same numbers from the table, that IS repetition.
-- If the same specific number or stat appears in 3+ separate locations (excluding chapô), flag it as "high" severity repetition.
-- If a paragraph restates the core point of a previous paragraph with different words but adds nothing new, flag it.
+- A table or list that organizes data is NOT repetition of itself — but if the prose ALSO states the same numbers from the table with no new context, that IS repetition.
+- If the same specific number or stat appears in 3+ separate locations (excluding chapô) with no added value each time, flag it as "high" severity repetition.
+- If a later mention ADDS context, analysis, a quote, or new details around the same fact, do NOT flag it — that is normal editorial writing.
 
 FLAG ONLY content that Google would classify as:
 - Auto-generated or AI-generated filler (template sentences that could appear in any article with names swapped)
@@ -5849,7 +5852,7 @@ For each padding instance: the exact quote, a category (delete-test, any-team, c
                   topic: { type: 'string', description: 'The real topic derived from the title. E.g. "attendance figures roundup", "transfer news", "match preview Man Utd vs Tottenham"' },
                   type: { type: 'string', enum: ['match-report','preview','transfer-news','rankings-list','roundup-compilation','analysis','interview','player-profile','opinion','news','other'], description: 'Article type category' },
                   key_facts: { type: 'array', items: { type: 'string' }, description: 'The 3-5 most important specific facts (numbers, scores, stats) used to check for cross-paragraph repetition' },
-                  repeated_facts: { type: 'array', items: { type: 'object', properties: { fact: { type: 'string', description: 'The specific fact/number that is repeated' }, locations: { type: 'integer', description: 'Number of separate locations where this fact appears (excluding chapô)' }, positions: { type: 'array', items: { type: 'string' }, description: 'Where in the article each occurrence appears. Use short labels: "intro" (first 2 paragraphs), "middle", "conclusion" (last 2 paragraphs), or "paragraph N" for specific paragraphs. One entry per occurrence.' } }, required: ['fact', 'locations', 'positions'] }, description: 'Facts that appear in 2+ separate paragraphs (excluding chapô). Empty array if no repetition found.' }
+                  repeated_facts: { type: 'array', items: { type: 'object', properties: { fact: { type: 'string', description: 'The specific fact/number that is repeated with NO new information added' }, locations: { type: 'integer', description: 'Number of separate locations where this fact appears with no added value (excluding chapô)' }, positions: { type: 'array', items: { type: 'string' }, description: 'Specific paragraph numbers where each redundant occurrence appears, e.g. ["§3", "§7"]. Count from 1 after chapô. One entry per occurrence.' } }, required: ['fact', 'locations', 'positions'] }, description: 'Facts restated in 2+ paragraphs with NO new context or details added (pure redundancy). Do NOT include facts that reappear with added analysis, quotes, or new information — that is normal writing. Empty array if no true redundancy found.' }
                 }, required: ['topic', 'type', 'key_facts', 'repeated_facts']
               },
               title_alignment: {
@@ -6109,6 +6112,7 @@ URL list format: [index] path | clicks | impressions` },
         match30.avg_clicks = matched30.reduce((a, r) => a + r.clicks, 0) / matched30.length;
         match30.avg_impressions = matched30.reduce((a, r) => a + r.impressions, 0) / matched30.length;
         match30.avg_ctr = matched30.reduce((a, r) => a + r.ctr, 0) / matched30.length;
+        match30.top_articles = [...matched30].sort((a, b) => b.clicks - a.clicks).slice(0, 3);
       }
     }
 
@@ -6125,6 +6129,7 @@ URL list format: [index] path | clicks | impressions` },
         match10.avg_clicks = matched10.reduce((a, r) => a + r.clicks, 0) / matched10.length;
         match10.avg_impressions = matched10.reduce((a, r) => a + r.impressions, 0) / matched10.length;
         match10.avg_ctr = matched10.reduce((a, r) => a + r.ctr, 0) / matched10.length;
+        match10.top_articles = [...matched10].sort((a, b) => b.clicks - a.clicks).slice(0, 3);
       }
     }
 
@@ -6148,6 +6153,9 @@ URL list format: [index] path | clicks | impressions` },
       trend = on90 && on30 ? 'consistent' : on90 && !on30 ? 'fading' : !on90 && on30 ? 'trending' : 'absent';
     }
 
+    // Top 3 articles from main dataset (sorted by clicks)
+    const topArticlesMain = count > 0 ? [...matchingRows].sort((a, b) => b.clicks - a.clicks).slice(0, 3) : [];
+
     const result = {
       topic: gpt.topic,
       matching_count: count,
@@ -6155,6 +6163,7 @@ URL list format: [index] path | clicks | impressions` },
       avg_impressions: count > 0 ? matchingRows.reduce((a, r) => a + r.impressions, 0) / count : 0,
       avg_ctr: count > 0 ? matchingRows.reduce((a, r) => a + r.ctr, 0) / count : 0,
       total_articles: totalArticles,
+      top_articles: topArticlesMain,
       site: tab,
       site_stats: siteStats,
       authority_level: count > 0 ? 'on_discover' : 'not_on_discover',
@@ -6168,6 +6177,23 @@ URL list format: [index] path | clicks | impressions` },
     };
     return result;
   } catch(e) { return null; }
+}
+
+function renderTopArticles(articles) {
+  if (!articles || articles.length === 0) return '';
+  let html = `<div style="margin-top:8px;margin-bottom:4px">
+    <div style="font-size:11px;font-weight:600;color:var(--text-dim,#999);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">Top articles</div>`;
+  articles.forEach((r, i) => {
+    const path = r.url.replace(/https?:\/\/[^/]+/, '');
+    const shortPath = path.length > 70 ? path.slice(0, 67) + '...' : path;
+    html += `<div style="font-size:12px;line-height:1.6;display:flex;gap:6px;align-items:baseline">
+      <span style="color:var(--text-dim,#aaa);font-size:11px;min-width:14px">${i+1}.</span>
+      <a href="${r.url}" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none;word-break:break-all;flex:1" title="${r.url}">${shortPath}</a>
+      <span style="white-space:nowrap;font-size:11px;color:var(--text-muted)">${r.clicks} clicks · ${r.impressions} imp</span>
+    </div>`;
+  });
+  html += `</div>`;
+  return html;
 }
 
 function renderDiscoverInsights(d) {
@@ -6216,6 +6242,7 @@ function renderDiscoverInsights(d) {
     const para30 = t('authority_para_on', { topic: d.topic, count: d.matching_count, total: d.total_articles });
     html += `<p style="color:var(--text);line-height:1.7;margin:0 0 12px 0">${para30}</p>`;
     html += buildComparisonTable(d, d.site_stats, 'Topic');
+    html += renderTopArticles(d.top_articles);
   } else {
     const para30 = t('authority_para_off', { topic: d.topic, total: d.total_articles });
     html += `<p style="color:var(--text);line-height:1.7;margin:0 0 12px 0">${para30}</p>`;
@@ -6231,6 +6258,7 @@ function renderDiscoverInsights(d) {
       const para10 = t('authority_para_on_10d', { topic: d.topic, count: d.match_10d.count, total: d.total_articles_10d });
       html += `<p style="color:var(--text);line-height:1.7;margin:0 0 12px 0">${para10}</p>`;
       html += buildComparisonTable(d.match_10d, d.site_stats_10d, 'Topic');
+      html += renderTopArticles(d.match_10d.top_articles);
     } else {
       const para10 = t('authority_para_off_10d', { topic: d.topic, total: d.total_articles_10d || 0 });
       html += `<p style="color:var(--text);line-height:1.7;margin:0">${para10}</p>`;
@@ -6313,6 +6341,7 @@ URL list format: [index] path | clicks | impressions` },
       .map(i => subset[i]);
     const count = matchingRows.length;
 
+    const topArticlesSearch = count > 0 ? [...matchingRows].sort((a, b) => b.clicks - a.clicks).slice(0, 3) : [];
     const result = {
       topic: gpt.topic,
       matching_count: count,
@@ -6320,6 +6349,7 @@ URL list format: [index] path | clicks | impressions` },
       avg_impressions: count > 0 ? matchingRows.reduce((a, r) => a + r.impressions, 0) / count : 0,
       avg_ctr: count > 0 ? matchingRows.reduce((a, r) => a + r.ctr, 0) / count : 0,
       total_articles: totalArticles,
+      top_articles: topArticlesSearch,
       site: tab,
       site_stats: siteStats,
       authority_level: count > 0 ? 'on_search' : 'not_on_search'
@@ -6348,6 +6378,7 @@ function renderSearchInsights(d) {
     const para = t('authority_search_para_on', { topic: d.topic, count: d.matching_count, total: d.total_articles });
     html += `<p style="color:var(--text);line-height:1.7;margin:0 0 12px 0">${para}</p>`;
     html += buildComparisonTable(d, d.site_stats, 'Topic');
+    html += renderTopArticles(d.top_articles);
   } else {
     const para = t('authority_search_para_off', { topic: d.topic, total: d.total_articles });
     html += `<p style="color:var(--text);line-height:1.7;margin:0">${para}</p>`;
