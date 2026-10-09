@@ -5431,11 +5431,151 @@ function checkAuthor(doc, jsonldItems) {
   return { label: t('author_label'), status: 'warning', detail: t('author_absent') };
 }
 function checkPublicationDate(doc, jsonldItems) {
-  for (const it of jsonldItems) {
-    if (it.datePublished) return { label: t('date_label'), status: 'ok', detail: t('date_ok', {date: String(it.datePublished).substring(0,30)}) };
+  // Helper: try to normalise a raw date string into a readable format
+  function formatDate(raw) {
+    if (!raw) return '';
+    const s = raw.trim();
+    // Already short enough and looks readable — return as-is
+    if (s.length <= 30) return s;
+    // Try ISO parse
+    const d = new Date(s);
+    if (!isNaN(d.getTime())) return d.toISOString().substring(0, 16).replace('T', ' ');
+    return s.substring(0, 30);
   }
+  // Helper: validate that a string looks like a plausible date (not random text)
+  function looksLikeDate(s) {
+    if (!s || s.length < 6 || s.length > 80) return false;
+    // Must contain at least one digit
+    if (!/\d/.test(s)) return false;
+    // Try common patterns: DD/MM/YYYY, YYYY-MM-DD, Month DD YYYY, DD Month YYYY, etc.
+    const datePatterns = [
+      /\d{1,2}[\/.:-]\d{1,2}[\/.:-]\d{2,4}/,            // DD/MM/YYYY or MM-DD-YYYY variants
+      /\d{4}[\/.:-]\d{1,2}[\/.:-]\d{1,2}/,               // YYYY-MM-DD
+      /\b\d{1,2}\s+(?:de\s+)?[a-záéíóúàèìòùäëïöüâêîôûñçšžřůýě]{3,}\s+(?:de\s+)?\d{2,4}/i,  // DD Month YYYY (multi-lang)
+      /\b[a-záéíóúàèìòùäëïöüâêîôûñçšžřůýě]{3,}\s+\d{1,2},?\s+\d{2,4}/i,  // Month DD, YYYY
+      /\b\d{1,2}\s+[a-záéíóúàèìòùäëïöüâêîôûñçšžřůýě]{3,}\b/i,           // DD Month (no year — common in recent articles)
+    ];
+    return datePatterns.some(p => p.test(s));
+  }
+
+  // 1. JSON-LD datePublished
+  for (const it of jsonldItems) {
+    if (it.datePublished) return { label: t('date_label'), status: 'ok', detail: t('date_ok', {date: formatDate(String(it.datePublished))}) };
+  }
+  // 2. <meta property="article:published_time"> (Open Graph)
   const mt = doc.querySelector('meta[property="article:published_time"]');
-  if (mt && mt.getAttribute('content')) return { label: t('date_label'), status: 'ok', detail: t('date_og', {date: mt.getAttribute('content').substring(0,30)}) };
+  if (mt && mt.getAttribute('content')) return { label: t('date_label'), status: 'ok', detail: t('date_og', {date: formatDate(mt.getAttribute('content'))}) };
+  // 3. Schema.org microdata itemprop="datePublished" (used by Al Aire Libre, many CMS)
+  const ipDate = doc.querySelector('[itemprop="datePublished"]');
+  if (ipDate) {
+    const val = (ipDate.getAttribute('content') || ipDate.getAttribute('datetime') || ipDate.textContent || '').trim();
+    if (val) return { label: t('date_label'), status: 'ok', detail: t('date_ok', {date: formatDate(val)}) };
+  }
+  // 4. <time> element with datetime attribute (HTML5 standard)
+  const timeEl = doc.querySelector('article time[datetime], .post time[datetime], .entry time[datetime], time[datetime]');
+  if (timeEl) {
+    const val = timeEl.getAttribute('datetime').trim();
+    if (val) return { label: t('date_label'), status: 'ok', detail: t('date_ok', {date: formatDate(val)}) };
+  }
+  // 5. <meta> date variants (various CMS use different names)
+  const metaDateSelectors = [
+    'meta[name="date"]',
+    'meta[name="publish-date"]',
+    'meta[name="publish_date"]',
+    'meta[name="pubdate"]',
+    'meta[name="publication_date"]',
+    'meta[name="dc.date"]',
+    'meta[name="DC.date"]',
+    'meta[name="dc.date.issued"]',
+    'meta[name="dcterms.date"]',
+    'meta[name="sailthru.date"]',
+    'meta[property="og:published_time"]',
+    'meta[property="og:updated_time"]',
+    'meta[name="article:published_time"]',
+    'meta[name="parsely-pub-date"]',
+    'meta[name="cXenseParse:recs:publishtime"]',
+  ];
+  for (const sel of metaDateSelectors) {
+    try {
+      const el = doc.querySelector(sel);
+      if (el && el.getAttribute('content')) {
+        const val = el.getAttribute('content').trim();
+        if (val) return { label: t('date_label'), status: 'ok', detail: t('date_ok', {date: formatDate(val)}) };
+      }
+    } catch(e) { /* skip */ }
+  }
+  // 6. Common CSS class/id patterns for date display
+  const dateSelectors = [
+    '.post-date', '.entry-date', '.publish-date', '.published-date', '.article-date',
+    '.date-published', '.post-meta time', '.meta-date', '.story-date', '.fecha',
+    '.date', '.fecha-publicacion', '.article-info time', '.post-info time',
+    '[class*="publish"] time', '[class*="date-pub"]', '[class*="post-date"]',
+    '.td-post-date', '.wp-post-date',
+  ];
+  for (const sel of dateSelectors) {
+    try {
+      const el = doc.querySelector(sel);
+      if (el) {
+        const val = (el.getAttribute('datetime') || el.textContent || '').trim();
+        if (val && looksLikeDate(val)) return { label: t('date_label'), status: 'ok', detail: t('date_ok', {date: formatDate(val)}) };
+      }
+    } catch(e) { /* skip */ }
+  }
+  // 7. Text content scan: look for "Publicado el:", "Published:", "Publié le", etc.
+  // Search in small date-like containers near the top of the article
+  const dateTextPatterns = [
+    /publicado\s*(?:el|em|a)?\s*:?\s*(.{6,30})/i,     // ES/PT: "Publicado el: DD/MM/YYYY"
+    /published\s*(?:on)?\s*:?\s*(.{6,30})/i,           // EN: "Published: ..." or "Published on ..."
+    /publié\s*(?:le)?\s*:?\s*(.{6,30})/i,              // FR: "Publié le ..."
+    /pubblicato\s*(?:il)?\s*:?\s*(.{6,30})/i,          // IT: "Pubblicato il ..."
+    /опубликовано\s*:?\s*(.{6,30})/i,                  // RU: "Опубликовано ..."
+    /опубліковано\s*:?\s*(.{6,30})/i,                  // UK: "Опубліковано ..."
+    /opublikowano\s*:?\s*(.{6,30})/i,                  // PL: "Opublikowano ..."
+    /publikováno\s*:?\s*(.{6,30})/i,                   // CS: "Publikováno ..."
+    /fecha\s*(?:de\s*publicación)?\s*:?\s*(.{6,30})/i, // ES alt: "Fecha de publicación: ..."
+    /data\s*(?:de\s*publicação)?\s*:?\s*(.{6,30})/i,   // PT alt
+    /date\s*(?:de\s*publication)?\s*:?\s*(.{6,30})/i,   // FR alt
+  ];
+  // Scan header area, byline containers, and other metadata-like elements
+  const scanSelectors = [
+    'article header', '.post-header', '.article-header', '.entry-header',
+    '.post-meta', '.article-meta', '.entry-meta', '.meta-info', '.byline',
+    '.article-info', '.post-info', '.story-meta', '.nota-info',
+    '[class*="author"]', '[class*="byline"]', '[class*="meta"]',
+  ];
+  for (const sel of scanSelectors) {
+    try {
+      const els = doc.querySelectorAll(sel);
+      for (const el of els) {
+        const text = el.textContent || '';
+        for (const pat of dateTextPatterns) {
+          const m = text.match(pat);
+          if (m && m[1]) {
+            const candidate = m[1].replace(/\s+/g, ' ').trim();
+            if (looksLikeDate(candidate)) return { label: t('date_label'), status: 'ok', detail: t('date_ok', {date: formatDate(candidate)}) };
+          }
+        }
+      }
+    } catch(e) { /* skip */ }
+  }
+  // 8. Last resort: scan the first ~20 elements inside <article> or main content for date text
+  const article = doc.querySelector('article') || doc.querySelector('[role="article"]') || doc.querySelector('main');
+  if (article) {
+    const candidates = article.querySelectorAll('span, p, div, small, em, time');
+    let scanned = 0;
+    for (const el of candidates) {
+      if (scanned++ > 40) break; // limit scan depth
+      const text = el.textContent || '';
+      if (text.length > 200) continue; // skip long paragraphs
+      for (const pat of dateTextPatterns) {
+        const m = text.match(pat);
+        if (m && m[1]) {
+          const candidate = m[1].replace(/\s+/g, ' ').trim();
+          if (looksLikeDate(candidate)) return { label: t('date_label'), status: 'ok', detail: t('date_ok', {date: formatDate(candidate)}) };
+        }
+      }
+    }
+  }
   return { label: t('date_label'), status: 'warning', detail: t('date_absent') };
 }
 function checkViewport(doc) {
