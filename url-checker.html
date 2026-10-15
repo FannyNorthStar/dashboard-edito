@@ -4885,7 +4885,7 @@ Generate 3 categories of article ideas:
 - TOURNAMENT DRAW: group death analysis, travel logistics, historical head-to-heads, qualification scenarios, dark horse narratives
 Think beyond football. Every sport and every content type has its own cascade chain. The key question is: "what does the reader want to know NEXT after reading this story?"
 
-Each idea should be a specific, publishable article title. Give 3-5 ideas per category. Be creative and specific based on the actual topic.` },
+Each idea should be a specific, publishable article title. Give exactly 2 ideas per category (6 total) — only the strongest, most actionable ones. Be creative and specific based on the actual topic.` },
       { role: 'user', content: `User input: "${originalInput}"\n\nExtracted topics: ${entities.map(e => e.name).join(', ')}\n\nDiscover data context:${discoverContext || ' (no matching data found)'}${latestNews}` }
     ],
     tools: [{
@@ -4899,17 +4899,17 @@ Each idea should be a specific, publishable article title. Give 3-5 ideas per ca
             longtail: {
               type: 'array',
               items: { type: 'string' },
-              description: 'Long Tail SEO article ideas — timeless, search-driven (3-5 titles)'
+              description: 'Long Tail SEO article ideas — timeless, search-driven (exactly 2)'
             },
             discover: {
               type: 'array',
               items: { type: 'string' },
-              description: 'Discover Focused article ideas — trending, high engagement (3-5 titles)'
+              description: 'Discover Focused article ideas — trending, high engagement (exactly 2)'
             },
             threads: {
               type: 'array',
               items: { type: 'string' },
-              description: 'Story Threads — cascade follow-up articles (3-5 titles)'
+              description: 'Story Threads — cascade follow-up articles (exactly 2)'
             }
           },
           required: ['longtail', 'discover', 'threads']
@@ -4976,7 +4976,7 @@ Generate 3 categories of follow-up ideas:
 - TOURNAMENT DRAW: group analysis, historical head-to-heads, qualification scenarios, dark horse narratives
 Think beyond football. The key question is: "what does the reader want to know NEXT after reading this article?"
 
-Give 3-4 ideas per category. Each idea should include:
+Give exactly 2 ideas per category (6 total) — only the strongest, most actionable ones. Each idea should include:
 - A specific article title (in the article's language)
 - A one-sentence pitch explaining WHY this angle matters right now
 
@@ -5012,7 +5012,7 @@ ${excerpt}${latestNews}` }
                 },
                 required: ['title', 'pitch']
               },
-              description: 'Long Tail SEO article ideas (3-4)'
+              description: 'Long Tail SEO article ideas (exactly 2)'
             },
             discover: {
               type: 'array',
@@ -5024,7 +5024,7 @@ ${excerpt}${latestNews}` }
                 },
                 required: ['title', 'pitch']
               },
-              description: 'Discover Focused article ideas (3-4)'
+              description: 'Discover Focused article ideas (exactly 2)'
             },
             threads: {
               type: 'array',
@@ -5036,7 +5036,7 @@ ${excerpt}${latestNews}` }
                 },
                 required: ['title', 'pitch']
               },
-              description: 'Story Threads — cascade follow-up articles (3-4)'
+              description: 'Story Threads — cascade follow-up articles (exactly 2)'
             }
           },
           required: ['longtail', 'discover', 'threads']
