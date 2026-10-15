@@ -914,7 +914,7 @@ body {
 
   <div class="input-section">
     <div class="mode-tabs">
-      <button class="mode-tab active" onclick="switchMode('keyword')" data-mode="keyword" data-t="tab_keyword">Keyword Checker</button>
+      <button class="mode-tab active" onclick="switchMode('keyword')" data-mode="keyword" data-t="tab_keyword">Should we cover?</button>
       <button class="mode-tab" onclick="switchMode('url')" data-mode="url" data-t="tab_url">Check URL</button>
       <button class="mode-tab" onclick="switchMode('html')" data-mode="html" data-t="tab_draft">Check Draft</button>
       <button class="mode-tab" onclick="switchMode('evergreen')" data-mode="evergreen" data-t="tab_evergreen">Evergreen</button>
@@ -951,7 +951,6 @@ body {
         <label class="tick-chip"><input type="checkbox" id="urlTickDiscoverAuth" checked> <span data-t="tick_discover_auth">Discover Authority</span></label>
         <label class="tick-chip"><input type="checkbox" id="urlTickSearchAuth" checked> <span data-t="tick_search_auth">Search Authority</span></label>
         <label class="tick-chip"><input type="checkbox" id="urlTickAngles" checked> <span data-t="tick_angles">Article Angles</span></label>
-        <label class="tick-chip"><input type="checkbox" id="urlTickNews" checked> <span data-t="tick_news">Latest News</span></label>
       </div>
       <button class="btn" id="analyzeBtnUrl" onclick="startAnalysis('url')" style="width:100%">
         <span id="btnTextUrl" data-t="btn_check_url">Check URL</span>
@@ -967,7 +966,6 @@ body {
         <label class="tick-chip"><input type="checkbox" id="draftTickSpell" checked> <span data-t="tick_spell">Spell Check</span></label>
         <label class="tick-chip"><input type="checkbox" id="draftTickQuality" checked> <span data-t="tick_quality">Google Quality Rater</span></label>
         <label class="tick-chip"><input type="checkbox" id="draftTickAngles" checked> <span data-t="tick_angles">Article Angles</span></label>
-        <label class="tick-chip"><input type="checkbox" id="draftTickNews" checked> <span data-t="tick_news">Latest News</span></label>
       </div>
       <button class="btn" id="analyzeBtnHtml" onclick="startAnalysis('html')" style="width:100%">
         <span id="btnTextHtml" data-t="btn_check_html">Check HTML</span>
@@ -1405,7 +1403,7 @@ const T = {
     // Keyword Checker
     tab_url: "Check URL",
     tab_draft: "Check Draft",
-    tab_keyword: "Keyword Checker",
+    tab_keyword: "Should we cover?",
     kw_site_label: "Site",
     kw_all_sites: "All sites",
     kw_placeholder: "Describe your article idea, keywords, or topic... e.g. 'Liverpool transfer Dutch midfielder' or 'best wonderkids in Eredivisie'",
@@ -1684,7 +1682,7 @@ const T = {
     pdf_btn_download: "Telecharger le PDF",
     tab_url: "Verifier URL",
     tab_draft: "Verifier brouillon",
-    tab_keyword: "Analyseur de mots-cles",
+    tab_keyword: "On couvre ?",
     kw_site_label: "Site",
     kw_all_sites: "Tous les sites",
     kw_placeholder: "Decrivez votre idee d'article, mots-cles ou sujet... ex. 'transfert Liverpool milieu neerlandais'",
@@ -1950,7 +1948,7 @@ const T = {
     pdf_btn_download: "Baixar PDF",
     tab_url: "Verificar URL",
     tab_draft: "Verificar rascunho",
-    tab_keyword: "Verificador de palavras-chave",
+    tab_keyword: "Devemos cobrir?",
     kw_site_label: "Site",
     kw_all_sites: "Todos os sites",
     kw_placeholder: "Descreva sua ideia de artigo, palavras-chave ou tema... ex. 'transferencia Liverpool meio-campista holandes'",
@@ -2228,7 +2226,7 @@ const T = {
     pdf_btn_download: "Descargar PDF",
     tab_url: "Verificar URL",
     tab_draft: "Verificar borrador",
-    tab_keyword: "Verificador de palabras clave",
+    tab_keyword: "¿Lo cubrimos?",
     kw_site_label: "Sitio",
     kw_all_sites: "Todos los sitios",
     kw_placeholder: "Describe tu idea de articulo, palabras clave o tema... ej. 'fichaje Liverpool centrocampista holandes'",
@@ -2506,7 +2504,7 @@ const T = {
     pdf_btn_download: "Scarica PDF",
     tab_url: "Verifica URL",
     tab_draft: "Verifica bozza",
-    tab_keyword: "Analizzatore parole chiave",
+    tab_keyword: "Lo copriamo?",
     kw_site_label: "Sito",
     kw_all_sites: "Tutti i siti",
     kw_placeholder: "Descrivi la tua idea di articolo, parole chiave o argomento... es. 'trasferimento Liverpool centrocampista olandese'",
@@ -2784,7 +2782,7 @@ const T = {
     pdf_btn_download: "Скачать PDF",
     tab_url: "Проверить URL",
     tab_draft: "Проверить черновик",
-    tab_keyword: "Проверка ключевых слов",
+    tab_keyword: "Освещаем?",
     kw_site_label: "Сайт",
     kw_all_sites: "Все сайты",
     kw_placeholder: "Опишите идею статьи, ключевые слова или тему... напр. 'трансфер Ливерпуль голландский полузащитник'",
@@ -3062,7 +3060,7 @@ const T = {
     pdf_btn_download: "Завантажити PDF",
     tab_url: "Перевірити URL",
     tab_draft: "Перевірити чернетку",
-    tab_keyword: "Перевірка ключових слів",
+    tab_keyword: "Висвітлюємо?",
     kw_site_label: "Сайт",
     kw_all_sites: "Усі сайти",
     kw_placeholder: "Опишіть ідею статті, ключові слова або тему... напр. 'трансфер Ліверпуль голландський півзахисник'",
@@ -3352,7 +3350,7 @@ const T = {
     pdf_btn_download: "Pobierz PDF",
     tab_url: "Sprawdz URL",
     tab_draft: "Sprawdz szkic",
-    tab_keyword: "Sprawdzanie slow kluczowych",
+    tab_keyword: "Opisujemy?",
     kw_site_label: "Strona",
     kw_all_sites: "Wszystkie strony",
     kw_placeholder: "Opisz pomysl na artykul, slowa kluczowe lub temat... np. 'transfer Liverpool holenderski pomocnik'",
@@ -3618,7 +3616,7 @@ const T = {
     pdf_btn_download: "Stahnout PDF",
     tab_url: "Zkontrolovat URL",
     tab_draft: "Zkontrolovat koncept",
-    tab_keyword: "Kontrola klicovych slov",
+    tab_keyword: "Pokryjeme to?",
     kw_site_label: "Web",
     kw_all_sites: "Vsechny weby",
     kw_placeholder: "Popiste napad na clanek, klicova slova nebo tema... napr. 'prestup Liverpool holandsky zaloznik'",
@@ -4182,7 +4180,7 @@ async function startAnalysis(mode) {
     const doDiscoverAuth = mode === 'url' && (document.getElementById(prefix + 'DiscoverAuth')?.checked ?? true);
     const doSearchAuth = mode === 'url' && (document.getElementById(prefix + 'SearchAuth')?.checked ?? true);
     const doAngles = document.getElementById(prefix + 'Angles')?.checked ?? true;
-    const doNews = document.getElementById(prefix + 'News')?.checked ?? true;
+    const doNews = false;
 
     // Run selected AI calls in parallel — they are independent
     setProgress(62, t('prog_ai'));
