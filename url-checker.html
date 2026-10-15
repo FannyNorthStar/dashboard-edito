@@ -5125,9 +5125,7 @@ function renderLatestNews(tieredNews, containerId) {
 
   // Tier 1 — Specific (combined entity query)
   if (tier1.length > 0) {
-    if (hasTier2) {
-      html += `<div style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--accent);letter-spacing:0.5px;margin-bottom:2px">🎯 ${esc(t('news_tier1'))}</div>`;
-    }
+    html += `<div style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--accent);letter-spacing:0.5px;margin-bottom:2px">🎯 ${esc(t('news_tier1'))}</div>`;
     html += `<div style="display:flex;flex-direction:column;gap:6px">${renderHeadlineList(tier1)}</div>`;
   }
 
@@ -6766,7 +6764,7 @@ function renderKeywordResults(inputText, selectedSite, entityResults, angleIdeas
       newsHtml += `<div style="padding:12px;color:var(--text-muted);font-size:13px;text-align:center">${esc(noNewsMsg)}</div>`;
     } else {
       if (kwTier1.length > 0) {
-        if (hasKwTier2) newsHtml += `<div style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--accent);letter-spacing:0.5px;margin-bottom:2px">🎯 ${esc(t('news_tier1'))}</div>`;
+        newsHtml += `<div style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--accent);letter-spacing:0.5px;margin-bottom:2px">🎯 ${esc(t('news_tier1'))}</div>`;
         newsHtml += `<div style="display:flex;flex-direction:column;gap:6px">${kwRenderItems(kwTier1)}</div>`;
       }
       if (hasKwTier2) {
