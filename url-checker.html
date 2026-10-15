@@ -3936,6 +3936,8 @@ function saveSettings() {
   const proxyUrl = document.getElementById('settingsProxyUrl').value.trim();
   if (proxyUrl) localStorage.setItem('media_dashboard_cors_proxy', proxyUrl);
   else localStorage.removeItem('media_dashboard_cors_proxy');
+  // Clear sheet data cache when settings change (new URLs = new data)
+  if (typeof clearSourceDataCache === 'function') clearSourceDataCache();
   closeSettings();
 }
 
@@ -4200,33 +4202,51 @@ async function startAnalysis(mode) {
     const doAngles = document.getElementById(prefix + 'Angles')?.checked ?? true;
     const doNews = false;
 
-    // Run selected AI calls in parallel — they are independent
+    // Run AI calls in parallel — angles starts as soon as content analysis resolves
     setProgress(62, t('prog_ai'));
-    const aiPromises = [];
-    const aiLabels = [];
-    if (doContent) { aiPromises.push(runAIAnalysis(url, title, bodyText).catch(e => { aiError = e.message; console.warn('AI analysis failed:', e.message); return null; })); aiLabels.push('content'); }
-    if (doSpell) { aiPromises.push(runSpellcheck(bodyText, doc).catch(e => { spellError = e.message; console.warn('Spellcheck failed:', e.message); return null; })); aiLabels.push('spell'); }
-    if (doQuality) { aiPromises.push(runQualityCheck(title, bodyText, url).catch(e => { qualityError = e.message; console.warn('Quality check failed:', e.message); return null; })); aiLabels.push('quality'); }
-    if (doDiscoverAuth) { aiPromises.push(runDiscoverAuthority(url, title).catch(e => { console.warn('Discover authority failed:', e.message); return null; })); aiLabels.push('discoverAuth'); }
-    if (doSearchAuth) { aiPromises.push(runSearchAuthority(url, title).catch(e => { console.warn('Search authority failed:', e.message); return null; })); aiLabels.push('searchAuth'); }
 
-    const aiResults = await Promise.all(aiPromises);
-    aiResult = aiLabels.includes('content') ? aiResults[aiLabels.indexOf('content')] : null;
-    spellResult = aiLabels.includes('spell') ? aiResults[aiLabels.indexOf('spell')] : null;
-    qualityResult = aiLabels.includes('quality') ? aiResults[aiLabels.indexOf('quality')] : null;
-    discoverAuthority = aiLabels.includes('discoverAuth') ? (aiResults[aiLabels.indexOf('discoverAuth')] || null) : null;
-    searchAuthority = aiLabels.includes('searchAuth') ? (aiResults[aiLabels.indexOf('searchAuth')] || null) : null;
+    // Content analysis promise (angles depends on it)
+    const contentPromise = doContent
+      ? runAIAnalysis(url, title, bodyText).catch(e => { aiError = e.message; console.warn('AI analysis failed:', e.message); return null; })
+      : Promise.resolve(null);
 
-    setProgress(88, t('prog_angles'));
-    // Angles runs after AI so it can use aiResult for richer context
-    if (doAngles || doNews) {
-      try {
-        const anglesData = await generateEditorialAngles(title, bodyText, aiResult, url, doNews);
-        if (doAngles) anglesResult = anglesData.angles;
-        newsHeadlines = anglesData.tieredNews || [];
-      } catch(e) {
-        console.warn('Editorial angles failed:', e.message);
-      }
+    // Angles chain: waits only for content analysis, not the other AI calls
+    const anglesPromise = (doAngles || doNews)
+      ? contentPromise.then(async (contentResult) => {
+          setProgress(78, t('prog_angles'));
+          try {
+            return await generateEditorialAngles(title, bodyText, contentResult, url, doNews);
+          } catch(e) {
+            console.warn('Editorial angles failed:', e.message);
+            return null;
+          }
+        })
+      : Promise.resolve(null);
+
+    // Other AI calls run in parallel alongside content+angles
+    const otherPromises = [];
+    const otherLabels = [];
+    if (doSpell) { otherPromises.push(runSpellcheck(bodyText, doc).catch(e => { spellError = e.message; console.warn('Spellcheck failed:', e.message); return null; })); otherLabels.push('spell'); }
+    if (doQuality) { otherPromises.push(runQualityCheck(title, bodyText, url).catch(e => { qualityError = e.message; console.warn('Quality check failed:', e.message); return null; })); otherLabels.push('quality'); }
+    if (doDiscoverAuth) { otherPromises.push(runDiscoverAuthority(url, title).catch(e => { console.warn('Discover authority failed:', e.message); return null; })); otherLabels.push('discoverAuth'); }
+    if (doSearchAuth) { otherPromises.push(runSearchAuthority(url, title).catch(e => { console.warn('Search authority failed:', e.message); return null; })); otherLabels.push('searchAuth'); }
+
+    // Wait for everything: content, angles, and all other AI calls finish in parallel
+    const [contentRes, anglesData, ...otherResults] = await Promise.all([
+      contentPromise,
+      anglesPromise,
+      ...otherPromises
+    ]);
+
+    aiResult = contentRes;
+    spellResult = otherLabels.includes('spell') ? otherResults[otherLabels.indexOf('spell')] : null;
+    qualityResult = otherLabels.includes('quality') ? otherResults[otherLabels.indexOf('quality')] : null;
+    discoverAuthority = otherLabels.includes('discoverAuth') ? (otherResults[otherLabels.indexOf('discoverAuth')] || null) : null;
+    searchAuthority = otherLabels.includes('searchAuth') ? (otherResults[otherLabels.indexOf('searchAuth')] || null) : null;
+
+    if (anglesData) {
+      if (doAngles) anglesResult = anglesData.angles;
+      newsHeadlines = anglesData.tieredNews || [];
     }
 
     setProgress(100, t('prog_done'));
@@ -4312,8 +4332,24 @@ async function discoverTabGids(sheetUrl) {
   return gids;
 }
 
-// Fetch CSV data for a sheet+tab, returns parsed rows or empty array
+// Session-level cache for sheet data — same sheet+tab returns cached rows
+// Call clearSourceDataCache() to force re-fetch (e.g. after changing sheets)
+const _sourceDataCache = new Map();
+function clearSourceDataCache() { _sourceDataCache.clear(); console.log('[cache] Source data cache cleared'); }
+
+// Fetch CSV data for a sheet+tab, returns parsed rows or empty array (cached per session)
 async function fetchSourceData(sheetUrl, tab) {
+  const cacheKey = `${sheetUrl}||${tab}`;
+  if (_sourceDataCache.has(cacheKey)) {
+    console.log(`[fetchSourceData] cache hit for tab=${tab}`);
+    return _sourceDataCache.get(cacheKey);
+  }
+  const result = await _fetchSourceDataUncached(sheetUrl, tab);
+  _sourceDataCache.set(cacheKey, result);
+  return result;
+}
+
+async function _fetchSourceDataUncached(sheetUrl, tab) {
   if (!sheetUrl) return [];
 
   // Domains associated with this tab code (e.g. TRIVELA → ['trivela.com.br'])
@@ -4435,17 +4471,27 @@ async function startKeywordAnalysis() {
 
     for (const tab of tabsToCheck) {
       fetchIdx++;
-      let d30 = [], d10 = [], search = [];
+      setProgress(5 + Math.round(10 * fetchIdx / totalFetches), `Fetching sources for ${tab}...`);
+
+      // Fetch D30, D10, Search in parallel — they are independent
+      const fetchPromises = [];
+      const fetchLabels = [];
       if (doDiscoverAuth) {
-        setProgress(5 + Math.round(8 * fetchIdx / totalFetches), `Fetching D30 for ${tab}...`);
-        d30 = await fetchSourceData(sheetUrl30, tab);
-        setProgress(5 + Math.round(16 * fetchIdx / totalFetches), `Fetching D10 for ${tab}...`);
-        d10 = await fetchSourceData(sheetUrl10, tab);
+        fetchPromises.push(fetchSourceData(sheetUrl30, tab));
+        fetchLabels.push('d30');
+        fetchPromises.push(fetchSourceData(sheetUrl10, tab));
+        fetchLabels.push('d10');
       }
       if (doSearchAuth) {
-        setProgress(5 + Math.round(25 * fetchIdx / totalFetches), `Fetching Search for ${tab}...`);
-        search = await fetchSourceData(sheetUrlSearch, tab);
+        fetchPromises.push(fetchSourceData(sheetUrlSearch, tab));
+        fetchLabels.push('search');
       }
+
+      const fetchResults = await Promise.all(fetchPromises);
+      const d30 = fetchLabels.includes('d30') ? fetchResults[fetchLabels.indexOf('d30')] : [];
+      const d10 = fetchLabels.includes('d10') ? fetchResults[fetchLabels.indexOf('d10')] : [];
+      const search = fetchLabels.includes('search') ? fetchResults[fetchLabels.indexOf('search')] : [];
+
       if (d30.length > 0 || d10.length > 0 || search.length > 0) {
         sourceData[tab] = { d30, d10, search };
       }
@@ -4463,51 +4509,61 @@ async function startKeywordAnalysis() {
     const broadEntities = parsed.entities.filter(e => (e.scope || 'specific') === 'broad');
     const nicheEntities = parsed.entities.filter(e => (e.scope || 'specific') === 'specific');
 
-    // 4a: Process broad entities with GPT matching
+    // 4a: Process broad entities with GPT matching — all entities in parallel
     // Store matched URL sets per broad entity per tab per source for intersection later
     const broadUrlSets = {}; // { entityName: { tab: { d30: Set, search: Set } } }
-    let entityIdx = 0;
 
-    for (const entity of broadEntities) {
-      entityIdx++;
+    setProgress(30, `Matching ${broadEntities.length} entities...`);
+
+    const broadEntityPromises = broadEntities.map(entity => {
       const keywords = (entity.url_keywords && entity.url_keywords.length > 0)
         ? entity.url_keywords.map(k => k.toLowerCase().trim()).filter(k => k.length > 1)
         : extractTopicKeywords(entity.name);
-      if (keywords.length === 0) continue;
+      if (keywords.length === 0) return Promise.resolve(null);
 
-      const entityData = { name: entity.name, scope: 'broad', sites: [] };
-      broadUrlSets[entity.name] = {};
+      return (async () => {
+        const entityData = { name: entity.name, scope: 'broad', sites: [] };
+        broadUrlSets[entity.name] = {};
 
-      for (const [tab, src] of Object.entries(sourceData)) {
-        setProgress(30 + Math.round(30 * entityIdx / broadEntities.length), `Matching "${entity.name}" on ${tab}...`);
+        for (const [tab, src] of Object.entries(sourceData)) {
+          // D30 and Search GPT matching run in parallel (D10 derives from D30, no GPT)
+          const [matchD30, matchSearch] = await Promise.all([
+            src.d30.length > 0 ? gptMatchRows(entity.name, keywords, src.d30, 'Discover 30d', 'broad') : Promise.resolve([]),
+            src.search.length > 0 ? gptMatchRows(entity.name, keywords, src.search, 'Search 10d', 'broad') : Promise.resolve([])
+          ]);
+          const matchD30Urls = new Set(matchD30.map(r => r.url));
+          const matchD10 = src.d10.filter(r => matchD30Urls.has(r.url));
+          const matchSearchUrls = new Set(matchSearch.map(r => r.url));
 
-        const matchD30 = src.d30.length > 0 ? await gptMatchRows(entity.name, keywords, src.d30, 'Discover 30d', 'broad') : [];
-        const matchD30Urls = new Set(matchD30.map(r => r.url));
-        const matchD10 = src.d10.filter(r => matchD30Urls.has(r.url));
-        const matchSearch = src.search.length > 0 ? await gptMatchRows(entity.name, keywords, src.search, 'Search 10d', 'broad') : [];
-        const matchSearchUrls = new Set(matchSearch.map(r => r.url));
+          // Store URL sets for niche intersection
+          broadUrlSets[entity.name][tab] = {
+            d30: matchD30Urls,
+            d30Rows: matchD30,
+            search: matchSearchUrls,
+            searchRows: matchSearch
+          };
 
-        // Store URL sets for niche intersection
-        broadUrlSets[entity.name][tab] = {
-          d30: matchD30Urls,
-          d30Rows: matchD30,
-          search: matchSearchUrls,
-          searchRows: matchSearch
-        };
+          entityData.sites.push({
+            tab,
+            discover30: { matchingRows: matchD30, siteStats: src.d30.length > 0 ? computeSiteStats(src.d30) : null, totalArticles: src.d30.length },
+            discover10: { matchingRows: matchD10, siteStats: src.d10.length > 0 ? computeSiteStats(src.d10) : null, totalArticles: src.d10.length },
+            search: { matchingRows: matchSearch, siteStats: src.search.length > 0 ? computeSiteStats(src.search) : null, totalArticles: src.search.length }
+          });
+        }
 
-        entityData.sites.push({
-          tab,
-          discover30: { matchingRows: matchD30, siteStats: src.d30.length > 0 ? computeSiteStats(src.d30) : null, totalArticles: src.d30.length },
-          discover10: { matchingRows: matchD10, siteStats: src.d10.length > 0 ? computeSiteStats(src.d10) : null, totalArticles: src.d10.length },
-          search: { matchingRows: matchSearch, siteStats: src.search.length > 0 ? computeSiteStats(src.search) : null, totalArticles: src.search.length }
-        });
-      }
+        return entityData;
+      })();
+    });
 
-      entityResults.push(entityData);
+    const broadResults = await Promise.all(broadEntityPromises);
+    for (const entityData of broadResults) {
+      if (entityData) entityResults.push(entityData);
     }
+    setProgress(60, t('prog_kw_match'));
 
     // 4b: Process niche entities via set intersection of broad results (no GPT call)
     const broadNames = Object.keys(broadUrlSets);
+    let entityIdx = broadEntities.length;
 
     for (const entity of nicheEntities) {
       entityIdx++;
