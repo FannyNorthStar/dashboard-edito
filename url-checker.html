@@ -1345,8 +1345,10 @@ const T = {
     tick_topic_discover: 'Topic Authority Discover',
     tick_topic_search: 'Topic Authority Search',
     tick_select_all: 'Select All',
-    news_tier1: 'Combined',
-    news_tier2_label: 'Per Entity',
+    news_tier1: 'Specific',
+    news_tier2_label: 'broader',
+    news_no_results: 'No {entity} news in the last 7 days',
+    news_no_results_generic: 'No relevant news in the last 7 days',
     err_empty_html: "Paste HTML code to analyze.",
     kpi_spell: "Spelling",
     kpi_quality: "Quality",
@@ -1627,8 +1629,10 @@ const T = {
     tick_topic_discover: 'Autorite Discover',
     tick_topic_search: 'Autorite Search',
     tick_select_all: 'Tout selectionner',
-    news_tier1: 'Combinee',
-    news_tier2_label: 'Par entite',
+    news_tier1: 'Specifique',
+    news_tier2_label: 'elargi',
+    news_no_results: 'Aucune actualite {entity} ces 7 derniers jours',
+    news_no_results_generic: 'Aucune actualite pertinente ces 7 derniers jours',
     err_empty_html: "Collez du code HTML à analyser.",
     kpi_spell: "Orthographe",
     kpi_quality: "Qualité",
@@ -2018,8 +2022,10 @@ const T = {
     tick_topic_discover: 'Autoridade Discover',
     tick_topic_search: 'Autoridade Search',
     tick_select_all: 'Selecionar Tudo',
-    news_tier1: 'Combinado',
-    news_tier2_label: 'Por entidade',
+    news_tier1: 'Especifico',
+    news_tier2_label: 'ampliado',
+    news_no_results: 'Nenhuma noticia sobre {entity} nos ultimos 7 dias',
+    news_no_results_generic: 'Nenhuma noticia relevante nos ultimos 7 dias',
   },
   es: {
     input_title: "Analizar un artículo",
@@ -2296,8 +2302,10 @@ const T = {
     tick_topic_discover: 'Autoridad Discover',
     tick_topic_search: 'Autoridad Search',
     tick_select_all: 'Seleccionar Todo',
-    news_tier1: 'Combinado',
-    news_tier2_label: 'Por entidad',
+    news_tier1: 'Especifico',
+    news_tier2_label: 'ampliado',
+    news_no_results: 'Sin noticias de {entity} en los ultimos 7 dias',
+    news_no_results_generic: 'Sin noticias relevantes en los ultimos 7 dias',
   },
   it: {
     input_title: "Analizza un articolo",
@@ -2574,8 +2582,10 @@ const T = {
     tick_topic_discover: 'Autorita Discover',
     tick_topic_search: 'Autorita Search',
     tick_select_all: 'Seleziona Tutto',
-    news_tier1: 'Combinato',
-    news_tier2_label: 'Per entita',
+    news_tier1: 'Specifico',
+    news_tier2_label: 'ampliato',
+    news_no_results: 'Nessuna notizia su {entity} negli ultimi 7 giorni',
+    news_no_results_generic: 'Nessuna notizia rilevante negli ultimi 7 giorni',
   },
   ru: {
     input_title: "Анализ статьи",
@@ -2852,8 +2862,10 @@ const T = {
     tick_topic_discover: 'Авторитет Discover',
     tick_topic_search: 'Авторитет Search',
     tick_select_all: 'Выбрать все',
-    news_tier1: 'Общие',
-    news_tier2_label: 'По теме',
+    news_tier1: 'Точные',
+    news_tier2_label: 'шире',
+    news_no_results: 'Нет новостей о {entity} за последние 7 дней',
+    news_no_results_generic: 'Нет актуальных новостей за последние 7 дней',
   },
   uk: {
     input_title: "Аналіз статті",
@@ -3130,8 +3142,10 @@ const T = {
     tick_topic_discover: 'Авторитет Discover',
     tick_topic_search: 'Авторитет Search',
     tick_select_all: 'Вибрати все',
-    news_tier1: 'Загальні',
-    news_tier2_label: 'За темою',
+    news_tier1: 'Точні',
+    news_tier2_label: 'ширше',
+    news_no_results: 'Немає новин про {entity} за останні 7 днів',
+    news_no_results_generic: 'Немає актуальних новин за останні 7 днів',
   },
   pl: {
     input_title: "Analiza artykułu",
@@ -3296,8 +3310,10 @@ const T = {
     tick_topic_discover: 'Autorytet Discover',
     tick_topic_search: 'Autorytet Search',
     tick_select_all: 'Zaznacz wszystko',
-    news_tier1: 'Lacznie',
-    news_tier2_label: 'Wg tematu',
+    news_tier1: 'Dokladne',
+    news_tier2_label: 'szerzej',
+    news_no_results: 'Brak wiadomosci o {entity} z ostatnich 7 dni',
+    news_no_results_generic: 'Brak istotnych wiadomosci z ostatnich 7 dni',
     kpi_spell: "Ortografia",
     kpi_quality: "Jakość",
     discover_insights_title: "Discover AI Insights",
@@ -3686,8 +3702,10 @@ const T = {
     tick_topic_discover: 'Autorita Discover',
     tick_topic_search: 'Autorita Search',
     tick_select_all: 'Vybrat vse',
-    news_tier1: 'Souhrnne',
-    news_tier2_label: 'Podle tematu',
+    news_tier1: 'Presne',
+    news_tier2_label: 'sirsi',
+    news_no_results: 'Zadne zpravy o {entity} za poslednich 7 dni',
+    news_no_results_generic: 'Zadne relevantni zpravy za poslednich 7 dni',
   }
 };
 
@@ -4790,42 +4808,39 @@ Be strict. Examples:
 }
 
 async function fetchTieredNews(entities, fallbackQuery) {
-  // Tier 1: all entities combined. Tier 2: per-entity individual fetches.
-  // Deduplicates across tiers, then AI-filters for relevance.
+  // Specific-first funnel: start with the most targeted query, widen only if needed.
+  // Tier 1 (Specific): all entities combined = narrow, on-topic results
+  // Tier 2 (Broader): individual entity searches = wider net, only if Tier 1 is thin
   const entityNames = Array.isArray(entities)
     ? entities.map(e => typeof e === 'string' ? e : e.name).filter(Boolean)
     : [];
   const combinedQuery = entityNames.join(' ') || fallbackQuery || '';
+  const queryLabel = combinedQuery; // for "no news" message
 
-  // Tier 1 — combined
+  // Tier 1 — specific combined query (e.g. "Arsenal stadium")
   const tier1Result = combinedQuery ? await fetchLatestNews(combinedQuery) : { text: '', headlines: [] };
-  const tier1Titles = new Set(tier1Result.headlines.map(h => h.title.toLowerCase().trim()));
 
-  // Tier 2 — per entity (only if >1 entity; skip if single entity = same as combined)
-  const tier2Raw = {};
-  if (entityNames.length > 1) {
+  // AI relevance filter on Tier 1 (strict: score >= 4)
+  let filteredTier1 = await scoreNewsRelevance(tier1Result.headlines, combinedQuery);
+
+  // Tier 2 — broader per-entity only if Tier 1 yielded < 3 results AND >1 entity
+  const tier1Titles = new Set(filteredTier1.map(h => h.title.toLowerCase().trim()));
+  const tier2 = {};
+  if (filteredTier1.length < 3 && entityNames.length > 1) {
     const perEntityPromises = entityNames.map(name => fetchLatestNews(name).then(r => ({ name, result: r })));
     const perEntityResults = await Promise.all(perEntityPromises);
+    // Score and deduplicate per entity
+    const scoringPromises = [];
     for (const { name, result } of perEntityResults) {
-      // Deduplicate: remove headlines already in Tier 1
       const unique = result.headlines.filter(h => !tier1Titles.has(h.title.toLowerCase().trim()));
-      if (unique.length > 0) tier2Raw[name] = unique;
+      if (unique.length > 0) {
+        scoringPromises.push(scoreNewsRelevance(unique, name).then(filtered => ({ name, filtered })));
+      }
     }
-  }
-
-  // AI relevance filtering — single call for Tier 1, one per Tier 2 entity
-  const scoringPromises = [];
-  scoringPromises.push(scoreNewsRelevance(tier1Result.headlines, combinedQuery).then(filtered => ({ key: '__tier1__', filtered })));
-  for (const [name, headlines] of Object.entries(tier2Raw)) {
-    scoringPromises.push(scoreNewsRelevance(headlines, name).then(filtered => ({ key: name, filtered })));
-  }
-  const scoringResults = await Promise.all(scoringPromises);
-
-  let filteredTier1 = [];
-  const tier2 = {};
-  for (const { key, filtered } of scoringResults) {
-    if (key === '__tier1__') filteredTier1 = filtered;
-    else if (filtered.length > 0) tier2[key] = filtered;
+    const scored = await Promise.all(scoringPromises);
+    for (const { name, filtered } of scored) {
+      if (filtered.length > 0) tier2[name] = filtered;
+    }
   }
 
   // Build combined text for AI prompt
@@ -4842,6 +4857,7 @@ async function fetchTieredNews(entities, fallbackQuery) {
     tier1: filteredTier1,
     tier2,
     text: allText,
+    queryLabel,
     allHeadlines: [
       ...filteredTier1,
       ...Object.values(tier2).flat()
@@ -5060,8 +5076,15 @@ function renderLatestNews(tieredNews, containerId) {
   const tier1 = isTiered ? (tieredNews.tier1 || []) : (tieredNews || []);
   const tier2 = isTiered ? (tieredNews.tier2 || {}) : {};
   const hasTier2 = Object.keys(tier2).length > 0;
-  if (tier1.length === 0 && !hasTier2) { card.style.display = 'none'; return; }
   card.style.display = 'block';
+  if (tier1.length === 0 && !hasTier2) {
+    const queryLabel = isTiered ? (tieredNews.queryLabel || '') : '';
+    const noNewsMsg = queryLabel
+      ? t('news_no_results', { entity: queryLabel })
+      : t('news_no_results_generic');
+    document.getElementById(containerId + 'Body').innerHTML = `<div style="padding:12px;color:var(--text-muted);font-size:13px;text-align:center">${esc(noNewsMsg)}</div>`;
+    return;
+  }
 
   // Format relative time
   function timeAgo(dateStr) {
@@ -5100,19 +5123,19 @@ function renderLatestNews(tieredNews, containerId) {
 
   let html = `<div style="display:flex;flex-direction:column;gap:8px">`;
 
-  // Tier 1 — Combined
+  // Tier 1 — Specific (combined entity query)
   if (tier1.length > 0) {
     if (hasTier2) {
-      html += `<div style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--accent);letter-spacing:0.5px;margin-bottom:2px">🔗 ${esc(t('news_tier1'))}</div>`;
+      html += `<div style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--accent);letter-spacing:0.5px;margin-bottom:2px">🎯 ${esc(t('news_tier1'))}</div>`;
     }
     html += `<div style="display:flex;flex-direction:column;gap:6px">${renderHeadlineList(tier1)}</div>`;
   }
 
-  // Tier 2 — Per entity
+  // Tier 2 — Broader (per-entity fallback)
   if (hasTier2) {
     for (const [entityName, headlines] of Object.entries(tier2)) {
       html += `<div style="margin-top:8px">`;
-      html += `<div style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--accent);letter-spacing:0.5px;margin-bottom:4px">🏷️ ${esc(entityName)}</div>`;
+      html += `<div style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--accent);letter-spacing:0.5px;margin-bottom:4px">🔍 ${esc(entityName)} <span style="font-weight:400;font-size:10px;opacity:0.7">(${esc(t('news_tier2_label'))})</span></div>`;
       html += `<div style="display:flex;flex-direction:column;gap:6px">${renderHeadlineList(headlines)}</div>`;
       html += `</div>`;
     }
@@ -6704,7 +6727,7 @@ function renderKeywordResults(inputText, selectedSite, entityResults, angleIdeas
   const kwTier1 = isTieredKw ? (newsHeadlines.tier1 || []) : (newsHeadlines || []);
   const kwTier2 = isTieredKw ? (newsHeadlines.tier2 || {}) : {};
   const hasKwTier2 = Object.keys(kwTier2).length > 0;
-  if (kwTier1.length > 0 || hasKwTier2) {
+  {
     function kwTimeAgo(dateStr) {
       if (!dateStr) return '';
       try {
@@ -6737,14 +6760,20 @@ function renderKeywordResults(inputText, selectedSite, entityResults, angleIdeas
         <span class="chevron">▼</span>
       </div>
       <div class="card-body"><div style="display:flex;flex-direction:column;gap:8px">`;
-    if (kwTier1.length > 0) {
-      if (hasKwTier2) newsHtml += `<div style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--accent);letter-spacing:0.5px;margin-bottom:2px">🔗 ${esc(t('news_tier1'))}</div>`;
-      newsHtml += `<div style="display:flex;flex-direction:column;gap:6px">${kwRenderItems(kwTier1)}</div>`;
-    }
-    if (hasKwTier2) {
-      for (const [entityName, items] of Object.entries(kwTier2)) {
-        newsHtml += `<div style="margin-top:8px"><div style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--accent);letter-spacing:0.5px;margin-bottom:4px">🏷️ ${esc(entityName)}</div>`;
-        newsHtml += `<div style="display:flex;flex-direction:column;gap:6px">${kwRenderItems(items)}</div></div>`;
+    if (kwTier1.length === 0 && !hasKwTier2) {
+      const kwQueryLabel = isTieredKw ? (newsHeadlines.queryLabel || '') : '';
+      const noNewsMsg = kwQueryLabel ? t('news_no_results', { entity: kwQueryLabel }) : t('news_no_results_generic');
+      newsHtml += `<div style="padding:12px;color:var(--text-muted);font-size:13px;text-align:center">${esc(noNewsMsg)}</div>`;
+    } else {
+      if (kwTier1.length > 0) {
+        if (hasKwTier2) newsHtml += `<div style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--accent);letter-spacing:0.5px;margin-bottom:2px">🎯 ${esc(t('news_tier1'))}</div>`;
+        newsHtml += `<div style="display:flex;flex-direction:column;gap:6px">${kwRenderItems(kwTier1)}</div>`;
+      }
+      if (hasKwTier2) {
+        for (const [entityName, items] of Object.entries(kwTier2)) {
+          newsHtml += `<div style="margin-top:8px"><div style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--accent);letter-spacing:0.5px;margin-bottom:4px">🔍 ${esc(entityName)} <span style="font-weight:400;font-size:10px;opacity:0.7">(${esc(t('news_tier2_label'))})</span></div>`;
+          newsHtml += `<div style="display:flex;flex-direction:column;gap:6px">${kwRenderItems(items)}</div></div>`;
+        }
       }
     }
     newsHtml += `</div></div></div>`;
