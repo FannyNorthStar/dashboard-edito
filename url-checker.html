@@ -4252,7 +4252,8 @@ async function startAnalysis(mode) {
           setProgress(78, t('prog_angles'));
           try {
             const siteAuth = selectedSite ? (SITE_AUTHORITY[selectedSite] || null) : null;
-            return await generateEditorialAngles(title, bodyText, contentResult, url, doNews, siteAuth);
+            const siteLang = selectedSite ? (SITE_LANG_MAP[selectedSite] || 'en') : 'en';
+            return await generateEditorialAngles(title, bodyText, contentResult, url, doNews, siteAuth, siteLang);
           } catch(e) {
             console.warn('Editorial angles failed:', e.message);
             return null;
@@ -4651,7 +4652,8 @@ async function startKeywordAnalysis() {
     if (doAngles || doNews) {
       try {
         const siteAuth = SITE_AUTHORITY[selectedSite] || null;
-        const anglesData = await generateArticleAngles(kwText, parsed.entities, entityResults, doNews, siteAuth);
+        const siteLang = SITE_LANG_MAP[selectedSite] || 'en';
+        const anglesData = await generateArticleAngles(kwText, parsed.entities, entityResults, doNews, siteAuth, siteLang);
         if (doAngles) angleIdeas = anglesData.angles;
         kwNewsHeadlines = anglesData.tieredNews || { tier1: [], tier2: {} };
       } catch(e) {
@@ -4774,14 +4776,29 @@ ENTITY EXAMPLES:
   return JSON.parse(tc.function.arguments);
 }
 
-async function fetchLatestNews(query, maxAgeDays = 7) {
+// Google News locale params by language code
+const GNEWS_LOCALE = {
+  'en': 'hl=en&gl=US&ceid=US:en',
+  'fr': 'hl=fr&gl=FR&ceid=FR:fr',
+  'pt-BR': 'hl=pt-BR&gl=BR&ceid=BR:pt-419',
+  'es': 'hl=es-419&gl=US&ceid=US:es-419',
+  'it': 'hl=it&gl=IT&ceid=IT:it',
+  'ru': 'hl=ru&gl=RU&ceid=RU:ru',
+  'cs': 'hl=cs&gl=CZ&ceid=CZ:cs',
+  'pl': 'hl=pl&gl=PL&ceid=PL:pl',
+  'uk': 'hl=uk&gl=UA&ceid=UA:uk',
+};
+
+async function fetchLatestNews(query, maxAgeDays = 7, lang = 'en') {
   // Fetch latest news headlines via Google News RSS through the proxy
   // Returns { text: string for AI prompt, headlines: array for UI display }
   // maxAgeDays: filter out articles older than this (default 7 days)
+  // lang: language code for Google News locale (default 'en')
   try {
     // Append "sport" to bias Google News results toward sports content
     const sportQuery = query + ' sport';
-    const newsUrl = 'https://news.google.com/rss/search?q=' + encodeURIComponent(sportQuery) + '&hl=en&gl=US&ceid=US:en';
+    const locale = GNEWS_LOCALE[lang] || GNEWS_LOCALE['en'];
+    const newsUrl = 'https://news.google.com/rss/search?q=' + encodeURIComponent(sportQuery) + '&' + locale;
     const xml = await fetchViaProxy(newsUrl);
     if (!xml) return { text: '', headlines: [] };
     // Parse RSS XML — extract <title> and <link> from <item> elements
@@ -4893,34 +4910,64 @@ Be strict. Examples:
   }
 }
 
-async function fetchTieredNews(entities, fallbackQuery) {
+async function fetchTieredNews(entities, fallbackQuery, siteLang = 'en') {
   // Specific-first funnel: start with the most targeted query, widen only if needed.
   // Tier 1 (Specific): all entities combined = narrow, on-topic results
   // Tier 2 (Broader): individual entity searches = wider net, only if Tier 1 is thin
+  // siteLang: fetch in both EN + siteLang when site is non-English
   const entityNames = Array.isArray(entities)
     ? entities.map(e => typeof e === 'string' ? e : e.name).filter(Boolean)
     : [];
   const combinedQuery = entityNames.join(' ') || fallbackQuery || '';
   const queryLabel = combinedQuery; // for "no news" message
 
-  // Tier 1 — specific combined query (e.g. "Arsenal stadium")
-  const tier1Result = combinedQuery ? await fetchLatestNews(combinedQuery) : { text: '', headlines: [] };
+  // Determine which languages to fetch
+  const langs = ['en'];
+  if (siteLang && siteLang !== 'en' && !langs.includes(siteLang)) langs.push(siteLang);
+
+  // Tier 1 — specific combined query in all languages in parallel
+  let allTier1Headlines = [];
+  if (combinedQuery) {
+    const tier1Promises = langs.map(lang => fetchLatestNews(combinedQuery, 7, lang));
+    const tier1Results = await Promise.all(tier1Promises);
+    // Merge and deduplicate by title
+    const seenTitles = new Set();
+    for (const r of tier1Results) {
+      for (const h of r.headlines) {
+        const key = h.title.toLowerCase().trim();
+        if (!seenTitles.has(key)) { seenTitles.add(key); allTier1Headlines.push(h); }
+      }
+    }
+  }
 
   // AI relevance filter on Tier 1 (strict: score >= 4)
-  let filteredTier1 = await scoreNewsRelevance(tier1Result.headlines, combinedQuery);
+  let filteredTier1 = await scoreNewsRelevance(allTier1Headlines, combinedQuery);
 
   // Tier 2 — broader per-entity only if Tier 1 yielded < 3 results AND >1 entity
   const tier1Titles = new Set(filteredTier1.map(h => h.title.toLowerCase().trim()));
   const tier2 = {};
   if (filteredTier1.length < 3 && entityNames.length > 1) {
-    const perEntityPromises = entityNames.map(name => fetchLatestNews(name).then(r => ({ name, result: r })));
+    // Fetch each entity in all languages
+    const perEntityPromises = entityNames.flatMap(name =>
+      langs.map(lang => fetchLatestNews(name, 7, lang).then(r => ({ name, result: r })))
+    );
     const perEntityResults = await Promise.all(perEntityPromises);
-    // Score and deduplicate per entity
-    const scoringPromises = [];
+    // Group by entity name, deduplicate across languages
+    const entityHeadlines = {};
     for (const { name, result } of perEntityResults) {
-      const unique = result.headlines.filter(h => !tier1Titles.has(h.title.toLowerCase().trim()));
-      if (unique.length > 0) {
-        scoringPromises.push(scoreNewsRelevance(unique, name).then(filtered => ({ name, filtered })));
+      if (!entityHeadlines[name]) entityHeadlines[name] = [];
+      for (const h of result.headlines) {
+        const key = h.title.toLowerCase().trim();
+        if (!tier1Titles.has(key) && !entityHeadlines[name].some(x => x.title.toLowerCase().trim() === key)) {
+          entityHeadlines[name].push(h);
+        }
+      }
+    }
+    // Score per entity
+    const scoringPromises = [];
+    for (const [name, headlines] of Object.entries(entityHeadlines)) {
+      if (headlines.length > 0) {
+        scoringPromises.push(scoreNewsRelevance(headlines, name).then(filtered => ({ name, filtered })));
       }
     }
     const scored = await Promise.all(scoringPromises);
@@ -4951,7 +4998,7 @@ async function fetchTieredNews(entities, fallbackQuery) {
   };
 }
 
-async function generateArticleAngles(originalInput, entities, entityResults, doNews = true, siteAuth = null) {
+async function generateArticleAngles(originalInput, entities, entityResults, doNews = true, siteAuth = null, siteLang = 'en') {
   // Build context about what Discover data shows
   let discoverContext = '';
   for (const er of entityResults) {
@@ -4964,7 +5011,7 @@ async function generateArticleAngles(originalInput, entities, entityResults, doN
   }
 
   // Fetch latest news about the topic for grounded suggestions (tiered)
-  const tieredNews = doNews ? await fetchTieredNews(entities, originalInput) : { tier1: [], tier2: {}, text: '', allHeadlines: [] };
+  const tieredNews = doNews ? await fetchTieredNews(entities, originalInput, siteLang) : { tier1: [], tier2: {}, text: '', allHeadlines: [] };
   const latestNews = tieredNews.text;
 
   const data = await callOpenAI({
@@ -5030,7 +5077,7 @@ Each idea should be a specific, publishable article title. Give exactly 2 ideas 
 }
 
 // ========== EDITORIAL ANGLES (URL/Draft) ==========
-async function generateEditorialAngles(title, bodyText, aiResult, articleUrl, doNews = true, siteAuth = null) {
+async function generateEditorialAngles(title, bodyText, aiResult, articleUrl, doNews = true, siteAuth = null, siteLang = 'en') {
   // Build context from AI analysis
   const entities = (aiResult?.entites_principales || []).join(', ');
   const keyword = aiResult?.search?.mot_cle_principal || '';
@@ -5050,7 +5097,7 @@ async function generateEditorialAngles(title, bodyText, aiResult, articleUrl, do
   // Fetch latest news about the article's topic for grounded suggestions (tiered)
   const entityList = (aiResult?.entites_principales || []).map(e => ({ name: e }));
   const newsQuery = keyword || entities || title.split(/\s+/).slice(0, 6).join(' ');
-  const tieredNews = doNews ? await fetchTieredNews(entityList.length > 1 ? entityList : [], newsQuery) : { tier1: [], tier2: {}, text: '', allHeadlines: [] };
+  const tieredNews = doNews ? await fetchTieredNews(entityList.length > 1 ? entityList : [], newsQuery, siteLang) : { tier1: [], tier2: {}, text: '', allHeadlines: [] };
   const latestNews = tieredNews.text;
 
   const data = await callOpenAI({
