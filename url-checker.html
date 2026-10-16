@@ -4484,61 +4484,53 @@ async function startKeywordAnalysis() {
   document.getElementById('progressBar').classList.remove('active');
 
   try {
-    // Step 1: GPT extracts entities/topics from free text
-    setProgress(5, t('prog_kw_parse'));
-    const parsed = await parseKeywordInput(kwText);
-
-    if (!parsed.entities || parsed.entities.length === 0) {
-      throw new Error('Could not extract topics from your input. Try being more specific.');
-    }
-
-    // Step 2: Site to check (single site only)
-    const tabsToCheck = [selectedSite];
-
-    // Read tick-case selections
+    // Read tick-case selections (known before any async work)
     const doDiscoverAuth = document.getElementById('kwTickDiscoverAuth')?.checked ?? true;
     const doSearchAuth = document.getElementById('kwTickSearchAuth')?.checked ?? true;
     const doAngles = document.getElementById('kwTickAngles')?.checked ?? true;
     const doNews = document.getElementById('kwTickNews')?.checked ?? true;
 
-    // Step 3: Fetch sources per tab (only what's ticked)
-    const sourceData = {}; // { tab: { d30, d10, search } }
-    let fetchIdx = 0;
-    const totalFetches = tabsToCheck.length;
+    // Step 1+2 in PARALLEL: GPT parse + sheet fetches start at the same time
+    setProgress(5, t('prog_kw_parse'));
 
-    for (const tab of tabsToCheck) {
-      fetchIdx++;
-      setProgress(5 + Math.round(10 * fetchIdx / totalFetches), `Fetching sources for ${tab}...`);
+    // Fire sheet fetches immediately — they don't need GPT results
+    const sheetFetchPromises = [];
+    const sheetFetchLabels = [];
+    if (doDiscoverAuth) {
+      sheetFetchPromises.push(fetchSourceData(sheetUrl30, selectedSite));
+      sheetFetchLabels.push('d30');
+      sheetFetchPromises.push(fetchSourceData(sheetUrl10, selectedSite));
+      sheetFetchLabels.push('d10');
+    }
+    if (doSearchAuth) {
+      sheetFetchPromises.push(fetchSourceData(sheetUrlSearch, selectedSite));
+      sheetFetchLabels.push('search');
+    }
 
-      // Fetch D30, D10, Search in parallel — they are independent
-      const fetchPromises = [];
-      const fetchLabels = [];
-      if (doDiscoverAuth) {
-        fetchPromises.push(fetchSourceData(sheetUrl30, tab));
-        fetchLabels.push('d30');
-        fetchPromises.push(fetchSourceData(sheetUrl10, tab));
-        fetchLabels.push('d10');
-      }
-      if (doSearchAuth) {
-        fetchPromises.push(fetchSourceData(sheetUrlSearch, tab));
-        fetchLabels.push('search');
-      }
+    // GPT parse runs alongside sheet fetches
+    const [parsed, ...fetchResults] = await Promise.all([
+      parseKeywordInput(kwText),
+      ...sheetFetchPromises
+    ]);
 
-      const fetchResults = await Promise.all(fetchPromises);
-      const d30 = fetchLabels.includes('d30') ? fetchResults[fetchLabels.indexOf('d30')] : [];
-      const d10 = fetchLabels.includes('d10') ? fetchResults[fetchLabels.indexOf('d10')] : [];
-      const search = fetchLabels.includes('search') ? fetchResults[fetchLabels.indexOf('search')] : [];
+    if (!parsed.entities || parsed.entities.length === 0) {
+      throw new Error('Could not extract topics from your input. Try being more specific.');
+    }
 
-      if (d30.length > 0 || d10.length > 0 || search.length > 0) {
-        sourceData[tab] = { d30, d10, search };
-      }
+    // Assemble source data from fetch results
+    const sourceData = {};
+    const d30 = sheetFetchLabels.includes('d30') ? fetchResults[sheetFetchLabels.indexOf('d30')] : [];
+    const d10 = sheetFetchLabels.includes('d10') ? fetchResults[sheetFetchLabels.indexOf('d10')] : [];
+    const search = sheetFetchLabels.includes('search') ? fetchResults[sheetFetchLabels.indexOf('search')] : [];
+
+    if (d30.length > 0 || d10.length > 0 || search.length > 0) {
+      sourceData[selectedSite] = { d30, d10, search };
     }
 
     // Even with no Discover/Search data, continue — angles + news still work
     if (Object.keys(sourceData).length === 0) {
-      // Create an empty entry so the flow continues
-      sourceData[tabsToCheck[0]] = { d30: [], d10: [], search: [] };
-      console.warn(`[keyword] No source data found for ${tabsToCheck[0]}, proceeding with angles + news only`);
+      sourceData[selectedSite] = { d30: [], d10: [], search: [] };
+      console.warn(`[keyword] No source data found for ${selectedSite}, proceeding with angles + news only`);
     }
 
     // Step 4: Match entities — broad first (GPT), then niche (set intersection, no GPT)
