@@ -143,6 +143,25 @@ body {
   border-radius: 4px; box-shadow: 0 1px 0 var(--border);
 }
 
+/* COVERAGE VERDICT BANNER */
+.coverage-verdict {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 12px 16px; margin: 12px 0 16px; border-radius: 8px;
+  font-size: 15px; font-weight: 600; line-height: 1.4;
+  border: 2px solid;
+}
+.verdict-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+.verdict-yes { background: #ecfdf5; border-color: #22c55e; color: #166534; }
+.verdict-yesif { background: #fefce8; border-color: #eab308; color: #854d0e; }
+.verdict-maybe { background: #fefce8; border-color: #eab308; color: #854d0e; }
+.verdict-no { background: #fef2f2; border-color: #ef4444; color: #991b1b; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .verdict-yes { background: #052e16; border-color: #22c55e; color: #86efac; }
+  :root:not([data-theme="light"]) .verdict-yesif { background: #422006; border-color: #eab308; color: #fde047; }
+  :root:not([data-theme="light"]) .verdict-maybe { background: #422006; border-color: #eab308; color: #fde047; }
+  :root:not([data-theme="light"]) .verdict-no { background: #450a0a; border-color: #ef4444; color: #fca5a5; }
+}
+
 /* SITE SELECTOR (keyword mode) */
 .site-select-row {
   display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px;
@@ -4645,14 +4664,20 @@ async function startKeywordAnalysis() {
       entityResults.push(entityData);
     }
 
-    // Step 5: Generate article ideas and angles (if ticked)
+    // Step 5: Generate coverage verdict + article angles (in parallel)
     setProgress(80, t('prog_kw_angles'));
     let angleIdeas = null;
     let kwNewsHeadlines = [];
+    let coverageVerdict = null;
+    const siteAuth = SITE_AUTHORITY[selectedSite] || null;
+    const siteLang = SITE_LANG_MAP[selectedSite] || 'en';
+    const siteLabel = TAB_LABELS[selectedSite] || selectedSite;
+
+    // Verdict runs in parallel with angles — no extra wait
+    const verdictPromise = generateCoverageVerdict(kwText, siteAuth, siteLabel);
+
     if (doAngles || doNews) {
       try {
-        const siteAuth = SITE_AUTHORITY[selectedSite] || null;
-        const siteLang = SITE_LANG_MAP[selectedSite] || 'en';
         const anglesData = await generateArticleAngles(kwText, parsed.entities, entityResults, doNews, siteAuth, siteLang);
         if (doAngles) angleIdeas = anglesData.angles;
         kwNewsHeadlines = anglesData.tieredNews || { tier1: [], tier2: {} };
@@ -4661,8 +4686,10 @@ async function startKeywordAnalysis() {
       }
     }
 
+    coverageVerdict = await verdictPromise;
+
     setProgress(100, t('prog_done'));
-    renderKeywordResults(kwText, selectedSite, entityResults, angleIdeas, kwNewsHeadlines);
+    renderKeywordResults(kwText, selectedSite, entityResults, angleIdeas, kwNewsHeadlines, coverageVerdict);
 
   } catch(err) {
     showError('Error: ' + err.message);
@@ -4996,6 +5023,40 @@ async function fetchTieredNews(entities, fallbackQuery, siteLang = 'en') {
       ...Object.values(tier2).flat()
     ]
   };
+}
+
+async function generateCoverageVerdict(topic, siteAuth, siteLabel) {
+  // Quick GPT call: one-liner verdict on whether this topic fits the site's editorial identity
+  if (!siteAuth) return null;
+  try {
+    const data = await callOpenAI({
+      model: OPENAI_MODEL,
+      messages: [
+        { role: 'system', content: `You are a senior editorial director. A writer wants to cover a topic. Your job is to give a one-line verdict: does this topic fit the site's editorial identity?
+
+SITE: "${siteLabel}" — ${siteAuth.desc}
+CORE TOPICS: ${siteAuth.topics}
+
+Rules:
+- Answer in ONE short sentence (max 25 words).
+- Start with one of: "Yes", "Yes IF", "Maybe IF", or "No".
+- "Yes" = topic directly in scope, no caveats needed.
+- "Yes IF" = topic is relevant but ONLY if the angle connects to the site's coverage area. Name the specific angle needed.
+- "Maybe IF" = topic is tangential, would need a very specific hook. Name it.
+- "No" = topic has no realistic connection to the site's coverage area.
+- Be specific. Don't say "if there's a relevant angle". Say WHAT the angle is. Name players, teams, leagues, competitions.
+- Think about the site's AUDIENCE: what would THEY care about in this topic?` },
+        { role: 'user', content: `Topic: "${topic}"` }
+      ],
+      temperature: 0.3,
+      max_tokens: 80
+    });
+    const verdict = data.choices?.[0]?.message?.content?.trim();
+    return verdict || null;
+  } catch (e) {
+    console.warn('[verdict] Coverage verdict failed:', e.message);
+    return null;
+  }
 }
 
 async function generateArticleAngles(originalInput, entities, entityResults, doNews = true, siteAuth = null, siteLang = 'en') {
@@ -6677,17 +6738,32 @@ function renderSearchInsights(d) {
 }
 
 // ========== KEYWORD RESULTS RENDERER ==========
-function renderKeywordResults(inputText, selectedSite, entityResults, angleIdeas, newsHeadlines) {
+function renderKeywordResults(inputText, selectedSite, entityResults, angleIdeas, newsHeadlines, coverageVerdict) {
   document.getElementById('results').classList.remove('active');
   const container = document.getElementById('kwResults');
   container.style.display = 'block';
+
+  // Determine verdict style
+  let verdictHtml = '';
+  if (coverageVerdict) {
+    const lc = coverageVerdict.toLowerCase();
+    let verdictType, verdictIcon;
+    if (lc.startsWith('no')) { verdictType = 'no'; verdictIcon = '🔴'; }
+    else if (lc.startsWith('maybe')) { verdictType = 'maybe'; verdictIcon = '🟡'; }
+    else if (lc.startsWith('yes if') || (lc.startsWith('yes,') && lc.includes('if'))) { verdictType = 'yesif'; verdictIcon = '🟡'; }
+    else { verdictType = 'yes'; verdictIcon = '🟢'; }
+    verdictHtml = `<div class="coverage-verdict verdict-${verdictType}">
+      <span class="verdict-icon">${verdictIcon}</span>
+      <span class="verdict-text">${esc(coverageVerdict)}</span>
+    </div>`;
+  }
 
   let allHtml = `<div class="result-header">
     <div>
       <div class="result-title">${esc(t('kw_results_title'))}</div>
       <div class="result-url" style="font-style:italic">${esc(inputText.substring(0, 200))}</div>
     </div>
-  </div>`;
+  </div>${verdictHtml}`;
 
   for (const entity of entityResults) {
     // Aggregate counts across all sites
