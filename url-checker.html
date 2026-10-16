@@ -132,9 +132,20 @@ body {
 .mode-panel { display: none; }
 .mode-panel.active { display: block; }
 
+/* DRAFT HINT */
+.draft-hint {
+  margin: 4px 0 10px; font-size: 12px; color: var(--text-dim);
+  line-height: 1.5;
+}
+.draft-hint kbd {
+  display: inline-block; padding: 1px 5px; font-size: 11px;
+  font-family: inherit; background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: 4px; box-shadow: 0 1px 0 var(--border);
+}
+
 /* SITE SELECTOR (keyword mode) */
 .site-select-row {
-  display: flex; align-items: center; gap: 10px; margin-bottom: 14px;
+  display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px;
 }
 .site-select-row label {
   font-size: 12px; font-weight: 600; color: var(--text-muted);
@@ -706,7 +717,7 @@ body {
 @media (max-width: 600px) {
   .mode-tabs { gap: 0; overflow-x: auto; }
   .mode-tab { padding: 8px 12px; font-size: 12px; white-space: nowrap; }
-  .site-select-row { flex-direction: column; align-items: stretch; gap: 6px; }
+  .site-select-row { gap: 4px; }
   .input-row { flex-direction: column; }
   .check-label { min-width: auto; }
   .check-row { flex-wrap: wrap; }
@@ -961,6 +972,7 @@ body {
 
     <div class="mode-panel" id="panelHtml">
       <textarea class="html-textarea" id="htmlInput" data-t-placeholder="html_placeholder" placeholder="Paste your HTML source code here..."></textarea>
+      <p class="draft-hint" data-t="draft_hint">Tip: Open your article preview, press <kbd>Ctrl+U</kbd> (or <kbd>Cmd+U</kbd> on Mac) to view source, then <kbd>Ctrl+A</kbd> to select all and <kbd>Ctrl+C</kbd> to copy.</p>
       <div class="site-select-row">
         <label data-t="kw_site_label">Site</label>
         <select class="site-select" id="draftSiteSelect"></select>
@@ -1182,6 +1194,7 @@ const T = {
     input_or: "OR",
     input_placeholder: "https://www.example.com/my-article",
     html_placeholder: "Paste your HTML source code here...",
+    draft_hint: "Tip: Open your article preview, press <kbd>Ctrl+U</kbd> (or <kbd>Cmd+U</kbd> on Mac) to view source, then <kbd>Ctrl+A</kbd> to select all and <kbd>Ctrl+C</kbd> to copy.",
     btn_check_url: "Check URL",
     btn_check_html: "Check HTML",
     btn_analyzing: "Analyzing...",
@@ -1470,6 +1483,7 @@ const T = {
     input_or: "OU",
     input_placeholder: "https://www.example.com/mon-article",
     html_placeholder: "Collez votre code source HTML ici...",
+    draft_hint: "Astuce : Ouvrez la prévisualisation de votre article, appuyez sur <kbd>Ctrl+U</kbd> (ou <kbd>Cmd+U</kbd> sur Mac) pour afficher le code source, puis <kbd>Ctrl+A</kbd> pour tout sélectionner et <kbd>Ctrl+C</kbd> pour copier.",
     btn_check_url: "Vérifier l'URL",
     btn_check_html: "Vérifier le HTML",
     btn_analyzing: "Analyse...",
@@ -1749,6 +1763,7 @@ const T = {
     input_or: "OU",
     input_placeholder: "https://www.example.com/meu-artigo",
     html_placeholder: "Cole o código-fonte HTML aqui...",
+    draft_hint: "Dica: Abra a pré-visualização do artigo, pressione <kbd>Ctrl+U</kbd> (ou <kbd>Cmd+U</kbd> no Mac) para ver o código-fonte, depois <kbd>Ctrl+A</kbd> para selecionar tudo e <kbd>Ctrl+C</kbd> para copiar.",
     btn_check_url: "Verificar URL",
     btn_check_html: "Verificar HTML",
     btn_analyzing: "Analisando...",
@@ -2028,6 +2043,7 @@ const T = {
     input_or: "O",
     input_placeholder: "https://www.example.com/mi-articulo",
     html_placeholder: "Pega tu código fuente HTML aquí...",
+    draft_hint: "Consejo: Abre la vista previa de tu artículo, pulsa <kbd>Ctrl+U</kbd> (o <kbd>Cmd+U</kbd> en Mac) para ver el código fuente, luego <kbd>Ctrl+A</kbd> para seleccionar todo y <kbd>Ctrl+C</kbd> para copiar.",
     btn_check_url: "Verificar URL",
     btn_check_html: "Verificar HTML",
     btn_analyzing: "Analizando...",
@@ -2307,6 +2323,7 @@ const T = {
     input_or: "OPPURE",
     input_placeholder: "https://www.example.com/mio-articolo",
     html_placeholder: "Incolla qui il codice sorgente HTML...",
+    draft_hint: "Suggerimento: Apri l'anteprima del tuo articolo, premi <kbd>Ctrl+U</kbd> (o <kbd>Cmd+U</kbd> su Mac) per visualizzare il codice sorgente, poi <kbd>Ctrl+A</kbd> per selezionare tutto e <kbd>Ctrl+C</kbd> per copiare.",
     btn_check_url: "Verifica URL",
     btn_check_html: "Verifica HTML",
     btn_analyzing: "Analisi in corso...",
@@ -2586,6 +2603,7 @@ const T = {
     input_or: "ИЛИ",
     input_placeholder: "https://www.example.com/moya-statya",
     html_placeholder: "Вставьте исходный HTML-код сюда...",
+    draft_hint: "Совет: Откройте превью статьи, нажмите <kbd>Ctrl+U</kbd> (или <kbd>Cmd+U</kbd> на Mac) для просмотра исходного кода, затем <kbd>Ctrl+A</kbd> — выделить всё, <kbd>Ctrl+C</kbd> — скопировать.",
     btn_check_url: "Проверить URL",
     btn_check_html: "Проверить HTML",
     btn_analyzing: "Анализ...",
@@ -2865,6 +2883,7 @@ const T = {
     input_or: "АБО",
     input_placeholder: "https://www.example.com/moya-stattya",
     html_placeholder: "Вставте вихідний HTML-код сюди...",
+    draft_hint: "Порада: Відкрийте попередній перегляд статті, натисніть <kbd>Ctrl+U</kbd> (або <kbd>Cmd+U</kbd> на Mac), щоб переглянути вихідний код, потім <kbd>Ctrl+A</kbd> — виділити все, <kbd>Ctrl+C</kbd> — скопіювати.",
     btn_check_url: "Перевірити URL",
     btn_check_html: "Перевірити HTML",
     btn_analyzing: "Аналіз...",
@@ -3144,6 +3163,7 @@ const T = {
     input_or: "LUB",
     input_placeholder: "https://www.example.com/moj-artykul",
     html_placeholder: "Wklej tutaj kod źródłowy HTML...",
+    draft_hint: "Wskazówka: Otwórz podgląd artykułu, naciśnij <kbd>Ctrl+U</kbd> (lub <kbd>Cmd+U</kbd> na Macu), aby wyświetlić kod źródłowy, następnie <kbd>Ctrl+A</kbd> — zaznacz wszystko, <kbd>Ctrl+C</kbd> — skopiuj.",
     btn_check_url: "Sprawdź URL",
     btn_check_html: "Sprawdź HTML",
     btn_analyzing: "Analiza...",
@@ -3423,6 +3443,7 @@ const T = {
     input_or: "NEBO",
     input_placeholder: "https://www.example.com/muj-clanek",
     html_placeholder: "Vložte zdrojový HTML kód zde...",
+    draft_hint: "Tip: Otevřete náhled článku, stiskněte <kbd>Ctrl+U</kbd> (nebo <kbd>Cmd+U</kbd> na Macu) pro zobrazení zdrojového kódu, pak <kbd>Ctrl+A</kbd> — vybrat vše, <kbd>Ctrl+C</kbd> — zkopírovat.",
     btn_check_url: "Zkontrolovat URL",
     btn_check_html: "Zkontrolovat HTML",
     btn_analyzing: "Analýza...",
@@ -3709,9 +3730,12 @@ function t(key, replacements) {
   return s;
 }
 
+const HTML_TRANSLATION_KEYS = new Set(['draft_hint']);
 function applyTranslations() {
   document.querySelectorAll('[data-t]').forEach(el => {
-    el.textContent = t(el.dataset.t);
+    const key = el.dataset.t;
+    if (HTML_TRANSLATION_KEYS.has(key)) { el.innerHTML = t(key); }
+    else { el.textContent = t(key); }
   });
   document.querySelectorAll('[data-t-placeholder]').forEach(el => {
     el.placeholder = t(el.dataset.tPlaceholder);
