@@ -943,6 +943,10 @@ body {
       <div class="input-row">
         <input type="text" id="urlInput" data-t-placeholder="input_placeholder" placeholder="https://www.example.com/my-article" autocomplete="url">
       </div>
+      <div class="site-select-row">
+        <label data-t="kw_site_label">Site</label>
+        <select class="site-select" id="urlSiteSelect"></select>
+      </div>
       <div class="tick-row" id="urlTicks">
         <label class="tick-chip select-all"><input type="checkbox" id="urlTickAll" checked onchange="toggleSelectAll('urlTicks',this.checked)"> <span data-t="tick_select_all">Select All</span></label>
         <label class="tick-chip"><input type="checkbox" id="urlTickContent" checked> <span data-t="tick_content">Content Analysis</span></label>
@@ -960,11 +964,17 @@ body {
 
     <div class="mode-panel" id="panelHtml">
       <textarea class="html-textarea" id="htmlInput" data-t-placeholder="html_placeholder" placeholder="Paste your HTML source code here..."></textarea>
+      <div class="site-select-row">
+        <label data-t="kw_site_label">Site</label>
+        <select class="site-select" id="draftSiteSelect"></select>
+      </div>
       <div class="tick-row" id="draftTicks">
         <label class="tick-chip select-all"><input type="checkbox" id="draftTickAll" checked onchange="toggleSelectAll('draftTicks',this.checked)"> <span data-t="tick_select_all">Select All</span></label>
         <label class="tick-chip"><input type="checkbox" id="draftTickContent" checked> <span data-t="tick_content">Content Analysis</span></label>
         <label class="tick-chip"><input type="checkbox" id="draftTickSpell" checked> <span data-t="tick_spell">Spell Check</span></label>
         <label class="tick-chip"><input type="checkbox" id="draftTickQuality" checked> <span data-t="tick_quality">Google Quality Rater</span></label>
+        <label class="tick-chip"><input type="checkbox" id="draftTickDiscoverAuth" checked> <span data-t="tick_discover_auth">Discover Authority</span></label>
+        <label class="tick-chip"><input type="checkbox" id="draftTickSearchAuth" checked> <span data-t="tick_search_auth">Search Authority</span></label>
         <label class="tick-chip"><input type="checkbox" id="draftTickAngles" checked> <span data-t="tick_angles">Article Angles</span></label>
       </div>
       <button class="btn" id="analyzeBtnHtml" onclick="startAnalysis('html')" style="width:100%">
@@ -3899,6 +3909,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.target === e.currentTarget) closeSettings();
   });
   populateSiteSelect();
+  setupUrlAutoDetect();
 });
 
 document.getElementById('langSelect').addEventListener('change', e => {
@@ -4069,7 +4080,7 @@ const SITE_OPTIONS = [
 ];
 
 function populateSiteSelect() {
-  ['kwSiteSelect', 'evSiteSelect'].forEach(selId => {
+  ['kwSiteSelect', 'evSiteSelect', 'urlSiteSelect', 'draftSiteSelect'].forEach(selId => {
     const sel = document.getElementById(selId);
     if (!sel) return;
     sel.innerHTML = '';
@@ -4080,6 +4091,25 @@ function populateSiteSelect() {
       sel.appendChild(opt);
     }
   });
+}
+
+// Auto-detect site from URL input and pre-select dropdown
+function setupUrlAutoDetect() {
+  const urlInput = document.getElementById('urlInput');
+  const urlSelect = document.getElementById('urlSiteSelect');
+  if (!urlInput || !urlSelect) return;
+
+  const detect = () => {
+    const val = urlInput.value.trim();
+    if (!val.startsWith('http')) return;
+    const tab = resolveTab(val);
+    if (tab && urlSelect.querySelector(`option[value="${tab}"]`)) {
+      urlSelect.value = tab;
+    }
+  };
+
+  urlInput.addEventListener('input', detect);
+  urlInput.addEventListener('paste', () => setTimeout(detect, 50));
 }
 
 function switchMode(mode) {
@@ -4192,13 +4222,17 @@ async function startAnalysis(mode) {
     let searchAuthority = null;
     let aiError = null, spellError = null, qualityError = null;
 
+    // Read selected site from dropdown
+    const siteSelectId = mode === 'url' ? 'urlSiteSelect' : 'draftSiteSelect';
+    const selectedSite = document.getElementById(siteSelectId)?.value || null;
+
     // Read tick-case selections
     const prefix = mode === 'url' ? 'urlTick' : 'draftTick';
     const doContent = document.getElementById(prefix + 'Content')?.checked ?? true;
     const doSpell = document.getElementById(prefix + 'Spell')?.checked ?? true;
     const doQuality = document.getElementById(prefix + 'Quality')?.checked ?? true;
-    const doDiscoverAuth = mode === 'url' && (document.getElementById(prefix + 'DiscoverAuth')?.checked ?? true);
-    const doSearchAuth = mode === 'url' && (document.getElementById(prefix + 'SearchAuth')?.checked ?? true);
+    const doDiscoverAuth = selectedSite && (document.getElementById(prefix + 'DiscoverAuth')?.checked ?? true);
+    const doSearchAuth = selectedSite && (document.getElementById(prefix + 'SearchAuth')?.checked ?? true);
     const doAngles = document.getElementById(prefix + 'Angles')?.checked ?? true;
     const doNews = false;
 
@@ -4228,8 +4262,8 @@ async function startAnalysis(mode) {
     const otherLabels = [];
     if (doSpell) { otherPromises.push(runSpellcheck(bodyText, doc).catch(e => { spellError = e.message; console.warn('Spellcheck failed:', e.message); return null; })); otherLabels.push('spell'); }
     if (doQuality) { otherPromises.push(runQualityCheck(title, bodyText, url).catch(e => { qualityError = e.message; console.warn('Quality check failed:', e.message); return null; })); otherLabels.push('quality'); }
-    if (doDiscoverAuth) { otherPromises.push(runDiscoverAuthority(url, title).catch(e => { console.warn('Discover authority failed:', e.message); return null; })); otherLabels.push('discoverAuth'); }
-    if (doSearchAuth) { otherPromises.push(runSearchAuthority(url, title).catch(e => { console.warn('Search authority failed:', e.message); return null; })); otherLabels.push('searchAuth'); }
+    if (doDiscoverAuth) { otherPromises.push(runDiscoverAuthority(url, title, selectedSite).catch(e => { console.warn('Discover authority failed:', e.message); return null; })); otherLabels.push('discoverAuth'); }
+    if (doSearchAuth) { otherPromises.push(runSearchAuthority(url, title, selectedSite).catch(e => { console.warn('Search authority failed:', e.message); return null; })); otherLabels.push('searchAuth'); }
 
     // Wait for everything: content, angles, and all other AI calls finish in parallel
     const [contentRes, anglesData, ...otherResults] = await Promise.all([
@@ -6230,11 +6264,11 @@ function extractTopicKeywords(title) {
     .filter(w => w.length > 2 && !STOP_WORDS.has(w));
 }
 
-async function runDiscoverAuthority(url, title) {
+async function runDiscoverAuthority(url, title, overrideTab) {
   const sheetUrl = localStorage.getItem('media_dashboard_discover_sheet') || DEFAULT_DISCOVER_SHEET;
   if (!sheetUrl) return null;
 
-  const tab = resolveTab(url);
+  const tab = overrideTab || resolveTab(url);
   if (!tab) return null;
 
   // Use fetchSourceData for tab-name resilience across all sheets
@@ -6486,11 +6520,11 @@ function renderDiscoverInsights(d) {
 }
 
 // ========== SEARCH AUTHORITY ==========
-async function runSearchAuthority(url, title) {
+async function runSearchAuthority(url, title, overrideTab) {
   const sheetUrl = localStorage.getItem('media_dashboard_search_sheet') || DEFAULT_SEARCH_SHEET;
   if (!sheetUrl) return null;
 
-  const tab = resolveTab(url);
+  const tab = overrideTab || resolveTab(url);
   if (!tab) return null;
 
   // Use fetchSourceData for tab-name resilience (handles mismatched tab names)
