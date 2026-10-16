@@ -5280,25 +5280,17 @@ async function fetchWithTimeout(url, opts = {}, timeoutMs = 15000) {
 async function fetchViaProxy(targetUrl) {
   const errors = [];
 
-  // 1. Try custom Google Apps Script proxy first (most reliable) — with retry
+  // 1. Try custom Google Apps Script proxy first (most reliable) — single attempt, 12s timeout
   const customProxy = localStorage.getItem('media_dashboard_cors_proxy') || DEFAULT_GAS_PROXY;
   if (customProxy) {
-    for (let attempt = 0; attempt < 2; attempt++) {
-      try {
-        const sep = customProxy.includes('?') ? '&' : '?';
-        const proxyUrl = customProxy + sep + 'url=' + encodeURIComponent(targetUrl);
-        const resp = await fetchWithTimeout(proxyUrl, { redirect:'follow' }, 30000);
-        if (resp.ok) { console.log('[proxy] custom GAS OK for', targetUrl.substring(0, 80)); return await resp.text(); }
-        errors.push(`custom: HTTP ${resp.status}`);
-        break; // non-timeout HTTP error, no retry
-      } catch(e) {
-        const msg = e.name === 'AbortError' ? 'timeout' : e.message;
-        if (attempt === 0 && e.name === 'AbortError') {
-          errors.push('custom: timeout (retrying)');
-          continue; // retry once on timeout
-        }
-        errors.push(`custom: ${msg}`);
-      }
+    try {
+      const sep = customProxy.includes('?') ? '&' : '?';
+      const proxyUrl = customProxy + sep + 'url=' + encodeURIComponent(targetUrl);
+      const resp = await fetchWithTimeout(proxyUrl, { redirect:'follow' }, 12000);
+      if (resp.ok) { console.log('[proxy] custom GAS OK for', targetUrl.substring(0, 80)); return await resp.text(); }
+      errors.push(`custom: HTTP ${resp.status}`);
+    } catch(e) {
+      errors.push(`custom: ${e.name === 'AbortError' ? 'timeout' : e.message}`);
     }
   }
 
