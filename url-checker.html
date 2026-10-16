@@ -830,9 +830,6 @@ body {
   background: var(--surface-2);
   border-radius: var(--radius-sm);
 }
-.ev-selectors-row {
-  display: flex; gap: 12px; align-items: end;
-}
 .ev-authority-banner {
   padding: 12px 16px;
   margin-bottom: 16px;
@@ -881,7 +878,7 @@ body {
 @media (max-width: 600px) {
   .ev-meta-row { gap: 4px; }
   .ev-card-header { flex-wrap: wrap; gap: 8px; }
-  .ev-selectors-row { flex-direction: column; }
+
   .ev-data-row { flex-direction: column; gap: 8px; }
 }
 </style>
@@ -984,19 +981,9 @@ body {
     </div>
 
     <div class="mode-panel" id="panelEvergreen">
-      <div class="ev-selectors-row">
-        <div class="site-select-row" style="flex:1">
-          <label data-t="ev_site_label">Site</label>
-          <select class="site-select" id="evSiteSelect"></select>
-        </div>
-        <div class="site-select-row" style="flex:0 0 auto;min-width:140px">
-          <label data-t="ev_model_label">Model</label>
-          <select class="site-select" id="evModelSelect">
-            <option value="gpt-4o">GPT-4o</option>
-            <option value="gpt-4o-mini">GPT-4o mini (fast)</option>
-            <option value="o3-mini">o3-mini (reasoning)</option>
-          </select>
-        </div>
+      <div class="site-select-row">
+        <label data-t="ev_site_label">Site</label>
+        <select class="site-select" id="evSiteSelect"></select>
       </div>
       <textarea class="html-textarea" id="evInput" data-t-placeholder="ev_placeholder" placeholder="Enter a keyword or article idea... e.g. 'Champions League all-time top scorers' or 'How does the FIFA ranking work?'" style="min-height:120px;font-family:inherit"></textarea>
       <button class="btn" id="analyzeBtnEv" onclick="startAnalysis('evergreen')" style="width:100%">
@@ -1465,7 +1452,6 @@ const T = {
     ev_format_listicle: "Listicle",
     ev_format_comparison: "Comparison",
     ev_format_definition: "Definition",
-    ev_model_label: "Model",
     ev_volume: "Est. volume",
     ev_difficulty: "Difficulty",
     ev_diff_low: "Low",
@@ -1745,7 +1731,6 @@ const T = {
     ev_format_listicle: "Listicle",
     ev_format_comparison: "Comparatif",
     ev_format_definition: "Definition",
-    ev_model_label: "Modele",
     ev_volume: "Volume est.",
     ev_difficulty: "Difficulte",
     ev_diff_low: "Faible",
@@ -2011,7 +1996,6 @@ const T = {
     ev_format_listicle: "Listicle",
     ev_format_comparison: "Comparativo",
     ev_format_definition: "Definicao",
-    ev_model_label: "Modelo",
     ev_volume: "Volume est.",
     ev_difficulty: "Dificuldade",
     ev_diff_low: "Baixa",
@@ -2291,7 +2275,6 @@ const T = {
     ev_format_listicle: "Listicle",
     ev_format_comparison: "Comparativa",
     ev_format_definition: "Definicion",
-    ev_model_label: "Modelo",
     ev_volume: "Volumen est.",
     ev_difficulty: "Dificultad",
     ev_diff_low: "Baja",
@@ -2571,7 +2554,6 @@ const T = {
     ev_format_listicle: "Listicle",
     ev_format_comparison: "Confronto",
     ev_format_definition: "Definizione",
-    ev_model_label: "Modello",
     ev_volume: "Volume stimato",
     ev_difficulty: "Difficolta",
     ev_diff_low: "Bassa",
@@ -2851,7 +2833,6 @@ const T = {
     ev_format_listicle: "Листикл",
     ev_format_comparison: "Сравнение",
     ev_format_definition: "Определение",
-    ev_model_label: "Модель",
     ev_volume: "Объем (оц.)",
     ev_difficulty: "Сложность",
     ev_diff_low: "Низкая",
@@ -3131,7 +3112,6 @@ const T = {
     ev_format_listicle: "Лістикл",
     ev_format_comparison: "Порівняння",
     ev_format_definition: "Визначення",
-    ev_model_label: "Модель",
     ev_volume: "Обсяг (оц.)",
     ev_difficulty: "Складнiсть",
     ev_diff_low: "Низька",
@@ -3425,7 +3405,6 @@ const T = {
     ev_format_listicle: "Listicle",
     ev_format_comparison: "Porownanie",
     ev_format_definition: "Definicja",
-    ev_model_label: "Model",
     ev_volume: "Szac. objętosc",
     ev_difficulty: "Trudnosc",
     ev_diff_low: "Niska",
@@ -3691,7 +3670,6 @@ const T = {
     ev_format_listicle: "Listicle",
     ev_format_comparison: "Srovnani",
     ev_format_definition: "Definice",
-    ev_model_label: "Model",
     ev_volume: "Odh. objem",
     ev_difficulty: "Obtiznost",
     ev_diff_low: "Nizka",
@@ -7817,7 +7795,7 @@ async function startEvergreenAnalysis() {
   const siteLang = SITE_LANG_MAP[selectedSite] || 'en';
   const siteLabel = TAB_LABELS[selectedSite] || selectedSite;
   const siteAuth = SITE_AUTHORITY[selectedSite] || { desc: 'Sports news site', topics: 'sports, football' };
-  const selectedModel = document.getElementById('evModelSelect').value;
+
 
   const spinnerEl = document.getElementById('btnSpinnerEv');
   spinnerEl.id = 'btnSpinner_active';
@@ -7893,7 +7871,7 @@ ${suggestions.length > 0 ? `\nGoogle Autocomplete suggestions (${suggestions.len
 First assess authority match, then generate 3 evergreen article proposals with different angles/formats.`;
 
     const body = {
-      model: selectedModel,
+      model: OPENAI_MODEL,
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt }
@@ -7959,7 +7937,7 @@ First assess authority match, then generate 3 evergreen article proposals with d
     if (!proposals || proposals.length === 0) throw new Error('No proposals returned.');
 
     setProgress(95, t('prog_done'));
-    renderEvergreenResults(proposals, siteLabel, suggestions, authority, selectedModel);
+    renderEvergreenResults(proposals, siteLabel, suggestions, authority);
 
   } catch(e) {
     showError(e.message || 'Evergreen analysis failed.');
@@ -7971,7 +7949,7 @@ First assess authority match, then generate 3 evergreen article proposals with d
   }
 }
 
-function renderEvergreenResults(proposals, siteLabel, suggestions, authority, modelUsed) {
+function renderEvergreenResults(proposals, siteLabel, suggestions, authority) {
   const container = document.getElementById('evResults');
 
   const cycleLabels = { never: t('ev_cycle_never'), annual: t('ev_cycle_annual'), seasonal: t('ev_cycle_seasonal'), monthly: t('ev_cycle_monthly') };
@@ -7983,7 +7961,7 @@ function renderEvergreenResults(proposals, siteLabel, suggestions, authority, mo
 
   let html = `<div class="ev-results-header">
     <h2>${t('ev_results_title')}</h2>
-    <span class="ai-badge">${escapeHtml(modelUsed || 'GPT-4o')}</span>
+    <span class="ai-badge">AI</span>
   </div>`;
 
   // Authority assessment banner
