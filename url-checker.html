@@ -852,6 +852,45 @@ body {
   background: rgba(76, 175, 80, 0.08);
   border: 1px solid var(--green);
 }
+.ev-similar-block.links {
+  background: rgba(33, 150, 243, 0.08);
+  border: 1px solid var(--blue);
+}
+.ev-similar-block.links .ev-similar-header {
+  color: var(--blue);
+}
+.ev-similar-block.competitors {
+  background: rgba(156, 39, 176, 0.08);
+  border: 1px solid var(--accent);
+}
+.ev-similar-block.competitors .ev-similar-header {
+  color: var(--accent);
+}
+.ev-competitor-domain {
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--text);
+  white-space: nowrap;
+}
+.ev-competitor-note {
+  font-size: 11px;
+  color: var(--text-dim);
+}
+.ev-priority-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 12px;
+  color: #fff;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.ev-timing-row {
+  font-size: 12px;
+  color: var(--text);
+  padding: 6px 0;
+  margin-top: 4px;
+}
 .ev-similar-header {
   font-weight: 600;
   font-size: 13px;
@@ -1532,6 +1571,10 @@ const T = {
     ev_similar_impr: "impressions",
     ev_similar_source: "Source",
     ev_no_similar: "No similar content found in Search over the last 10 days",
+    ev_internal_links: "Internal linking opportunities",
+    ev_competitors: "Top competitors",
+    ev_best_timing: "Best time to publish",
+    ev_priority: "Priority",
     ev_words: "words",
     ev_cycle_never: "No updates needed",
     ev_cycle_annual: "Annual update",
@@ -1817,6 +1860,10 @@ const T = {
     ev_similar_impr: "impressions",
     ev_similar_source: "Source",
     ev_no_similar: "Aucun contenu similaire trouve dans Search sur les 10 derniers jours",
+    ev_internal_links: "Opportunites de maillage interne",
+    ev_competitors: "Top concurrents",
+    ev_best_timing: "Meilleur moment pour publier",
+    ev_priority: "Priorite",
     ev_words: "mots",
     ev_cycle_never: "Pas de mise a jour",
     ev_cycle_annual: "Mise a jour annuelle",
@@ -2088,6 +2135,10 @@ const T = {
     ev_similar_impr: "impressoes",
     ev_similar_source: "Fonte",
     ev_no_similar: "Nenhum conteudo similar encontrado no Search nos ultimos 10 dias",
+    ev_internal_links: "Oportunidades de link interno",
+    ev_competitors: "Principais concorrentes",
+    ev_best_timing: "Melhor momento para publicar",
+    ev_priority: "Prioridade",
     ev_words: "palavras",
     ev_cycle_never: "Sem atualizacao",
     ev_cycle_annual: "Atualizacao anual",
@@ -2373,6 +2424,10 @@ const T = {
     ev_similar_impr: "impresiones",
     ev_similar_source: "Fuente",
     ev_no_similar: "No se encontro contenido similar en Search en los ultimos 10 dias",
+    ev_internal_links: "Oportunidades de enlace interno",
+    ev_competitors: "Principales competidores",
+    ev_best_timing: "Mejor momento para publicar",
+    ev_priority: "Prioridad",
     ev_words: "palabras",
     ev_cycle_never: "Sin actualizacion",
     ev_cycle_annual: "Actualizacion anual",
@@ -2658,6 +2713,10 @@ const T = {
     ev_similar_impr: "impressioni",
     ev_similar_source: "Fonte",
     ev_no_similar: "Nessun contenuto simile trovato su Search negli ultimi 10 giorni",
+    ev_internal_links: "Opportunita di link interni",
+    ev_competitors: "Principali concorrenti",
+    ev_best_timing: "Momento migliore per pubblicare",
+    ev_priority: "Priorita",
     ev_words: "parole",
     ev_cycle_never: "Nessun aggiornamento",
     ev_cycle_annual: "Aggiornamento annuale",
@@ -2943,6 +3002,10 @@ const T = {
     ev_similar_impr: "показы",
     ev_similar_source: "Источник",
     ev_no_similar: "Похожий контент не найден в Search за последние 10 дней",
+    ev_internal_links: "Возможности внутренней перелинковки",
+    ev_competitors: "Топ конкуренты",
+    ev_best_timing: "Лучшее время для публикации",
+    ev_priority: "Приоритет",
     ev_words: "слов",
     ev_cycle_never: "Обновление не требуется",
     ev_cycle_annual: "Ежегодное обновление",
@@ -3228,6 +3291,10 @@ const T = {
     ev_similar_impr: "покази",
     ev_similar_source: "Джерело",
     ev_no_similar: "Схожий контент не знайдено в Search за останні 10 днів",
+    ev_internal_links: "Можливості внутрішньої перелінковки",
+    ev_competitors: "Топ конкуренти",
+    ev_best_timing: "Найкращий час для публікації",
+    ev_priority: "Пріоритет",
     ev_words: "слів",
     ev_cycle_never: "Оновлення не потрібне",
     ev_cycle_annual: "Щорічне оновлення",
@@ -3527,6 +3594,10 @@ const T = {
     ev_similar_impr: "wyswietlenia",
     ev_similar_source: "Zrodlo",
     ev_no_similar: "Nie znaleziono podobnej tresci w Search z ostatnich 10 dni",
+    ev_internal_links: "Mozliwosci linkowania wewnetrznego",
+    ev_competitors: "Glowni konkurenci",
+    ev_best_timing: "Najlepszy czas na publikacje",
+    ev_priority: "Priorytet",
     ev_words: "slow",
     ev_cycle_never: "Bez aktualizacji",
     ev_cycle_annual: "Aktualizacja roczna",
@@ -3798,6 +3869,10 @@ const T = {
     ev_similar_impr: "zobrazeni",
     ev_similar_source: "Zdroj",
     ev_no_similar: "Zadny podobny obsah nebyl nalezen v Search za poslednich 10 dni",
+    ev_internal_links: "Moznosti interniho prolinkovani",
+    ev_competitors: "Hlavni konkurenti",
+    ev_best_timing: "Nejlepsi cas k publikaci",
+    ev_priority: "Priorita",
     ev_words: "slov",
     ev_cycle_never: "Bez aktualizace",
     ev_cycle_annual: "Rocni aktualizace",
@@ -8024,6 +8099,26 @@ async function fetchAutocompleteSuggestions(keyword, lang) {
   return [...all].sort();
 }
 
+function findInternalLinks(proposals, allRows, similarMatches) {
+  if (!allRows || allRows.length === 0) return proposals.map(() => []);
+  return proposals.map((p, idx) => {
+    const keywords = extractTopicKeywords(
+      (p.title || '') + ' ' + (p.primary_keyword || '')
+    );
+    if (keywords.length === 0) return [];
+    // URLs already shown as duplicates — exclude them
+    const dupeUrls = new Set(((similarMatches && similarMatches[idx]) || []).map(r => r.url.toLowerCase()));
+    const matches = allRows.filter(r => {
+      if (dupeUrls.has(r.url.toLowerCase())) return false;
+      const slug = r.url.toLowerCase();
+      return keywords.some(kw => slug.includes(kw));
+    });
+    // Sort by clicks desc, keep top 5
+    matches.sort((a, b) => (b.clicks || 0) - (a.clicks || 0));
+    return matches.slice(0, 5);
+  });
+}
+
 function findSimilarArticles(proposals, allRows) {
   if (!allRows || allRows.length === 0) return proposals.map(() => []);
   return proposals.map(p => {
@@ -8116,6 +8211,16 @@ PROPOSAL QUALITY CHECKLIST:
 6. Word count must be realistic for the depth required
 7. Cluster satellites should be genuinely publishable companion articles
 
+TOP COMPETITORS:
+For each proposal, identify 3 real websites/pages that currently rank well for the primary keyword. These should be actual domains (not generic descriptions). Include the domain name and a short note on what makes their content strong or what angle they use. This helps editors understand the competitive landscape before writing.
+
+PUBLICATION TIMING:
+For each proposal, suggest the best time to publish or update. Consider:
+- For seasonal topics (World Cup, transfer window, pre-season): name the specific month(s) to publish before peak search interest
+- For annual topics (best-of lists, records): name the month when searches spike
+- For evergreen topics (history, rules, guides): say "anytime" but note if there is a slight seasonal peak
+Give a short, actionable recommendation (e.g. "Publish in May, peak search June-July" or "Anytime, slight peak during transfer windows").
+
 HEADING CAPITALIZATION:
 Follow the standard capitalization rules for ${langName}:
 - English: use Title Case (capitalize major words) for titles and H2s
@@ -8170,9 +8275,11 @@ First assess authority match, then generate 3 evergreen article proposals with d
                     long_tail_score: { type: 'number', description: 'Long-tail potential 1-10' },
                     estimated_volume: { type: 'string', enum: ['0-100', '100-1K', '1K-10K', '10K-100K', '100K+'], description: 'Estimated monthly search volume range' },
                     difficulty: { type: 'string', enum: ['low', 'medium', 'high'], description: 'Keyword difficulty to rank' },
-                    cluster_satellites: { type: 'array', items: { type: 'string' }, description: '3-5 satellite article ideas' }
+                    cluster_satellites: { type: 'array', items: { type: 'string' }, description: '3-5 satellite article ideas' },
+                    top_competitors: { type: 'array', items: { type: 'object', properties: { domain: { type: 'string', description: 'Domain or URL of a top-ranking competitor' }, note: { type: 'string', description: 'What makes their content strong or their angle (1 sentence)' } }, required: ['domain', 'note'] }, description: '3 real websites currently ranking for the primary keyword', minItems: 1, maxItems: 3 },
+                    best_timing: { type: 'string', description: 'When to publish for maximum impact (e.g. "Publish in May, peak June-July" or "Anytime, slight peak during transfer windows")' }
                   },
-                  required: ['title', 'primary_keyword', 'h2s', 'briefs', 'meta_description', 'word_count_estimate', 'update_cycle', 'search_intent', 'format', 'long_tail_score', 'estimated_volume', 'difficulty', 'cluster_satellites']
+                  required: ['title', 'primary_keyword', 'h2s', 'briefs', 'meta_description', 'word_count_estimate', 'update_cycle', 'search_intent', 'format', 'long_tail_score', 'estimated_volume', 'difficulty', 'cluster_satellites', 'top_competitors', 'best_timing']
                 },
                 minItems: 3,
                 maxItems: 3
@@ -8209,8 +8316,11 @@ First assess authority match, then generate 3 evergreen article proposals with d
     // Find similar articles per proposal
     const similarMatches = findSimilarArticles(proposals, searchRows);
 
+    // Find internal linking opportunities (1+ keyword, excludes duplicates)
+    const internalLinks = findInternalLinks(proposals, searchRows, similarMatches);
+
     setProgress(95, t('prog_done'));
-    renderEvergreenResults(proposals, siteLabel, suggestions, authority, similarMatches);
+    renderEvergreenResults(proposals, siteLabel, suggestions, authority, similarMatches, internalLinks);
 
   } catch(e) {
     showError(e.message || 'Evergreen analysis failed.');
@@ -8222,7 +8332,7 @@ First assess authority match, then generate 3 evergreen article proposals with d
   }
 }
 
-function renderEvergreenResults(proposals, siteLabel, suggestions, authority, similarMatches) {
+function renderEvergreenResults(proposals, siteLabel, suggestions, authority, similarMatches, internalLinks) {
   const container = document.getElementById('evResults');
 
   const cycleLabels = { never: t('ev_cycle_never'), annual: t('ev_cycle_annual'), seasonal: t('ev_cycle_seasonal'), monthly: t('ev_cycle_monthly') };
@@ -8258,12 +8368,28 @@ function renderEvergreenResults(proposals, siteLabel, suggestions, authority, si
     html += `<div class="ev-autocomplete-note">${t('ev_autocomplete_used')} (${suggestions.length}): ${suggestions.slice(0, 10).map(s => '<strong>' + escapeHtml(s) + '</strong>').join(', ')}${suggestions.length > 10 ? ` <span style="opacity:0.6">+${suggestions.length - 10} more</span>` : ''}</div>`;
   }
 
+  // Compute priority scores and rank
+  const volScores = { '0-100': 1, '100-1K': 2, '1K-10K': 4, '10K-100K': 7, '100K+': 10 };
+  const diffScores = { low: 3, medium: 2, high: 1 };
+  const priorityScores = proposals.map(p => {
+    const vol = volScores[p.estimated_volume] || 1;
+    const diff = diffScores[p.difficulty] || 2;
+    const lt = (p.long_tail_score || 5) / 10;
+    return Math.round(vol * diff * lt * 10);
+  });
+  const maxPri = Math.max(...priorityScores, 1);
+  const priorityRanks = priorityScores.map((s, i) => ({ score: s, idx: i })).sort((a, b) => b.score - a.score).map((item, rank) => { item.rank = rank + 1; return item; });
+  const rankByIdx = {};
+  priorityRanks.forEach(item => { rankByIdx[item.idx] = item.rank; });
+
   html += '<div class="ev-proposals">';
 
   proposals.forEach((p, i) => {
     const scoreColor = p.long_tail_score >= 7 ? 'var(--green)' : p.long_tail_score >= 4 ? 'var(--amber)' : 'var(--red)';
     const volColor = volColors[p.estimated_volume] || 'var(--text-dim)';
     const diffColor = diffColors[p.difficulty] || 'var(--amber)';
+    const rank = rankByIdx[i] || (i + 1);
+    const rankColor = rank === 1 ? 'var(--green)' : rank === 2 ? 'var(--amber)' : 'var(--text-dim)';
 
     html += `<div class="ev-card">
       <div class="ev-card-header">
@@ -8274,6 +8400,7 @@ function renderEvergreenResults(proposals, siteLabel, suggestions, authority, si
             <div class="ev-primary-kw">${t('ev_primary_kw')}: <strong>${escapeHtml(p.primary_keyword)}</strong></div>
           </div>
         </div>
+        <span class="ev-priority-badge" style="background:${rankColor}">${t('ev_priority')} #${rank}</span>
       </div>
       <div class="ev-card-body">
         <div class="ev-meta-row">
@@ -8292,7 +8419,8 @@ function renderEvergreenResults(proposals, siteLabel, suggestions, authority, si
             <span class="ev-data-label">${t('ev_difficulty')}</span>
             <span class="ev-data-value" style="color:${diffColor}">${diffLabels[p.difficulty] || p.difficulty}</span>
           </div>
-        </div>
+        </div>${p.best_timing ? `
+        <div class="ev-timing-row">📅 <strong>${t('ev_best_timing')}:</strong> ${escapeHtml(p.best_timing)}</div>` : ''}
         <div class="ev-meta-description">${escapeHtml(p.meta_description)}</div>
         <div class="ev-section-label">${t('ev_structure')}</div>
         <ul class="ev-h2-list">`;
@@ -8332,6 +8460,37 @@ function renderEvergreenResults(proposals, siteLabel, suggestions, authority, si
       html += `<div class="ev-similar-block ok">
         <div class="ev-similar-header">✓ ${t('ev_no_similar')}</div>
       </div>`;
+    }
+
+    // Internal linking suggestions
+    const links = (internalLinks && internalLinks[i]) || [];
+    if (links.length > 0) {
+      html += `<div class="ev-similar-block links">
+        <div class="ev-similar-header">🔗 ${t('ev_internal_links')} (${links.length})</div>
+        <ul class="ev-similar-list">`;
+      links.forEach(m => {
+        const path = m.url.replace(/https?:\/\/[^/]+/, '');
+        html += `<li class="ev-similar-item">
+          <a href="${escapeHtml(m.url)}" target="_blank" rel="noopener" class="ev-similar-url">${escapeHtml(path)}</a>
+          <span class="ev-similar-stats">${m.clicks || 0} ${t('ev_similar_clicks')} · ${m.impressions || 0} ${t('ev_similar_impr')}</span>
+        </li>`;
+      });
+      html += `</ul></div>`;
+    }
+
+    // Top competitors
+    const competitors = p.top_competitors || [];
+    if (competitors.length > 0) {
+      html += `<div class="ev-similar-block competitors">
+        <div class="ev-similar-header">🏆 ${t('ev_competitors')} (${competitors.length})</div>
+        <ul class="ev-similar-list">`;
+      competitors.forEach(c => {
+        html += `<li class="ev-similar-item">
+          <span class="ev-competitor-domain">${escapeHtml(c.domain)}</span>
+          <span class="ev-competitor-note">${escapeHtml(c.note)}</span>
+        </li>`;
+      });
+      html += `</ul></div>`;
     }
 
     html += `</div>
