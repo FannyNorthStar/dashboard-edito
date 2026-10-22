@@ -1,0 +1,45 @@
+Date,Feature/Change,What it does,Status
+2026-09-10,Traffic light color dots + light theme redesign,Added color-coded status dots and redesigned the page with a light theme,Done
+2026-09-10,Remove cross-links between dashboards,Removed navigation links between separate dashboard pages,Done
+2026-09-10,Tabbed input (URL / HTML) + spellcheck,Added tabs to switch between URL input and HTML paste input on the same page. Added spellcheck function,Done
+2026-09-10,URL and HTML input on same page + JS fix,Merged URL and HTML input modes onto a single page and fixed JavaScript syntax errors,Done
+2026-09-11,Content Quality AI check + rename Article Structure,Added AI-powered content quality scoring. Renamed Article Structure section. Moved spellcheck inline,Done
+2026-09-11,Split Analyze into Check URL and Check HTML,Separated the single Analyze button into two distinct buttons: Check URL and Check HTML (draft),Done
+2026-09-11,Split analyze buttons + Discover insights + multi-proxy,Added Discover performance insights. Added multiple CORS proxy fallbacks for reliability,Done
+2026-09-11,Improve CORS proxy fallback (5 proxies + direct fetch),Expanded proxy chain to 5 CORS proxies plus a direct fetch fallback,Done
+2026-09-11,Add GAS CORS proxy for reliable fetching,Integrated a Google Apps Script proxy for more reliable cross-origin data fetching,Done
+2026-09-11,GAS proxy + less strict fluff + bilingual suggestions + uppercase accents OK,Switched to GAS proxy. Relaxed fluff detection thresholds. Added bilingual improvement suggestions. Fixed uppercase accent handling,Done
+2026-09-17,Add ES / IT / RU / UK / PL / CS languages,Added 6 new language translations (Spanish / Italian / Russian / Ukrainian / Polish / Czech),Done
+2026-09-17,Upgrade fluff detection + feedback buttons + nickname spellcheck fix,Improved fluff detection algorithm. Added thumbs up/down feedback buttons. Fixed false positives on nicknames in spellcheck,Done
+2026-09-17,Update GAS proxy URL,Changed the Google Apps Script proxy endpoint URL,Done
+2026-09-17,Add reviewer selector + Google Sheets feedback + continuous learning for fluff,Added a reviewer name selector. Enabled sending feedback to Google Sheets. Added continuous learning loop for fluff detection,Done
+2026-09-17,Fix fluff feedback buttons + base64 encode quotes,Fixed broken feedback buttons. Base64-encoded quoted text to avoid encoding issues,Done
+2026-09-17,Add GAS proxy reference + move reviewer selector,Added GAS proxy documentation reference. Repositioned the reviewer selector in the UI,Done
+2026-09-17,Rework Discover authority,Rebuilt the Discover authority check logic from scratch,Done
+2026-09-17,Discover authority rework + CTR fix,Follow-up fixes to Discover authority rework. Fixed CTR calculation,Done
+2026-09-18,KPI /100 scores + issue(s) counts,Changed KPI display to show scores out of 100. Added singular/plural for issue counts,Done
+2026-09-18,Fix: isolate AI features + error notices + fetch retry,Isolated AI features so failures in one do not break others. Added visible error notices. Improved fetch retry logic,Done
+2026-09-18,Fix: CORS preflight blocking GAS proxy POST,Fixed CORS preflight requests that were blocking POST calls to the GAS proxy,Done
+2026-09-18,Add Keyword Checker mode,Added a new Keyword Checker tab that analyzes article keywords against Discover and Search data,Done
+2026-09-18,Rework fluff detection: harm-reduction threshold + split layout,Reworked fluff detection with a harm-reduction scoring threshold. Added split layout with inline text highlights,Done
+2026-09-18,Remove angle category headers (flat list),Removed category grouping headers from article angles. Angles now display as a flat list,Done
+2026-09-24,Add Discover 30 days with trend detection,Added Discover 30-day data source with trend detection (consistent / fading / trending),Done
+2026-09-24,Add Discover 10 Days with 3-period trend,Added Discover 10-day data source with 3-period trend comparison,Done
+2026-09-24,Apply 16 code review fixes,Applied 16 fixes from code review: error handling / edge cases / UI consistency,Done
+2026-09-24,Add Search authority check + spellcheck fix,Added Search 10-day authority check as a third data source. Fixed spellcheck false positives,Done
+2026-09-24,Add DEFAULT_SEARCH_SHEET constant,Added a shared constant for the default Search 10-day sheet URL,Done
+2026-09-24,Refactor: dedup siteStats / render / export / auto-generate SITE_OPTIONS,Deduplicated site stats calculation. Refactored table rendering and CSV export helpers. Auto-generated SITE_OPTIONS from sheet data,Done
+2026-09-25,Fix initialization order / spellcheck false positives / card expand bug,Fixed page initialization sequence. Reduced spellcheck false positives. Fixed the expand/collapse bug on result cards,Done
+2026-09-25,Spellcheck: skip optional comma placement,Excluded optional comma rules from spellcheck to reduce noise,Done
+2026-09-25,Reorder tabs (Keyword Checker first) + expand spellcheck to 15 rules,Moved Keyword Checker tab to first position. Expanded spellcheck from basic rules to 15 language-specific rules,Done
+2026-09-25,Rewrite spellcheck prompt: shorter meta-instruction,Rewrote the spellcheck GPT prompt to be shorter and more precise. Replaced 15 verbose rules with a compact meta-instruction,Done
+2026-09-25,Keyword Checker: 4-source analysis with authority / trends / position,Added 4-source analysis to Keyword Checker: Discover 30 authority + Discover 10 trends + Search 10 position + niche insights,Done
+2026-09-25,Keyword Checker: sub-angle decomposition + multi-sport + nuanced insights,Added sub-angle decomposition for keywords. Added multi-sport support. Added nuanced editorial insights,Done
+2026-09-25,Keyword Checker: GPT-generated multilingual URL keywords,Added GPT-generated multilingual keyword extraction from URLs for better cross-language matching,Done
+2026-09-25,Niche entities: set intersection instead of GPT matching,Replaced GPT-based entity matching with set intersection for niche entity detection. Faster and more deterministic,Done
+2026-09-25,Fix Search / Discover 30 / Discover 10 data not loading,Fixed data loading failures caused by mismatched sheet tab names in gid discovery,Done
+2026-09-25,Fix: serialize proxy calls + no-tab fallback for Discover 30 / Discover 10 / Search,Serialized concurrent proxy calls to avoid rate limits. Added fallback when sheet has no named tabs,Done
+2026-09-25,Fix: debug logging + HTML fallback + smart CSV parser,Added debug logging for data pipeline. Added HTML fallback parsing. Improved CSV parser to handle edge cases,Done
+2026-09-25,Fix: use pubhtml fallback for Discover 30 / Discover 10 / Search sheets,Added pubhtml page as fallback source when direct CSV fetch fails. Reads metadata from first tab,Done
+2026-09-25,Fix: discover tab gids from pubhtml for Discover 30 / Discover 10 / Search,Reads tab gid mappings from pubhtml JavaScript to correctly target individual sheet tabs,Done
+2026-09-25,Remove D90 from keyword analysis (keep Discover 30 / Discover 10 / Search only),Removed all Discover 90-day references. Keyword analysis now uses only Discover 30 / Discover 10 / Search 10,Done

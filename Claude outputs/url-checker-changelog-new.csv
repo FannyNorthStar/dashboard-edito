@@ -1,0 +1,5 @@
+2026-09-25,Fix "Last 90 days" → "Last 30 days" + "in the dataset" wording,Changed all 9 languages: removed Last 90 days references. Changed "total on the site" to "in the dataset" for Discover and Search sections,Done
+2026-09-25,Fix PDF One-Pager download,Replaced window.print() with html2canvas + jsPDF to generate a real downloadable PDF instead of opening print dialog,Done
+2026-09-25,Fix fluff feedback learning from localStorage,fetchFluffFeedback() now merges localStorage feedback into AI calibration prompt with deduplication. Previously only read from remote GAS proxy,Done
+2026-09-25,Rewrite fluff detection prompt (less strict),Reduced from 17 tests to 5. Only flags Google-penalizable content. Standard sports journalism explicitly whitelisted. Removed "low" severity,Done
+2026-09-25,Add Discover 10 days paragraph with comparison table,Added a second paragraph to Discover section showing Last 10 days data + stats table alongside existing Last 30 days. Translations in all 9 languages,Done

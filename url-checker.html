@@ -838,6 +838,61 @@ body {
   border-radius: 16px;
   border: 1px solid var(--border);
 }
+.ev-similar-block {
+  margin-top: 12px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+}
+.ev-similar-block.warning {
+  background: rgba(255, 152, 0, 0.08);
+  border: 1px solid var(--amber);
+}
+.ev-similar-block.ok {
+  background: rgba(76, 175, 80, 0.08);
+  border: 1px solid var(--green);
+}
+.ev-similar-header {
+  font-weight: 600;
+  font-size: 13px;
+  margin-bottom: 6px;
+  color: var(--text);
+}
+.ev-similar-block.ok .ev-similar-header {
+  margin-bottom: 0;
+  color: var(--green);
+}
+.ev-similar-block.warning .ev-similar-header {
+  color: var(--amber);
+}
+.ev-similar-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.ev-similar-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.ev-similar-url {
+  color: var(--accent);
+  text-decoration: none;
+  word-break: break-all;
+  font-size: 12px;
+  min-width: 0;
+}
+.ev-similar-url:hover { text-decoration: underline; }
+.ev-similar-stats {
+  font-size: 11px;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
 .ev-results-header {
   display: flex; align-items: center; gap: 10px;
   margin-bottom: 16px;
@@ -1472,6 +1527,11 @@ const T = {
     ev_autocomplete_used: "Autocomplete suggestions used",
     ev_structure: "Article structure",
     ev_cluster: "Cluster satellites",
+    ev_similar_warning: "Similar content found in Search (last 10 days)",
+    ev_similar_clicks: "clicks",
+    ev_similar_impr: "impressions",
+    ev_similar_source: "Source",
+    ev_no_similar: "No similar content found in Search over the last 10 days",
     ev_words: "words",
     ev_cycle_never: "No updates needed",
     ev_cycle_annual: "Annual update",
@@ -1752,6 +1812,11 @@ const T = {
     ev_autocomplete_used: "Suggestions autocomplete utilisees",
     ev_structure: "Structure de l'article",
     ev_cluster: "Articles satellites",
+    ev_similar_warning: "Contenu similaire trouve dans Search (10 derniers jours)",
+    ev_similar_clicks: "clics",
+    ev_similar_impr: "impressions",
+    ev_similar_source: "Source",
+    ev_no_similar: "Aucun contenu similaire trouve dans Search sur les 10 derniers jours",
     ev_words: "mots",
     ev_cycle_never: "Pas de mise a jour",
     ev_cycle_annual: "Mise a jour annuelle",
@@ -2018,6 +2083,11 @@ const T = {
     ev_autocomplete_used: "Sugestoes de autocomplete utilizadas",
     ev_structure: "Estrutura do artigo",
     ev_cluster: "Artigos satelites",
+    ev_similar_warning: "Conteudo similar encontrado no Search (ultimos 10 dias)",
+    ev_similar_clicks: "cliques",
+    ev_similar_impr: "impressoes",
+    ev_similar_source: "Fonte",
+    ev_no_similar: "Nenhum conteudo similar encontrado no Search nos ultimos 10 dias",
     ev_words: "palavras",
     ev_cycle_never: "Sem atualizacao",
     ev_cycle_annual: "Atualizacao anual",
@@ -2298,6 +2368,11 @@ const T = {
     ev_autocomplete_used: "Sugerencias de autocompletado utilizadas",
     ev_structure: "Estructura del articulo",
     ev_cluster: "Articulos satelite",
+    ev_similar_warning: "Contenido similar encontrado en Search (ultimos 10 dias)",
+    ev_similar_clicks: "clics",
+    ev_similar_impr: "impresiones",
+    ev_similar_source: "Fuente",
+    ev_no_similar: "No se encontro contenido similar en Search en los ultimos 10 dias",
     ev_words: "palabras",
     ev_cycle_never: "Sin actualizacion",
     ev_cycle_annual: "Actualizacion anual",
@@ -2578,6 +2653,11 @@ const T = {
     ev_autocomplete_used: "Suggerimenti autocomplete utilizzati",
     ev_structure: "Struttura dell'articolo",
     ev_cluster: "Articoli satellite",
+    ev_similar_warning: "Contenuto simile trovato su Search (ultimi 10 giorni)",
+    ev_similar_clicks: "clic",
+    ev_similar_impr: "impressioni",
+    ev_similar_source: "Fonte",
+    ev_no_similar: "Nessun contenuto simile trovato su Search negli ultimi 10 giorni",
     ev_words: "parole",
     ev_cycle_never: "Nessun aggiornamento",
     ev_cycle_annual: "Aggiornamento annuale",
@@ -2858,6 +2938,11 @@ const T = {
     ev_autocomplete_used: "Использованные подсказки автозаполнения",
     ev_structure: "Структура статьи",
     ev_cluster: "Сателлитные статьи",
+    ev_similar_warning: "Похожий контент найден в Search (последние 10 дней)",
+    ev_similar_clicks: "клики",
+    ev_similar_impr: "показы",
+    ev_similar_source: "Источник",
+    ev_no_similar: "Похожий контент не найден в Search за последние 10 дней",
     ev_words: "слов",
     ev_cycle_never: "Обновление не требуется",
     ev_cycle_annual: "Ежегодное обновление",
@@ -3138,6 +3223,11 @@ const T = {
     ev_autocomplete_used: "Використані підказки автозаповнення",
     ev_structure: "Структура статті",
     ev_cluster: "Сателітні статті",
+    ev_similar_warning: "Схожий контент знайдено в Search (останні 10 днів)",
+    ev_similar_clicks: "кліки",
+    ev_similar_impr: "покази",
+    ev_similar_source: "Джерело",
+    ev_no_similar: "Схожий контент не знайдено в Search за останні 10 днів",
     ev_words: "слів",
     ev_cycle_never: "Оновлення не потрібне",
     ev_cycle_annual: "Щорічне оновлення",
@@ -3432,6 +3522,11 @@ const T = {
     ev_autocomplete_used: "Wykorzystane sugestie autouzupelniania",
     ev_structure: "Struktura artykulu",
     ev_cluster: "Artykuly satelitarne",
+    ev_similar_warning: "Podobna tresc znaleziona w Search (ostatnie 10 dni)",
+    ev_similar_clicks: "klikniecia",
+    ev_similar_impr: "wyswietlenia",
+    ev_similar_source: "Zrodlo",
+    ev_no_similar: "Nie znaleziono podobnej tresci w Search z ostatnich 10 dni",
     ev_words: "slow",
     ev_cycle_never: "Bez aktualizacji",
     ev_cycle_annual: "Aktualizacja roczna",
@@ -3698,6 +3793,11 @@ const T = {
     ev_autocomplete_used: "Pouzite navrhy automatickeho doplnovani",
     ev_structure: "Struktura clanku",
     ev_cluster: "Satelitni clanky",
+    ev_similar_warning: "Podobny obsah nalezen v Search (poslednich 10 dni)",
+    ev_similar_clicks: "kliknuti",
+    ev_similar_impr: "zobrazeni",
+    ev_similar_source: "Zdroj",
+    ev_no_similar: "Zadny podobny obsah nebyl nalezen v Search za poslednich 10 dni",
     ev_words: "slov",
     ev_cycle_never: "Bez aktualizace",
     ev_cycle_annual: "Rocni aktualizace",
@@ -7924,6 +8024,24 @@ async function fetchAutocompleteSuggestions(keyword, lang) {
   return [...all].sort();
 }
 
+function findSimilarArticles(proposals, allRows) {
+  if (!allRows || allRows.length === 0) return proposals.map(() => []);
+  return proposals.map(p => {
+    const keywords = extractTopicKeywords(
+      (p.title || '') + ' ' + (p.primary_keyword || '')
+    );
+    if (keywords.length === 0) return [];
+    const matches = allRows.filter(r => {
+      const slug = r.url.toLowerCase();
+      const hits = keywords.filter(kw => slug.includes(kw));
+      return hits.length >= 2;
+    });
+    // Sort by clicks desc, keep top 5
+    matches.sort((a, b) => (b.clicks || 0) - (a.clicks || 0));
+    return matches.slice(0, 5);
+  });
+}
+
 async function startEvergreenAnalysis() {
   const evText = document.getElementById('evInput').value.trim();
   if (!evText) { showError(t('err_empty_ev')); return; }
@@ -8067,7 +8185,14 @@ First assess authority match, then generate 3 evergreen article proposals with d
       tool_choice: { type: 'function', function: { name: 'submit_evergreen_proposals' } }
     };
 
-    const response = await callOpenAI(body);
+    // Fetch Search 10d sheet data in parallel with GPT call for duplicate detection
+    const sheetUrlSearch = localStorage.getItem('media_dashboard_search_sheet') || DEFAULT_SEARCH_SHEET;
+
+    const [response, searchRows] = await Promise.all([
+      callOpenAI(body),
+      fetchSourceData(sheetUrlSearch, selectedSite).catch(() => [])
+    ]);
+
     setProgress(80, t('prog_ev_render'));
 
     const toolCall = response.choices?.[0]?.message?.tool_calls?.[0];
@@ -8079,8 +8204,13 @@ First assess authority match, then generate 3 evergreen article proposals with d
 
     if (!proposals || proposals.length === 0) throw new Error('No proposals returned.');
 
+    console.log('[evergreen] Search 10d rows loaded for duplicate check:', searchRows.length);
+
+    // Find similar articles per proposal
+    const similarMatches = findSimilarArticles(proposals, searchRows);
+
     setProgress(95, t('prog_done'));
-    renderEvergreenResults(proposals, siteLabel, suggestions, authority);
+    renderEvergreenResults(proposals, siteLabel, suggestions, authority, similarMatches);
 
   } catch(e) {
     showError(e.message || 'Evergreen analysis failed.');
@@ -8092,7 +8222,7 @@ First assess authority match, then generate 3 evergreen article proposals with d
   }
 }
 
-function renderEvergreenResults(proposals, siteLabel, suggestions, authority) {
+function renderEvergreenResults(proposals, siteLabel, suggestions, authority, similarMatches) {
   const container = document.getElementById('evResults');
 
   const cycleLabels = { never: t('ev_cycle_never'), annual: t('ev_cycle_annual'), seasonal: t('ev_cycle_seasonal'), monthly: t('ev_cycle_monthly') };
@@ -8182,8 +8312,29 @@ function renderEvergreenResults(proposals, siteLabel, suggestions, authority) {
       html += `<span class="ev-satellite-chip">${escapeHtml(sat)}</span>`;
     });
 
+    html += `</div>`;
+
+    // Similar content warning
+    const matches = (similarMatches && similarMatches[i]) || [];
+    if (matches.length > 0) {
+      html += `<div class="ev-similar-block warning">
+        <div class="ev-similar-header">⚠ ${t('ev_similar_warning')} (${matches.length})</div>
+        <ul class="ev-similar-list">`;
+      matches.forEach(m => {
+        const path = m.url.replace(/https?:\/\/[^/]+/, '');
+        html += `<li class="ev-similar-item">
+          <a href="${escapeHtml(m.url)}" target="_blank" rel="noopener" class="ev-similar-url">${escapeHtml(path)}</a>
+          <span class="ev-similar-stats">${m.clicks || 0} ${t('ev_similar_clicks')} · ${m.impressions || 0} ${t('ev_similar_impr')}</span>
+        </li>`;
+      });
+      html += `</ul></div>`;
+    } else {
+      html += `<div class="ev-similar-block ok">
+        <div class="ev-similar-header">✓ ${t('ev_no_similar')}</div>
+      </div>`;
+    }
+
     html += `</div>
-      </div>
     </div>`;
   });
 
