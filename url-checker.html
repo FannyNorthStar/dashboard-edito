@@ -34,6 +34,55 @@
   --radius-sm: 6px;
   --shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.03);
   --shadow-md: 0 4px 12px rgba(0,0,0,0.06);
+  --topbar-bg: rgba(255,255,255,0.92);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111318;
+    --surface: #1A1D28;
+    --surface-2: #22252F;
+    --surface-3: #2A2D3A;
+    --border: #2E3244;
+    --border-light: #3A3F54;
+    --text: #E2E4EE;
+    --text-muted: #9B9FB5;
+    --text-dim: #6B7088;
+    --accent: #818CF8;
+    --accent-glow: rgba(129,140,248,0.12);
+    --accent-hover: #6366F1;
+    --green: #34D399; --green-bg: rgba(52,211,153,0.10);
+    --red: #F87171; --red-bg: rgba(248,113,113,0.10);
+    --amber: #FBBF24; --amber-bg: rgba(251,191,36,0.10);
+    --blue: #60A5FA; --blue-bg: rgba(96,165,250,0.10);
+    --purple: #C084FC;
+    --shadow: 0 1px 3px rgba(0,0,0,0.20), 0 1px 2px rgba(0,0,0,0.15);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.25);
+    --topbar-bg: rgba(17,19,24,0.92);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #111318;
+  --surface: #1A1D28;
+  --surface-2: #22252F;
+  --surface-3: #2A2D3A;
+  --border: #2E3244;
+  --border-light: #3A3F54;
+  --text: #E2E4EE;
+  --text-muted: #9B9FB5;
+  --text-dim: #6B7088;
+  --accent: #818CF8;
+  --accent-glow: rgba(129,140,248,0.12);
+  --accent-hover: #6366F1;
+  --green: #34D399; --green-bg: rgba(52,211,153,0.10);
+  --red: #F87171; --red-bg: rgba(248,113,113,0.10);
+  --amber: #FBBF24; --amber-bg: rgba(251,191,36,0.10);
+  --blue: #60A5FA; --blue-bg: rgba(96,165,250,0.10);
+  --purple: #C084FC;
+  --shadow: 0 1px 3px rgba(0,0,0,0.20), 0 1px 2px rgba(0,0,0,0.15);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.25);
+  --topbar-bg: rgba(17,19,24,0.92);
+  color-scheme: dark;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -51,7 +100,7 @@ body {
   position: sticky; top: 0; z-index: 100;
   display: flex; align-items: center; gap: 16px;
   padding: 14px 28px;
-  background: rgba(255,255,255,0.92);
+  background: var(--topbar-bg);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
 }
@@ -160,7 +209,19 @@ body {
   :root:not([data-theme="light"]) .verdict-yesif { background: #422006; border-color: #eab308; color: #fde047; }
   :root:not([data-theme="light"]) .verdict-maybe { background: #422006; border-color: #eab308; color: #fde047; }
   :root:not([data-theme="light"]) .verdict-no { background: #450a0a; border-color: #ef4444; color: #fca5a5; }
+  :root:not([data-theme="light"]) .topbar select {
+    background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%239B9FB5' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  }
+  :root:not([data-theme="light"]) .modal-overlay { background: rgba(0,0,0,0.55); }
 }
+:root[data-theme="dark"] .verdict-yes { background: #052e16; border-color: #22c55e; color: #86efac; }
+:root[data-theme="dark"] .verdict-yesif { background: #422006; border-color: #eab308; color: #fde047; }
+:root[data-theme="dark"] .verdict-maybe { background: #422006; border-color: #eab308; color: #fde047; }
+:root[data-theme="dark"] .verdict-no { background: #450a0a; border-color: #ef4444; color: #fca5a5; }
+:root[data-theme="dark"] .topbar select {
+  background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%239B9FB5' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+:root[data-theme="dark"] .modal-overlay { background: rgba(0,0,0,0.55); }
 
 /* SITE SELECTOR (keyword mode) */
 .site-select-row {
@@ -845,15 +906,15 @@ body {
   font-size: 12px;
 }
 .ev-similar-block.warning {
-  background: rgba(255, 152, 0, 0.08);
+  background: var(--amber-bg);
   border: 1px solid var(--amber);
 }
 .ev-similar-block.ok {
-  background: rgba(76, 175, 80, 0.08);
+  background: var(--green-bg);
   border: 1px solid var(--green);
 }
 .ev-similar-block.links {
-  background: rgba(33, 150, 243, 0.08);
+  background: var(--blue-bg);
   border: 1px solid var(--blue);
 }
 .ev-similar-block.links .ev-similar-header {
@@ -1280,7 +1341,7 @@ body {
       <li>Go to <a href="https://script.google.com" target="_blank" rel="noopener">script.google.com</a> &rarr; <b>New project</b></li>
       <li>Delete everything and paste this code:</li>
     </ol>
-    <pre style="background:#f4f4f8;padding:12px;border-radius:8px;font-size:12px;overflow-x:auto;white-space:pre-wrap;margin:0 0 12px"><code>function doGet(e) {
+    <pre style="background:var(--surface-2);padding:12px;border-radius:8px;font-size:12px;overflow-x:auto;white-space:pre-wrap;margin:0 0 12px"><code>function doGet(e) {
   var url = e.parameter.url;
   if (!url) return ContentService.createTextOutput('Missing url param');
   var resp = UrlFetchApp.fetch(url, {muteHttpExceptions:true, followRedirects:true});
@@ -4283,24 +4344,26 @@ const PATH_TAB_OVERRIDES = [
   { domain: 'afrik-foot.com', pathPrefix: '/en-za/', tab: 'AFRIKFOOTZA' },
 ];
 
-// Resolve URL to tab code: checks path overrides first, then domain map
+// Toggle all checkboxes in a tick-row (used by Select All)
 function toggleSelectAll(rowId, checked) {
-      const row = document.getElementById(rowId);
-      if (!row) return;
-      row.querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.checked = checked; });
-    }
-    // When individual checkboxes change, sync the Select All state
-    document.addEventListener('change', function(e) {
-      if (e.target.type !== 'checkbox') return;
-      const row = e.target.closest('.tick-row');
-      if (!row) return;
-      const allCb = row.querySelector('.select-all input[type="checkbox"]');
-      if (!allCb || e.target === allCb) return;
-      const others = [...row.querySelectorAll('input[type="checkbox"]')].filter(cb => cb !== allCb);
-      allCb.checked = others.every(cb => cb.checked);
-    });
+  const row = document.getElementById(rowId);
+  if (!row) return;
+  row.querySelectorAll('input[type="checkbox"]').forEach(cb => { cb.checked = checked; });
+}
 
-    function resolveTab(url) {
+// When individual checkboxes change, sync the Select All state
+document.addEventListener('change', function(e) {
+  if (e.target.type !== 'checkbox') return;
+  const row = e.target.closest('.tick-row');
+  if (!row) return;
+  const allCb = row.querySelector('.select-all input[type="checkbox"]');
+  if (!allCb || e.target === allCb) return;
+  const others = [...row.querySelectorAll('input[type="checkbox"]')].filter(cb => cb !== allCb);
+  allCb.checked = others.every(cb => cb.checked);
+});
+
+// Resolve URL to tab code for site-specific sheet lookups
+function resolveTab(url) {
   try {
     const u = new URL(url);
     const host = u.hostname.replace(/^www\./, '');
@@ -5090,7 +5153,7 @@ async function fetchLatestNews(query, maxAgeDays = 7, lang = 'en') {
 
 async function scoreNewsRelevance(headlines, query) {
   // Use gpt-4o-mini to score each headline 1-5 for relevance to the query.
-  // Returns only headlines scoring >= 3. Cheap and fast.
+  // Returns only headlines scoring >= 4. Cheap and fast.
   if (!headlines || headlines.length === 0) return [];
   try {
     const numbered = headlines.map((h, i) => `${i + 1}. ${h.title}`).join('\n');
@@ -5147,7 +5210,7 @@ Be strict. Examples:
     const result = JSON.parse(tc.function.arguments);
     const scoreMap = new Map();
     for (const s of (result.scores || [])) scoreMap.set(s.index, s.score);
-    // Keep headlines with score >= 3
+    // Keep headlines with score >= 4
     return headlines.filter((_, i) => (scoreMap.get(i + 1) || 0) >= 4);
   } catch (e) {
     console.warn('[news] Relevance scoring failed, returning unfiltered:', e.message);
@@ -5605,45 +5668,51 @@ async function fetchWithTimeout(url, opts = {}, timeoutMs = 15000) {
 
 async function fetchViaProxy(targetUrl) {
   const errors = [];
+  const tag = targetUrl.substring(0, 80);
 
-  // 1. Try custom Google Apps Script proxy first (most reliable) — single attempt, 12s timeout
+  // Phase 1: Race GAS proxy vs direct CORS — whoever wins first
   const customProxy = localStorage.getItem('media_dashboard_cors_proxy') || DEFAULT_GAS_PROXY;
+  const primaryRacers = [];
+
   if (customProxy) {
-    try {
-      const sep = customProxy.includes('?') ? '&' : '?';
-      const proxyUrl = customProxy + sep + 'url=' + encodeURIComponent(targetUrl);
-      const resp = await fetchWithTimeout(proxyUrl, { redirect:'follow' }, 12000);
-      if (resp.ok) { console.log('[proxy] custom GAS OK for', targetUrl.substring(0, 80)); return await resp.text(); }
-      errors.push(`custom: HTTP ${resp.status}`);
-    } catch(e) {
-      errors.push(`custom: ${e.name === 'AbortError' ? 'timeout' : e.message}`);
-    }
+    const sep = customProxy.includes('?') ? '&' : '?';
+    const proxyUrl = customProxy + sep + 'url=' + encodeURIComponent(targetUrl);
+    primaryRacers.push(
+      fetchWithTimeout(proxyUrl, { redirect:'follow' }, 12000)
+        .then(r => r.ok ? r.text().then(t => { console.log('[proxy] GAS OK for', tag); return t; }) : Promise.reject(`custom: HTTP ${r.status}`))
+        .catch(e => { errors.push(typeof e === 'string' ? e : `custom: ${e.name === 'AbortError' ? 'timeout' : e.message}`); return Promise.reject(e); })
+    );
   }
 
-  // 2. Try direct fetch (works if site allows CORS)
-  try {
-    const resp = await fetchWithTimeout(targetUrl, { mode:'cors' }, 8000);
-    if (resp.ok) { console.log('[proxy] direct OK for', targetUrl.substring(0, 80)); return await resp.text(); }
-  } catch(e) { /* expected CORS block, continue to proxies */ }
+  primaryRacers.push(
+    fetchWithTimeout(targetUrl, { mode:'cors' }, 8000)
+      .then(r => r.ok ? r.text().then(t => { console.log('[proxy] direct OK for', tag); return t; }) : Promise.reject('direct: not ok'))
+      .catch(e => { errors.push(typeof e === 'string' ? e : `direct: ${e.name === 'AbortError' ? 'timeout' : e.message}`); return Promise.reject(e); })
+  );
 
-  // 3. Try each free proxy
-  for (const proxy of CORS_PROXIES) {
-    try {
-      const proxyUrl = proxy.url(targetUrl);
-      const resp = await fetchWithTimeout(proxyUrl, {}, 15000);
-      if (!resp.ok) { errors.push(`${proxy.name}: HTTP ${resp.status}`); continue; }
-      if (proxy.json) {
-        const j = await resp.json();
-        if (j && j.contents) { console.log(`[proxy] ${proxy.name} OK for`, targetUrl.substring(0, 80)); return j.contents; }
-        errors.push(`${proxy.name}: empty contents`);
-      } else {
-        console.log(`[proxy] ${proxy.name} OK for`, targetUrl.substring(0, 80));
-        return await resp.text();
-      }
-    } catch(e) {
-      errors.push(`${proxy.name}: ${e.name === 'AbortError' ? 'timeout' : e.message}`);
-    }
+  try { return await Promise.any(primaryRacers); } catch(_) { /* both failed, try free proxies */ }
+
+  // Phase 2: Race all free proxies together
+  const freeRacers = CORS_PROXIES.map(proxy => {
+    const proxyUrl = proxy.url(targetUrl);
+    return fetchWithTimeout(proxyUrl, {}, 15000)
+      .then(async r => {
+        if (!r.ok) return Promise.reject(`${proxy.name}: HTTP ${r.status}`);
+        if (proxy.json) {
+          const j = await r.json();
+          if (j && j.contents) { console.log(`[proxy] ${proxy.name} OK for`, tag); return j.contents; }
+          return Promise.reject(`${proxy.name}: empty contents`);
+        }
+        console.log(`[proxy] ${proxy.name} OK for`, tag);
+        return r.text();
+      })
+      .catch(e => { errors.push(typeof e === 'string' ? e : `${proxy.name}: ${e.name === 'AbortError' ? 'timeout' : e.message}`); return Promise.reject(e); });
+  });
+
+  if (freeRacers.length) {
+    try { return await Promise.any(freeRacers); } catch(_) { /* all failed */ }
   }
+
   throw new Error(t('err_fetch_hint', { status: errors.join(' / ') }));
 }
 
@@ -5658,10 +5727,12 @@ function extractTitle(doc) {
   return '(title not found)';
 }
 
+// ========== SHARED DOM SELECTORS ==========
+const CONTENT_KW = ['entry-content','post-content','article-content','article-body','post-body','td-post-content','single-content','content-single','the-content','main-content','story-body','c-article__body','post_content','article__content','nota-content','nota__content','contenido','news-content','field-body','text-content'];
+const EXCLUDE_KW = ['related','sidebar','widget','nav','footer','header','comment','newsletter','social','share','author-bio','breadcrumb','menu','advertisement','publicite','pub','cookie','popup','modal','notification','banner','alert','search','tags','meta','pagination','pager','next','prev','similar','recommended','also-read','a-lire','sur-le-meme','plus-sur'];
+
 // ========== BODY TEXT EXTRACTION ==========
 function extractBodyText(doc) {
-  const CONTENT_KW = ['entry-content','post-content','article-content','article-body','post-body','td-post-content','single-content','content-single','the-content','main-content','story-body','c-article__body','post_content','article__content','nota-content','nota__content','contenido','news-content','field-body','text-content'];
-  const EXCLUDE_KW = ['related','sidebar','widget','nav','footer','header','comment','newsletter','social','share','author-bio','breadcrumb','menu','advertisement','publicite','pub','cookie','popup','modal','notification','banner','alert','search','tags','meta','pagination','pager','next','prev','similar','recommended','also-read','a-lire','sur-le-meme','plus-sur'];
   let body = null;
   let bodySource = 'fallback:body';
   for (const el of doc.querySelectorAll('div, section, main')) {
@@ -6014,8 +6085,6 @@ function checkViewport(doc) {
 // ========== CONTENT CHECKS ==========
 function runContentChecks(doc, url) {
   const checks = [];
-  const EXCLUDE_KW = ['related','sidebar','widget','nav','footer','header','comment','newsletter','social','share','author-bio','breadcrumb','menu','advertisement','publicite','pub','cookie','popup','modal','notification','banner','alert','search','tags','meta','pagination','pager','next','prev','similar','recommended','also-read','a-lire','sur-le-meme','plus-sur'];
-  const CONTENT_KW = ['entry-content','post-content','article-content','article-body','post-body','td-post-content','single-content','content-single','the-content','main-content','story-body','c-article__body','post_content','article__content','nota-content','nota__content','contenido','news-content','field-body','text-content'];
   let body = null;
   for (const el of doc.querySelectorAll('div, section, main')) {
     const cls = (el.className || '').toLowerCase();
@@ -6577,7 +6646,7 @@ const STOP_WORDS = new Set(['the','a','an','and','or','but','in','on','at','to',
 function extractTopicKeywords(title) {
   return title.toLowerCase()
     .replace(/[''`]/g, "'")
-    .replace(/[^a-z0-9àâäéèêëïîôùûüÿçæœáãõúí' -]/g, ' ')
+    .replace(/[^\p{L}\p{N}' -]/gu, ' ')
     .split(/[\s-]+/)
     .filter(w => w.length > 2 && !STOP_WORDS.has(w));
 }
@@ -8020,7 +8089,7 @@ function generatePdf() {
         page++;
       }
       // Build filename from URL or title
-      const urlInput = document.getElementById('url');
+      const urlInput = document.getElementById('urlInput');
       let fname = 'url-checker-report';
       if (urlInput && urlInput.value) {
         try { fname = new URL(urlInput.value).pathname.replace(/\//g, '-').replace(/^-|-$/g, '') || fname; } catch(e) {}
@@ -8410,12 +8479,12 @@ function renderEvergreenResults(proposals, siteLabel, suggestions, authority, si
         <strong>${t('ev_authority_title')}</strong>
         <span class="ev-authority-score" style="background:${authColor}">${sigLabels[sig] || sig}</span>
       </div>
-      <div class="ev-authority-reason">${escapeHtml(authority.reason)}</div>
+      <div class="ev-authority-reason">${esc(authority.reason)}</div>
     </div>`;
   }
 
   if (suggestions.length > 0) {
-    html += `<div class="ev-autocomplete-note">${t('ev_autocomplete_used')} (${suggestions.length}): ${suggestions.slice(0, 10).map(s => '<strong>' + escapeHtml(s) + '</strong>').join(', ')}${suggestions.length > 10 ? ` <span style="opacity:0.6">+${suggestions.length - 10} more</span>` : ''}</div>`;
+    html += `<div class="ev-autocomplete-note">${t('ev_autocomplete_used')} (${suggestions.length}): ${suggestions.slice(0, 10).map(s => '<strong>' + esc(s) + '</strong>').join(', ')}${suggestions.length > 10 ? ` <span style="opacity:0.6">+${suggestions.length - 10} more</span>` : ''}</div>`;
   }
 
   // Compute priority scores and rank
@@ -8427,7 +8496,6 @@ function renderEvergreenResults(proposals, siteLabel, suggestions, authority, si
     const lt = (p.long_tail_score || 5) / 10;
     return Math.round(vol * diff * lt * 10);
   });
-  const maxPri = Math.max(...priorityScores, 1);
   const priorityRanks = priorityScores.map((s, i) => ({ score: s, idx: i })).sort((a, b) => b.score - a.score).map((item, rank) => { item.rank = rank + 1; return item; });
   const rankByIdx = {};
   priorityRanks.forEach(item => { rankByIdx[item.idx] = item.rank; });
@@ -8446,8 +8514,8 @@ function renderEvergreenResults(proposals, siteLabel, suggestions, authority, si
         <div style="display:flex;align-items:center;gap:10px;min-width:0">
           <span class="ev-number">${i + 1}</span>
           <div>
-            <h3 style="white-space:normal">${escapeHtml(p.title)}</h3>
-            <div class="ev-primary-kw">${t('ev_primary_kw')}: <strong>${escapeHtml(p.primary_keyword)}</strong></div>
+            <h3 style="white-space:normal">${esc(p.title)}</h3>
+            <div class="ev-primary-kw">${t('ev_primary_kw')}: <strong>${esc(p.primary_keyword)}</strong></div>
           </div>
         </div>
         <span class="ev-priority-badge" style="background:${rankColor}">${t('ev_priority')} #${rank}</span>
@@ -8470,15 +8538,15 @@ function renderEvergreenResults(proposals, siteLabel, suggestions, authority, si
             <span class="ev-data-value" style="color:${diffColor}">${diffLabels[p.difficulty] || p.difficulty}</span>
           </div>
         </div>${evTicks.timing && p.best_timing ? `
-        <div class="ev-timing-row">📅 <strong>${t('ev_best_timing')}:</strong> ${escapeHtml(p.best_timing)}</div>` : ''}
-        <div class="ev-meta-description">${escapeHtml(p.meta_description)}</div>
+        <div class="ev-timing-row">📅 <strong>${t('ev_best_timing')}:</strong> ${esc(p.best_timing)}</div>` : ''}
+        <div class="ev-meta-description">${esc(p.meta_description)}</div>
         <div class="ev-section-label">${t('ev_structure')}</div>
         <ul class="ev-h2-list">`;
 
     p.h2s.forEach((h2, j) => {
       html += `<li class="ev-h2-item">
-        <div class="ev-h2-title">${escapeHtml(h2)}</div>
-        ${p.briefs[j] ? `<div class="ev-h2-brief">${escapeHtml(p.briefs[j])}</div>` : ''}
+        <div class="ev-h2-title">${esc(h2)}</div>
+        ${p.briefs[j] ? `<div class="ev-h2-brief">${esc(p.briefs[j])}</div>` : ''}
       </li>`;
     });
 
@@ -8487,7 +8555,7 @@ function renderEvergreenResults(proposals, siteLabel, suggestions, authority, si
         <div class="ev-satellites">`;
 
     (p.cluster_satellites || []).forEach(sat => {
-      html += `<span class="ev-satellite-chip">${escapeHtml(sat)}</span>`;
+      html += `<span class="ev-satellite-chip">${esc(sat)}</span>`;
     });
 
     html += `</div>`;
@@ -8502,7 +8570,7 @@ function renderEvergreenResults(proposals, siteLabel, suggestions, authority, si
         matches.forEach(m => {
           const path = m.url.replace(/https?:\/\/[^/]+/, '');
           html += `<li class="ev-similar-item">
-            <a href="${escapeHtml(m.url)}" target="_blank" rel="noopener" class="ev-similar-url">${escapeHtml(path)}</a>
+            <a href="${esc(m.url)}" target="_blank" rel="noopener" class="ev-similar-url">${esc(path)}</a>
             <span class="ev-similar-stats">${m.clicks || 0} ${t('ev_similar_clicks')} · ${m.impressions || 0} ${t('ev_similar_impr')}</span>
           </li>`;
         });
@@ -8524,7 +8592,7 @@ function renderEvergreenResults(proposals, siteLabel, suggestions, authority, si
         links.forEach(m => {
           const path = m.url.replace(/https?:\/\/[^/]+/, '');
           html += `<li class="ev-similar-item">
-            <a href="${escapeHtml(m.url)}" target="_blank" rel="noopener" class="ev-similar-url">${escapeHtml(path)}</a>
+            <a href="${esc(m.url)}" target="_blank" rel="noopener" class="ev-similar-url">${esc(path)}</a>
             <span class="ev-similar-stats">${m.clicks || 0} ${t('ev_similar_clicks')} · ${m.impressions || 0} ${t('ev_similar_impr')}</span>
           </li>`;
         });
@@ -8541,8 +8609,8 @@ function renderEvergreenResults(proposals, siteLabel, suggestions, authority, si
           <ul class="ev-similar-list">`;
         competitors.forEach(c => {
           html += `<li class="ev-similar-item">
-            <span class="ev-competitor-domain">${escapeHtml(c.domain)}</span>
-            <span class="ev-competitor-note">${escapeHtml(c.note)}</span>
+            <span class="ev-competitor-domain">${esc(c.domain)}</span>
+            <span class="ev-competitor-note">${esc(c.note)}</span>
           </li>`;
         });
         html += `</ul></div>`;
@@ -8558,10 +8626,6 @@ function renderEvergreenResults(proposals, siteLabel, suggestions, authority, si
   container.style.display = 'block';
 }
 
-function escapeHtml(str) {
-  if (typeof str !== 'string') return '';
-  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
 </script>
 </body>
 </html>
