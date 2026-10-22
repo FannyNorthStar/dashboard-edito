@@ -1111,6 +1111,13 @@ body {
         <select class="site-select" id="evSiteSelect"></select>
       </div>
       <textarea class="html-textarea" id="evInput" data-t-placeholder="ev_placeholder" placeholder="Enter a keyword or article idea... e.g. 'Champions League all-time top scorers' or 'How does the FIFA ranking work?'" style="min-height:120px;font-family:inherit"></textarea>
+      <div class="tick-row" id="evTicks">
+        <label class="tick-chip select-all"><input type="checkbox" id="evTickAll" checked onchange="toggleSelectAll('evTicks',this.checked)"> <span data-t="tick_select_all">Select All</span></label>
+        <label class="tick-chip"><input type="checkbox" id="evTickDuplicates" checked> <span data-t="tick_ev_duplicates">Duplicate Check</span></label>
+        <label class="tick-chip"><input type="checkbox" id="evTickLinks" checked> <span data-t="tick_ev_links">Internal Links</span></label>
+        <label class="tick-chip"><input type="checkbox" id="evTickCompetitors" checked> <span data-t="tick_ev_competitors">Top Competitors</span></label>
+        <label class="tick-chip"><input type="checkbox" id="evTickTiming" checked> <span data-t="tick_ev_timing">Publication Timing</span></label>
+      </div>
       <button class="btn" id="analyzeBtnEv" onclick="startAnalysis('evergreen')" style="width:100%">
         <span id="btnTextEv" data-t="btn_check_ev">Generate Evergreen Proposals</span>
         <div class="spinner" id="btnSpinnerEv" style="display:none"></div>
@@ -1465,6 +1472,10 @@ const T = {
     tick_search_auth: 'Search Authority',
     tick_angles: 'Article Angles',
     tick_news: 'Latest News',
+    tick_ev_duplicates: 'Duplicate Check',
+    tick_ev_links: 'Internal Links',
+    tick_ev_competitors: 'Top Competitors',
+    tick_ev_timing: 'Publication Timing',
     tick_topic_discover: 'Topic Authority Discover',
     tick_topic_search: 'Topic Authority Search',
     tick_select_all: 'Select All',
@@ -1758,6 +1769,10 @@ const T = {
     tick_search_auth: 'Autorite Search',
     tick_angles: 'Idees d\'articles',
     tick_news: 'Dernieres actus',
+    tick_ev_duplicates: 'Verification doublons',
+    tick_ev_links: 'Liens internes',
+    tick_ev_competitors: 'Top concurrents',
+    tick_ev_timing: 'Timing publication',
     tick_topic_discover: 'Autorite Discover',
     tick_topic_search: 'Autorite Search',
     tick_select_all: 'Tout selectionner',
@@ -2168,6 +2183,10 @@ const T = {
     tick_search_auth: 'Autoridade Search',
     tick_angles: 'Angulos de Artigo',
     tick_news: 'Ultimas Noticias',
+    tick_ev_duplicates: 'Verificacao de Duplicatas',
+    tick_ev_links: 'Links Internos',
+    tick_ev_competitors: 'Top Concorrentes',
+    tick_ev_timing: 'Timing de Publicacao',
     tick_topic_discover: 'Autoridade Discover',
     tick_topic_search: 'Autoridade Search',
     tick_select_all: 'Selecionar Tudo',
@@ -2457,6 +2476,10 @@ const T = {
     tick_search_auth: 'Autoridad Search',
     tick_angles: 'Angulos de Articulo',
     tick_news: 'Ultimas Noticias',
+    tick_ev_duplicates: 'Verificacion de Duplicados',
+    tick_ev_links: 'Enlaces Internos',
+    tick_ev_competitors: 'Top Competidores',
+    tick_ev_timing: 'Timing de Publicacion',
     tick_topic_discover: 'Autoridad Discover',
     tick_topic_search: 'Autoridad Search',
     tick_select_all: 'Seleccionar Todo',
@@ -2746,6 +2769,10 @@ const T = {
     tick_search_auth: 'Autorita Search',
     tick_angles: 'Angoli Articolo',
     tick_news: 'Ultime Notizie',
+    tick_ev_duplicates: 'Verifica Duplicati',
+    tick_ev_links: 'Link Interni',
+    tick_ev_competitors: 'Top Concorrenti',
+    tick_ev_timing: 'Tempistica Pubblicazione',
     tick_topic_discover: 'Autorita Discover',
     tick_topic_search: 'Autorita Search',
     tick_select_all: 'Seleziona Tutto',
@@ -3035,6 +3062,10 @@ const T = {
     tick_search_auth: 'Авторитет Search',
     tick_angles: 'Углы статьи',
     tick_news: 'Последние новости',
+    tick_ev_duplicates: 'Проверка дубликатов',
+    tick_ev_links: 'Внутренние ссылки',
+    tick_ev_competitors: 'Топ конкуренты',
+    tick_ev_timing: 'Время публикации',
     tick_topic_discover: 'Авторитет Discover',
     tick_topic_search: 'Авторитет Search',
     tick_select_all: 'Выбрать все',
@@ -3324,6 +3355,10 @@ const T = {
     tick_search_auth: 'Авторитет Search',
     tick_angles: 'Кути статті',
     tick_news: 'Останні новини',
+    tick_ev_duplicates: 'Перевірка дублікатів',
+    tick_ev_links: 'Внутрішні посилання',
+    tick_ev_competitors: 'Топ конкуренти',
+    tick_ev_timing: 'Час публікації',
     tick_topic_discover: 'Авторитет Discover',
     tick_topic_search: 'Авторитет Search',
     tick_select_all: 'Вибрати все',
@@ -3493,6 +3528,10 @@ const T = {
     tick_search_auth: 'Autorytet Search',
     tick_angles: 'Pomysly na artykuly',
     tick_news: 'Najnowsze wiadomosci',
+    tick_ev_duplicates: 'Sprawdzanie duplikatow',
+    tick_ev_links: 'Linki wewnetrzne',
+    tick_ev_competitors: 'Top konkurenci',
+    tick_ev_timing: 'Czas publikacji',
     tick_topic_discover: 'Autorytet Discover',
     tick_topic_search: 'Autorytet Search',
     tick_select_all: 'Zaznacz wszystko',
@@ -3902,6 +3941,10 @@ const T = {
     tick_search_auth: 'Autorita Search',
     tick_angles: 'Uhly clanku',
     tick_news: 'Nejnovejsi zpravy',
+    tick_ev_duplicates: 'Kontrola duplicit',
+    tick_ev_links: 'Interni odkazy',
+    tick_ev_competitors: 'Top konkurenti',
+    tick_ev_timing: 'Cas publikace',
     tick_topic_discover: 'Autorita Discover',
     tick_topic_search: 'Autorita Search',
     tick_select_all: 'Vybrat vse',
@@ -8146,6 +8189,12 @@ async function startEvergreenAnalysis() {
   const siteLabel = TAB_LABELS[selectedSite] || selectedSite;
   const siteAuth = SITE_AUTHORITY[selectedSite] || { desc: 'Sports news site', topics: 'sports, football' };
 
+  // Read tick checkbox states
+  const wantDuplicates = document.getElementById('evTickDuplicates').checked;
+  const wantLinks = document.getElementById('evTickLinks').checked;
+  const wantCompetitors = document.getElementById('evTickCompetitors').checked;
+  const wantTiming = document.getElementById('evTickTiming').checked;
+  const needSheet = wantDuplicates || wantLinks;
 
   const spinnerEl = document.getElementById('btnSpinnerEv');
   spinnerEl.id = 'btnSpinner_active';
@@ -8211,17 +8260,15 @@ PROPOSAL QUALITY CHECKLIST:
 6. Word count must be realistic for the depth required
 7. Cluster satellites should be genuinely publishable companion articles
 
-TOP COMPETITORS:
+${wantCompetitors ? `TOP COMPETITORS:
 For each proposal, identify 3 real websites/pages that currently rank well for the primary keyword. These should be actual domains (not generic descriptions). Include the domain name and a short note on what makes their content strong or what angle they use. This helps editors understand the competitive landscape before writing.
-
-PUBLICATION TIMING:
+` : ''}${wantTiming ? `PUBLICATION TIMING:
 For each proposal, suggest the best time to publish or update. Consider:
 - For seasonal topics (World Cup, transfer window, pre-season): name the specific month(s) to publish before peak search interest
 - For annual topics (best-of lists, records): name the month when searches spike
 - For evergreen topics (history, rules, guides): say "anytime" but note if there is a slight seasonal peak
 Give a short, actionable recommendation (e.g. "Publish in May, peak search June-July" or "Anytime, slight peak during transfer windows").
-
-HEADING CAPITALIZATION:
+` : ''}HEADING CAPITALIZATION:
 Follow the standard capitalization rules for ${langName}:
 - English: use Title Case (capitalize major words) for titles and H2s
 - French, Spanish, Italian, Portuguese, Czech, Polish, Russian, Ukrainian, Dutch: only capitalize the first word and proper nouns. Do NOT use English-style Title Case. Example in French: "Les meilleurs joueurs camerounais de tous les temps" (NOT "Les Meilleurs Joueurs Camerounais De Tous Les Temps").
@@ -8276,10 +8323,10 @@ First assess authority match, then generate 3 evergreen article proposals with d
                     estimated_volume: { type: 'string', enum: ['0-100', '100-1K', '1K-10K', '10K-100K', '100K+'], description: 'Estimated monthly search volume range' },
                     difficulty: { type: 'string', enum: ['low', 'medium', 'high'], description: 'Keyword difficulty to rank' },
                     cluster_satellites: { type: 'array', items: { type: 'string' }, description: '3-5 satellite article ideas' },
-                    top_competitors: { type: 'array', items: { type: 'object', properties: { domain: { type: 'string', description: 'Domain or URL of a top-ranking competitor' }, note: { type: 'string', description: 'What makes their content strong or their angle (1 sentence)' } }, required: ['domain', 'note'] }, description: '3 real websites currently ranking for the primary keyword', minItems: 1, maxItems: 3 },
-                    best_timing: { type: 'string', description: 'When to publish for maximum impact (e.g. "Publish in May, peak June-July" or "Anytime, slight peak during transfer windows")' }
+                    ...(wantCompetitors ? { top_competitors: { type: 'array', items: { type: 'object', properties: { domain: { type: 'string', description: 'Domain or URL of a top-ranking competitor' }, note: { type: 'string', description: 'What makes their content strong or their angle (1 sentence)' } }, required: ['domain', 'note'] }, description: '3 real websites currently ranking for the primary keyword', minItems: 1, maxItems: 3 } } : {}),
+                    ...(wantTiming ? { best_timing: { type: 'string', description: 'When to publish for maximum impact (e.g. "Publish in May, peak June-July" or "Anytime, slight peak during transfer windows")' } } : {})
                   },
-                  required: ['title', 'primary_keyword', 'h2s', 'briefs', 'meta_description', 'word_count_estimate', 'update_cycle', 'search_intent', 'format', 'long_tail_score', 'estimated_volume', 'difficulty', 'cluster_satellites', 'top_competitors', 'best_timing']
+                  required: ['title', 'primary_keyword', 'h2s', 'briefs', 'meta_description', 'word_count_estimate', 'update_cycle', 'search_intent', 'format', 'long_tail_score', 'estimated_volume', 'difficulty', 'cluster_satellites', ...(wantCompetitors ? ['top_competitors'] : []), ...(wantTiming ? ['best_timing'] : [])]
                 },
                 minItems: 3,
                 maxItems: 3
@@ -8292,13 +8339,20 @@ First assess authority match, then generate 3 evergreen article proposals with d
       tool_choice: { type: 'function', function: { name: 'submit_evergreen_proposals' } }
     };
 
-    // Fetch Search 10d sheet data in parallel with GPT call for duplicate detection
-    const sheetUrlSearch = localStorage.getItem('media_dashboard_search_sheet') || DEFAULT_SEARCH_SHEET;
-
-    const [response, searchRows] = await Promise.all([
-      callOpenAI(body),
-      fetchSourceData(sheetUrlSearch, selectedSite).catch(() => [])
-    ]);
+    // Fetch Search 10d sheet data in parallel with GPT call (only if duplicates or links ticked)
+    let searchRows = [];
+    let response;
+    if (needSheet) {
+      const sheetUrlSearch = localStorage.getItem('media_dashboard_search_sheet') || DEFAULT_SEARCH_SHEET;
+      const results = await Promise.all([
+        callOpenAI(body),
+        fetchSourceData(sheetUrlSearch, selectedSite).catch(() => [])
+      ]);
+      response = results[0];
+      searchRows = results[1];
+    } else {
+      response = await callOpenAI(body);
+    }
 
     setProgress(80, t('prog_ev_render'));
 
@@ -8311,16 +8365,17 @@ First assess authority match, then generate 3 evergreen article proposals with d
 
     if (!proposals || proposals.length === 0) throw new Error('No proposals returned.');
 
-    console.log('[evergreen] Search 10d rows loaded for duplicate check:', searchRows.length);
+    console.log('[evergreen] Search 10d rows loaded:', searchRows.length, '| ticks: dupes=' + wantDuplicates + ' links=' + wantLinks + ' competitors=' + wantCompetitors + ' timing=' + wantTiming);
 
-    // Find similar articles per proposal
-    const similarMatches = findSimilarArticles(proposals, searchRows);
+    // Find similar articles per proposal (only if ticked)
+    const similarMatches = wantDuplicates ? findSimilarArticles(proposals, searchRows) : proposals.map(() => []);
 
-    // Find internal linking opportunities (1+ keyword, excludes duplicates)
-    const internalLinks = findInternalLinks(proposals, searchRows, similarMatches);
+    // Find internal linking opportunities (only if ticked)
+    const internalLinks = wantLinks ? findInternalLinks(proposals, searchRows, similarMatches) : proposals.map(() => []);
 
     setProgress(95, t('prog_done'));
-    renderEvergreenResults(proposals, siteLabel, suggestions, authority, similarMatches, internalLinks);
+    const evTicks = { duplicates: wantDuplicates, links: wantLinks, competitors: wantCompetitors, timing: wantTiming };
+    renderEvergreenResults(proposals, siteLabel, suggestions, authority, similarMatches, internalLinks, evTicks);
 
   } catch(e) {
     showError(e.message || 'Evergreen analysis failed.');
@@ -8332,7 +8387,8 @@ First assess authority match, then generate 3 evergreen article proposals with d
   }
 }
 
-function renderEvergreenResults(proposals, siteLabel, suggestions, authority, similarMatches, internalLinks) {
+function renderEvergreenResults(proposals, siteLabel, suggestions, authority, similarMatches, internalLinks, evTicks) {
+  evTicks = evTicks || { duplicates: true, links: true, competitors: true, timing: true };
   const container = document.getElementById('evResults');
 
   const cycleLabels = { never: t('ev_cycle_never'), annual: t('ev_cycle_annual'), seasonal: t('ev_cycle_seasonal'), monthly: t('ev_cycle_monthly') };
@@ -8419,7 +8475,7 @@ function renderEvergreenResults(proposals, siteLabel, suggestions, authority, si
             <span class="ev-data-label">${t('ev_difficulty')}</span>
             <span class="ev-data-value" style="color:${diffColor}">${diffLabels[p.difficulty] || p.difficulty}</span>
           </div>
-        </div>${p.best_timing ? `
+        </div>${evTicks.timing && p.best_timing ? `
         <div class="ev-timing-row">📅 <strong>${t('ev_best_timing')}:</strong> ${escapeHtml(p.best_timing)}</div>` : ''}
         <div class="ev-meta-description">${escapeHtml(p.meta_description)}</div>
         <div class="ev-section-label">${t('ev_structure')}</div>
@@ -8442,55 +8498,61 @@ function renderEvergreenResults(proposals, siteLabel, suggestions, authority, si
 
     html += `</div>`;
 
-    // Similar content warning
-    const matches = (similarMatches && similarMatches[i]) || [];
-    if (matches.length > 0) {
-      html += `<div class="ev-similar-block warning">
-        <div class="ev-similar-header">⚠ ${t('ev_similar_warning')} (${matches.length})</div>
-        <ul class="ev-similar-list">`;
-      matches.forEach(m => {
-        const path = m.url.replace(/https?:\/\/[^/]+/, '');
-        html += `<li class="ev-similar-item">
-          <a href="${escapeHtml(m.url)}" target="_blank" rel="noopener" class="ev-similar-url">${escapeHtml(path)}</a>
-          <span class="ev-similar-stats">${m.clicks || 0} ${t('ev_similar_clicks')} · ${m.impressions || 0} ${t('ev_similar_impr')}</span>
-        </li>`;
-      });
-      html += `</ul></div>`;
-    } else {
-      html += `<div class="ev-similar-block ok">
-        <div class="ev-similar-header">✓ ${t('ev_no_similar')}</div>
-      </div>`;
+    // Similar content warning (only if tick is checked)
+    if (evTicks.duplicates) {
+      const matches = (similarMatches && similarMatches[i]) || [];
+      if (matches.length > 0) {
+        html += `<div class="ev-similar-block warning">
+          <div class="ev-similar-header">⚠ ${t('ev_similar_warning')} (${matches.length})</div>
+          <ul class="ev-similar-list">`;
+        matches.forEach(m => {
+          const path = m.url.replace(/https?:\/\/[^/]+/, '');
+          html += `<li class="ev-similar-item">
+            <a href="${escapeHtml(m.url)}" target="_blank" rel="noopener" class="ev-similar-url">${escapeHtml(path)}</a>
+            <span class="ev-similar-stats">${m.clicks || 0} ${t('ev_similar_clicks')} · ${m.impressions || 0} ${t('ev_similar_impr')}</span>
+          </li>`;
+        });
+        html += `</ul></div>`;
+      } else {
+        html += `<div class="ev-similar-block ok">
+          <div class="ev-similar-header">✓ ${t('ev_no_similar')}</div>
+        </div>`;
+      }
     }
 
-    // Internal linking suggestions
-    const links = (internalLinks && internalLinks[i]) || [];
-    if (links.length > 0) {
-      html += `<div class="ev-similar-block links">
-        <div class="ev-similar-header">🔗 ${t('ev_internal_links')} (${links.length})</div>
-        <ul class="ev-similar-list">`;
-      links.forEach(m => {
-        const path = m.url.replace(/https?:\/\/[^/]+/, '');
-        html += `<li class="ev-similar-item">
-          <a href="${escapeHtml(m.url)}" target="_blank" rel="noopener" class="ev-similar-url">${escapeHtml(path)}</a>
-          <span class="ev-similar-stats">${m.clicks || 0} ${t('ev_similar_clicks')} · ${m.impressions || 0} ${t('ev_similar_impr')}</span>
-        </li>`;
-      });
-      html += `</ul></div>`;
+    // Internal linking suggestions (only if tick is checked)
+    if (evTicks.links) {
+      const links = (internalLinks && internalLinks[i]) || [];
+      if (links.length > 0) {
+        html += `<div class="ev-similar-block links">
+          <div class="ev-similar-header">🔗 ${t('ev_internal_links')} (${links.length})</div>
+          <ul class="ev-similar-list">`;
+        links.forEach(m => {
+          const path = m.url.replace(/https?:\/\/[^/]+/, '');
+          html += `<li class="ev-similar-item">
+            <a href="${escapeHtml(m.url)}" target="_blank" rel="noopener" class="ev-similar-url">${escapeHtml(path)}</a>
+            <span class="ev-similar-stats">${m.clicks || 0} ${t('ev_similar_clicks')} · ${m.impressions || 0} ${t('ev_similar_impr')}</span>
+          </li>`;
+        });
+        html += `</ul></div>`;
+      }
     }
 
-    // Top competitors
-    const competitors = p.top_competitors || [];
-    if (competitors.length > 0) {
-      html += `<div class="ev-similar-block competitors">
-        <div class="ev-similar-header">🏆 ${t('ev_competitors')} (${competitors.length})</div>
-        <ul class="ev-similar-list">`;
-      competitors.forEach(c => {
-        html += `<li class="ev-similar-item">
-          <span class="ev-competitor-domain">${escapeHtml(c.domain)}</span>
-          <span class="ev-competitor-note">${escapeHtml(c.note)}</span>
-        </li>`;
-      });
-      html += `</ul></div>`;
+    // Top competitors (only if tick is checked)
+    if (evTicks.competitors) {
+      const competitors = p.top_competitors || [];
+      if (competitors.length > 0) {
+        html += `<div class="ev-similar-block competitors">
+          <div class="ev-similar-header">🏆 ${t('ev_competitors')} (${competitors.length})</div>
+          <ul class="ev-similar-list">`;
+        competitors.forEach(c => {
+          html += `<li class="ev-similar-item">
+            <span class="ev-competitor-domain">${escapeHtml(c.domain)}</span>
+            <span class="ev-competitor-note">${escapeHtml(c.note)}</span>
+          </li>`;
+        });
+        html += `</ul></div>`;
+      }
     }
 
     html += `</div>
