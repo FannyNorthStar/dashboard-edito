@@ -8122,18 +8122,18 @@ async function fetchAutocompleteSuggestions(keyword, lang) {
 
   async function fetchOne(q) {
     const url = `https://suggestqueries.google.com/complete/search?client=firefox&q=${encodeURIComponent(q)}&hl=${lang}`;
-    try {
-      const resp = await fetchWithTimeout(url, { mode: 'cors' }, 5000);
-      if (resp.ok) { const data = await resp.json(); return data[1] || []; }
-    } catch(e) { /* CORS blocked */ }
-    try {
-      const proxy = localStorage.getItem('media_dashboard_cors_proxy') || DEFAULT_GAS_PROXY;
-      const sep = proxy.includes('?') ? '&' : '?';
-      const proxyUrl = proxy + sep + 'url=' + encodeURIComponent(url);
-      const resp = await fetchWithTimeout(proxyUrl, { redirect: 'follow' }, 8000);
-      if (resp.ok) { const text = await resp.text(); return JSON.parse(text)[1] || []; }
-    } catch(e) { console.warn('Autocomplete fetch failed:', e.message); }
-    return [];
+    const proxy = localStorage.getItem('media_dashboard_cors_proxy') || DEFAULT_GAS_PROXY;
+    const sep = proxy.includes('?') ? '&' : '?';
+    const proxyUrl = proxy + sep + 'url=' + encodeURIComponent(url);
+
+    // Race CORS direct vs proxy — whichever responds first wins
+    const directP = fetchWithTimeout(url, { mode: 'cors' }, 3000)
+      .then(r => r.ok ? r.json().then(d => d[1] || []) : Promise.reject('not ok'));
+    const proxyP = fetchWithTimeout(proxyUrl, { redirect: 'follow' }, 5000)
+      .then(r => r.ok ? r.text().then(t => JSON.parse(t)[1] || []) : Promise.reject('not ok'));
+
+    try { return await Promise.any([directP, proxyP]); }
+    catch(e) { return []; }
   }
 
   const results = await Promise.allSettled(queries.map(q => fetchOne(q)));
@@ -8208,12 +8208,15 @@ async function startEvergreenAnalysis() {
   document.getElementById('progressBar').classList.remove('active');
 
   try {
-    // Step 1: Fetch Google Autocomplete suggestions (multiple variants in parallel)
+    // Step 1: Fire autocomplete + sheet fetch in parallel (sheet is independent)
     setProgress(10, t('prog_ev_autocomplete'));
+    const sheetPromise = needSheet
+      ? fetchSourceData(localStorage.getItem('media_dashboard_search_sheet') || DEFAULT_SEARCH_SHEET, selectedSite).catch(() => [])
+      : Promise.resolve([]);
     const suggestions = await fetchAutocompleteSuggestions(evText, siteLang);
     console.log('[evergreen] Autocomplete suggestions:', suggestions.length, suggestions);
 
-    // Step 2: Send to AI
+    // Step 2: Send to AI (sheet already fetching in background)
     setProgress(30, t('prog_ev_ai'));
 
     const langNames = {
@@ -8339,20 +8342,11 @@ First assess authority match, then generate 3 evergreen article proposals with d
       tool_choice: { type: 'function', function: { name: 'submit_evergreen_proposals' } }
     };
 
-    // Fetch Search 10d sheet data in parallel with GPT call (only if duplicates or links ticked)
-    let searchRows = [];
-    let response;
-    if (needSheet) {
-      const sheetUrlSearch = localStorage.getItem('media_dashboard_search_sheet') || DEFAULT_SEARCH_SHEET;
-      const results = await Promise.all([
-        callOpenAI(body),
-        fetchSourceData(sheetUrlSearch, selectedSite).catch(() => [])
-      ]);
-      response = results[0];
-      searchRows = results[1];
-    } else {
-      response = await callOpenAI(body);
-    }
+    // GPT + sheet resolve in parallel (sheet was already started during autocomplete)
+    const [response, searchRows] = await Promise.all([
+      callOpenAI(body),
+      sheetPromise
+    ]);
 
     setProgress(80, t('prog_ev_render'));
 
