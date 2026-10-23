@@ -929,9 +929,12 @@ body {
 }
 .ev-competitor-domain {
   font-weight: 600;
-  font-size: 12px;
-  color: var(--text);
+  font-size: 11px;
+  color: var(--accent);
   white-space: nowrap;
+  background: var(--accent-glow);
+  padding: 1px 8px;
+  border-radius: 4px;
 }
 .ev-competitor-note {
   font-size: 11px;
@@ -1644,7 +1647,7 @@ const T = {
     ev_similar_source: "Source",
     ev_no_similar: "No similar content found in Search over the last 10 days",
     ev_internal_links: "Internal linking opportunities",
-    ev_competitors: "Top competitors",
+    ev_competitors: "Currently ranking for this keyword",
     ev_best_timing: "Best time to publish",
     ev_priority: "Priority",
     ev_words: "words",
@@ -1937,7 +1940,7 @@ const T = {
     ev_similar_source: "Source",
     ev_no_similar: "Aucun contenu similaire trouve dans Search sur les 10 derniers jours",
     ev_internal_links: "Opportunites de maillage interne",
-    ev_competitors: "Top concurrents",
+    ev_competitors: "Se positionnent sur ce mot-clé",
     ev_best_timing: "Meilleur moment pour publier",
     ev_priority: "Priorite",
     ev_words: "mots",
@@ -2212,7 +2215,7 @@ const T = {
     ev_similar_source: "Fonte",
     ev_no_similar: "Nenhum conteudo similar encontrado no Search nos ultimos 10 dias",
     ev_internal_links: "Oportunidades de link interno",
-    ev_competitors: "Principais concorrentes",
+    ev_competitors: "Ranqueando para esta palavra-chave",
     ev_best_timing: "Melhor momento para publicar",
     ev_priority: "Prioridade",
     ev_words: "palavras",
@@ -2505,7 +2508,7 @@ const T = {
     ev_similar_source: "Fuente",
     ev_no_similar: "No se encontro contenido similar en Search en los ultimos 10 dias",
     ev_internal_links: "Oportunidades de enlace interno",
-    ev_competitors: "Principales competidores",
+    ev_competitors: "Posicionados para esta keyword",
     ev_best_timing: "Mejor momento para publicar",
     ev_priority: "Prioridad",
     ev_words: "palabras",
@@ -2798,7 +2801,7 @@ const T = {
     ev_similar_source: "Fonte",
     ev_no_similar: "Nessun contenuto simile trovato su Search negli ultimi 10 giorni",
     ev_internal_links: "Opportunita di link interni",
-    ev_competitors: "Principali concorrenti",
+    ev_competitors: "Si posizionano per questa keyword",
     ev_best_timing: "Momento migliore per pubblicare",
     ev_priority: "Priorita",
     ev_words: "parole",
@@ -3091,7 +3094,7 @@ const T = {
     ev_similar_source: "Источник",
     ev_no_similar: "Похожий контент не найден в Search за последние 10 дней",
     ev_internal_links: "Возможности внутренней перелинковки",
-    ev_competitors: "Топ конкуренты",
+    ev_competitors: "Ранжируются по этому ключевому слову",
     ev_best_timing: "Лучшее время для публикации",
     ev_priority: "Приоритет",
     ev_words: "слов",
@@ -3384,7 +3387,7 @@ const T = {
     ev_similar_source: "Джерело",
     ev_no_similar: "Схожий контент не знайдено в Search за останні 10 днів",
     ev_internal_links: "Можливості внутрішньої перелінковки",
-    ev_competitors: "Топ конкуренти",
+    ev_competitors: "Ранжуються за цим ключовим словом",
     ev_best_timing: "Найкращий час для публікації",
     ev_priority: "Пріоритет",
     ev_words: "слів",
@@ -3695,7 +3698,7 @@ const T = {
     ev_similar_source: "Zrodlo",
     ev_no_similar: "Nie znaleziono podobnej tresci w Search z ostatnich 10 dni",
     ev_internal_links: "Mozliwosci linkowania wewnetrznego",
-    ev_competitors: "Glowni konkurenci",
+    ev_competitors: "Pozycjonują się na to słowo kluczowe",
     ev_best_timing: "Najlepszy czas na publikacje",
     ev_priority: "Priorytet",
     ev_words: "slow",
@@ -3970,7 +3973,7 @@ const T = {
     ev_similar_source: "Zdroj",
     ev_no_similar: "Zadny podobny obsah nebyl nalezen v Search za poslednich 10 dni",
     ev_internal_links: "Moznosti interniho prolinkovani",
-    ev_competitors: "Hlavni konkurenti",
+    ev_competitors: "Aktuálně se umisťují na toto klíčové slovo",
     ev_best_timing: "Nejlepsi cas k publikaci",
     ev_priority: "Priorita",
     ev_words: "slov",
@@ -8234,13 +8237,18 @@ function findInternalLinks(proposals, allRows, similarMatches) {
 function findSimilarArticles(proposals, allRows) {
   if (!allRows || allRows.length === 0) return proposals.map(() => []);
   return proposals.map(p => {
-    const keywords = extractTopicKeywords(
-      (p.title || '') + ' ' + (p.primary_keyword || '')
-    );
-    if (keywords.length === 0) return [];
+    const pkWords = extractTopicKeywords(p.primary_keyword || '');
+    const titleWords = extractTopicKeywords(p.title || '');
+    if (pkWords.length === 0 && titleWords.length === 0) return [];
     const matches = allRows.filter(r => {
       const slug = r.url.toLowerCase();
-      const hits = keywords.filter(kw => slug.includes(kw));
+      if (pkWords.length >= 2) {
+        // Primary keyword is the core topic — require ALL-1 words minimum (at least 2)
+        const pkHits = pkWords.filter(kw => slug.includes(kw));
+        return pkHits.length >= Math.max(2, pkWords.length - 1);
+      }
+      // Fallback: 1 or 0 primary keyword words — use title words, need >= 2
+      const hits = titleWords.filter(kw => slug.includes(kw));
       return hits.length >= 2;
     });
     // Sort by clicks desc, keep top 5
@@ -8395,7 +8403,7 @@ First assess authority match, then generate 3 evergreen article proposals with d
                     estimated_volume: { type: 'string', enum: ['0-100', '100-1K', '1K-10K', '10K-100K', '100K+'], description: 'Estimated monthly search volume range' },
                     difficulty: { type: 'string', enum: ['low', 'medium', 'high'], description: 'Keyword difficulty to rank' },
                     cluster_satellites: { type: 'array', items: { type: 'string' }, description: '3-5 satellite article ideas' },
-                    ...(wantCompetitors ? { top_competitors: { type: 'array', items: { type: 'object', properties: { url: { type: 'string', description: 'Full URL of a specific article/page currently ranking for this keyword (not just the domain)' }, title: { type: 'string', description: 'Title of the competitor article' }, angle: { type: 'string', description: 'How they approached this topic and what makes their content rank (1 sentence)' } }, required: ['url', 'title', 'angle'] }, description: '3 specific competitor articles/pages currently ranking for the primary keyword — provide real article URLs, not homepages', minItems: 1, maxItems: 3 } } : {}),
+                    ...(wantCompetitors ? { top_competitors: { type: 'array', items: { type: 'object', properties: { url: { type: 'string', description: 'Full URL of a specific article/page currently ranking for this keyword (not just the domain)' }, source: { type: 'string', description: 'Publisher name or domain (e.g. "Sky Sports", "ESPN", "FIFA.com")' }, title: { type: 'string', description: 'Title of the competitor article' }, angle: { type: 'string', description: 'How they approached this topic and what makes their content rank (1 sentence)' } }, required: ['url', 'source', 'title', 'angle'] }, description: '5 specific competitor articles/pages currently ranking for the primary keyword — provide real article URLs, not homepages', minItems: 1, maxItems: 5 } } : {}),
                     ...(wantTiming ? { best_timing: { type: 'string', description: 'When to publish for maximum impact (e.g. "Publish in May, peak June-July" or "Anytime, slight peak during transfer windows")' } } : {})
                   },
                   required: ['title', 'primary_keyword', 'h2s', 'briefs', 'meta_description', 'word_count_estimate', 'update_cycle', 'search_intent', 'format', 'long_tail_score', 'estimated_volume', 'difficulty', 'cluster_satellites', ...(wantCompetitors ? ['top_competitors'] : []), ...(wantTiming ? ['best_timing'] : [])]
@@ -8610,11 +8618,15 @@ function renderEvergreenResults(proposals, siteLabel, suggestions, authority, si
           <ul class="ev-similar-list">`;
         competitors.forEach(c => {
           const compUrl = c.url || c.domain || '';
+          const compSource = c.source || (compUrl ? new URL(compUrl, 'https://x').hostname.replace(/^www\./, '') : '');
           const compTitle = c.title || compUrl.replace(/https?:\/\/[^/]+/, '');
           const compAngle = c.angle || c.note || '';
           html += `<li class="ev-similar-item">
             <div style="display:flex;flex-direction:column;gap:2px;min-width:0">
-              <a href="${esc(compUrl)}" target="_blank" rel="noopener" class="ev-similar-url" style="white-space:normal">${esc(compTitle)}</a>
+              <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+                <span class="ev-competitor-domain">${esc(compSource)}</span>
+                <a href="${esc(compUrl)}" target="_blank" rel="noopener" class="ev-similar-url" style="white-space:normal">${esc(compTitle)}</a>
+              </div>
               <span class="ev-competitor-note">${esc(compAngle)}</span>
             </div>
           </li>`;
