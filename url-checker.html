@@ -1671,6 +1671,7 @@ const T = {
     ev_auth_green: "Good fit",
     ev_auth_orange: "Adjacent",
     ev_auth_red: "Poor fit",
+    ev_auth_red_stop: "This topic is outside the site's scope. No proposals generated. Try a different keyword or select a more relevant site.",
     ev_primary_kw: "Primary keyword",
   },
   fr: {
@@ -1964,6 +1965,7 @@ const T = {
     ev_auth_green: "Compatible",
     ev_auth_orange: "Adjacent",
     ev_auth_red: "Hors sujet",
+    ev_auth_red_stop: "Ce sujet est hors du scope du site. Aucune proposition generee. Essayez un autre mot-cle ou selectionnez un site plus pertinent.",
     ev_primary_kw: "Mot-cle principal",
   },
   "pt-br": {
@@ -2239,6 +2241,7 @@ const T = {
     ev_auth_green: "Compativel",
     ev_auth_orange: "Adjacente",
     ev_auth_red: "Fora do escopo",
+    ev_auth_red_stop: "Este tema esta fora do escopo do site. Nenhuma proposta gerada. Tente outra palavra-chave ou selecione um site mais relevante.",
     ev_primary_kw: "Palavra-chave principal",
     tick_content: 'Analise de Conteudo',
     tick_spell: 'Verificacao Ortografica',
@@ -2532,6 +2535,7 @@ const T = {
     ev_auth_green: "Compatible",
     ev_auth_orange: "Adyacente",
     ev_auth_red: "Fuera de tema",
+    ev_auth_red_stop: "Este tema esta fuera del alcance del sitio. No se generaron propuestas. Prueba otra palabra clave o selecciona un sitio mas relevante.",
     ev_primary_kw: "Palabra clave principal",
     tick_content: 'Analisis de Contenido',
     tick_spell: 'Revision Ortografica',
@@ -2825,6 +2829,7 @@ const T = {
     ev_auth_green: "Compatibile",
     ev_auth_orange: "Adiacente",
     ev_auth_red: "Fuori tema",
+    ev_auth_red_stop: "Questo argomento e fuori dall'ambito del sito. Nessuna proposta generata. Prova un'altra parola chiave o seleziona un sito piu pertinente.",
     ev_primary_kw: "Parola chiave principale",
     tick_content: 'Analisi Contenuto',
     tick_spell: 'Controllo Ortografico',
@@ -3118,6 +3123,7 @@ const T = {
     ev_auth_green: "Подходит",
     ev_auth_orange: "Смежная тема",
     ev_auth_red: "Не по теме",
+    ev_auth_red_stop: "Эта тема выходит за рамки сайта. Предложения не сгенерированы. Попробуйте другое ключевое слово или выберите более подходящий сайт.",
     ev_primary_kw: "Основное ключевое слово",
     tick_content: 'Анализ контента',
     tick_spell: 'Проверка орфографии',
@@ -3411,6 +3417,7 @@ const T = {
     ev_auth_green: "Пiдходить",
     ev_auth_orange: "Сумiжна тема",
     ev_auth_red: "Не по темi",
+    ev_auth_red_stop: "Ця тема виходить за межi сайту. Пропозицii не згенеровано. Спробуйте iнше ключове слово або оберiть бiльш вiдповiдний сайт.",
     ev_primary_kw: "Основне ключове слово",
     tick_content: 'Аналіз контенту',
     tick_spell: 'Перевірка орфографії',
@@ -3722,6 +3729,7 @@ const T = {
     ev_auth_green: "Pasuje",
     ev_auth_orange: "Pokrewny temat",
     ev_auth_red: "Poza tematem",
+    ev_auth_red_stop: "Ten temat wykracza poza zakres strony. Nie wygenerowano propozycji. Sprobuj innego slowa kluczowego lub wybierz bardziej odpowiednia strone.",
     ev_primary_kw: "Glowne slowo kluczowe",
   },
   cs: {
@@ -3997,6 +4005,7 @@ const T = {
     ev_auth_green: "Sedne",
     ev_auth_orange: "Priblizne",
     ev_auth_red: "Mimo tema",
+    ev_auth_red_stop: "Toto tema je mimo rozsah webu. Zadne navrhy nebyly vygenerovany. Zkuste jine klicove slovo nebo vyberte relevantnejsi web.",
     ev_primary_kw: "Hlavni klicove slovo",
     tick_content: 'Analyza obsahu',
     tick_spell: 'Kontrola pravopisu',
@@ -8489,6 +8498,14 @@ function renderEvergreenResults(proposals, siteLabel, suggestions, authority, si
       </div>
       <div class="ev-authority-reason">${esc(authority.reason)}</div>
     </div>`;
+
+    // Red = stop. Do not show proposals.
+    if (sig === 'red') {
+      html += `<div style="text-align:center;padding:24px 16px;color:var(--text-muted);font-size:14px">${t('ev_auth_red_stop')}</div>`;
+      container.innerHTML = html;
+      container.style.display = 'block';
+      return;
+    }
   }
 
   if (suggestions.length > 0) {
