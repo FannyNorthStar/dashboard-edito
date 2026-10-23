@@ -7045,7 +7045,7 @@ function renderKeywordResults(inputText, selectedSite, entityResults, angleIdeas
   // Determine verdict style
   let verdictHtml = '';
   if (coverageVerdict) {
-    const lc = coverageVerdict.toLowerCase();
+    const lc = coverageVerdict.toLowerCase().replace(/^["""''`\s]+/, '');
     let verdictType, verdictIcon;
     if (lc.startsWith('no')) { verdictType = 'no'; verdictIcon = '🔴'; }
     else if (lc.startsWith('maybe')) { verdictType = 'maybe'; verdictIcon = '🟡'; }
@@ -7053,7 +7053,7 @@ function renderKeywordResults(inputText, selectedSite, entityResults, angleIdeas
     else { verdictType = 'yes'; verdictIcon = '🟢'; }
     verdictHtml = `<div class="coverage-verdict verdict-${verdictType}">
       <span class="verdict-icon">${verdictIcon}</span>
-      <span class="verdict-text">${esc(coverageVerdict)}</span>
+      <span class="verdict-text">${esc(coverageVerdict.replace(/^["""''`\s]+|["""''`\s]+$/g, ''))}</span>
     </div>`;
 
     // "No" verdict = stop. Do not show results.
