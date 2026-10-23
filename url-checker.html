@@ -8502,17 +8502,18 @@ function renderEvergreenResults(proposals, siteLabel, suggestions, authority, si
 
   html += '<div class="ev-proposals">';
 
-  proposals.forEach((p, i) => {
+  priorityRanks.forEach(({ idx: origIdx, rank }) => {
+    const p = proposals[origIdx];
+    const i = origIdx;
     const scoreColor = p.long_tail_score >= 7 ? 'var(--green)' : p.long_tail_score >= 4 ? 'var(--amber)' : 'var(--red)';
     const volColor = volColors[p.estimated_volume] || 'var(--text-dim)';
     const diffColor = diffColors[p.difficulty] || 'var(--amber)';
-    const rank = rankByIdx[i] || (i + 1);
     const rankColor = rank === 1 ? 'var(--green)' : rank === 2 ? 'var(--amber)' : 'var(--text-dim)';
 
     html += `<div class="ev-card">
       <div class="ev-card-header">
         <div style="display:flex;align-items:center;gap:10px;min-width:0">
-          <span class="ev-number">${i + 1}</span>
+          <span class="ev-number">${rank}</span>
           <div>
             <h3 style="white-space:normal">${esc(p.title)}</h3>
             <div class="ev-primary-kw">${t('ev_primary_kw')}: <strong>${esc(p.primary_keyword)}</strong></div>
