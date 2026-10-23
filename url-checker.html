@@ -8566,7 +8566,7 @@ function renderEvergreenResults(proposals, siteLabel, suggestions, authority, si
       const matches = (similarMatches && similarMatches[i]) || [];
       if (matches.length > 0) {
         html += `<div class="ev-similar-block warning">
-          <div class="ev-similar-header">⚠ ${t('ev_similar_warning')} (${matches.length})</div>
+          <div class="ev-similar-header">🔍 ${t('ev_similar_warning')} (${matches.length})</div>
           <ul class="ev-similar-list">`;
         matches.forEach(m => {
           const path = m.url.replace(/https?:\/\/[^/]+/, '');
