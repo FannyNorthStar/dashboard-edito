@@ -8395,7 +8395,7 @@ First assess authority match, then generate 3 evergreen article proposals with d
                     estimated_volume: { type: 'string', enum: ['0-100', '100-1K', '1K-10K', '10K-100K', '100K+'], description: 'Estimated monthly search volume range' },
                     difficulty: { type: 'string', enum: ['low', 'medium', 'high'], description: 'Keyword difficulty to rank' },
                     cluster_satellites: { type: 'array', items: { type: 'string' }, description: '3-5 satellite article ideas' },
-                    ...(wantCompetitors ? { top_competitors: { type: 'array', items: { type: 'object', properties: { domain: { type: 'string', description: 'Domain or URL of a top-ranking competitor' }, note: { type: 'string', description: 'What makes their content strong or their angle (1 sentence)' } }, required: ['domain', 'note'] }, description: '3 real websites currently ranking for the primary keyword', minItems: 1, maxItems: 3 } } : {}),
+                    ...(wantCompetitors ? { top_competitors: { type: 'array', items: { type: 'object', properties: { url: { type: 'string', description: 'Full URL of a specific article/page currently ranking for this keyword (not just the domain)' }, title: { type: 'string', description: 'Title of the competitor article' }, angle: { type: 'string', description: 'How they approached this topic and what makes their content rank (1 sentence)' } }, required: ['url', 'title', 'angle'] }, description: '3 specific competitor articles/pages currently ranking for the primary keyword — provide real article URLs, not homepages', minItems: 1, maxItems: 3 } } : {}),
                     ...(wantTiming ? { best_timing: { type: 'string', description: 'When to publish for maximum impact (e.g. "Publish in May, peak June-July" or "Anytime, slight peak during transfer windows")' } } : {})
                   },
                   required: ['title', 'primary_keyword', 'h2s', 'briefs', 'meta_description', 'word_count_estimate', 'update_cycle', 'search_intent', 'format', 'long_tail_score', 'estimated_volume', 'difficulty', 'cluster_satellites', ...(wantCompetitors ? ['top_competitors'] : []), ...(wantTiming ? ['best_timing'] : [])]
@@ -8609,9 +8609,14 @@ function renderEvergreenResults(proposals, siteLabel, suggestions, authority, si
           <div class="ev-similar-header">🏆 ${t('ev_competitors')} (${competitors.length})</div>
           <ul class="ev-similar-list">`;
         competitors.forEach(c => {
+          const compUrl = c.url || c.domain || '';
+          const compTitle = c.title || compUrl.replace(/https?:\/\/[^/]+/, '');
+          const compAngle = c.angle || c.note || '';
           html += `<li class="ev-similar-item">
-            <span class="ev-competitor-domain">${esc(c.domain)}</span>
-            <span class="ev-competitor-note">${esc(c.note)}</span>
+            <div style="display:flex;flex-direction:column;gap:2px;min-width:0">
+              <a href="${esc(compUrl)}" target="_blank" rel="noopener" class="ev-similar-url" style="white-space:normal">${esc(compTitle)}</a>
+              <span class="ev-competitor-note">${esc(compAngle)}</span>
+            </div>
           </li>`;
         });
         html += `</ul></div>`;
