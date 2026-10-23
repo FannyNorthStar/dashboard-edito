@@ -7055,6 +7055,18 @@ function renderKeywordResults(inputText, selectedSite, entityResults, angleIdeas
       <span class="verdict-icon">${verdictIcon}</span>
       <span class="verdict-text">${esc(coverageVerdict)}</span>
     </div>`;
+
+    // "No" verdict = stop. Do not show results.
+    if (verdictType === 'no') {
+      verdictHtml += `<div style="text-align:center;padding:24px 16px;color:var(--text-muted);font-size:14px">${t('ev_auth_red_stop')}</div>`;
+      container.innerHTML = `<div class="result-header">
+        <div>
+          <div class="result-title">${esc(t('kw_results_title'))}</div>
+          <div class="result-url" style="font-style:italic">${esc(inputText.substring(0, 200))}</div>
+        </div>
+      </div>${verdictHtml}`;
+      return;
+    }
   }
 
   let allHtml = `<div class="result-header">
